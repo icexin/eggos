@@ -1,0 +1,6 @@
+{
+    "go.toolsEnvVars": {
+        "GOOS": "linux",
+        "GOARCH": "386",
+    },
+}

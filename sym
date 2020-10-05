@@ -1,0 +1,3 @@
+#!/bin/bash
+
+printf "%x" $1 | go tool addr2line kernel.elf

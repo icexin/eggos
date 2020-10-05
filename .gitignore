@@ -1,0 +1,11 @@
+*.o
+*.elf
+*.log
+*.pcap
+*.img
+*.hdd
+
+bootblock
+serial
+trace.txt
+sync.sh

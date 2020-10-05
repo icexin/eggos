@@ -1,0 +1,42 @@
+package main
+
+import (
+	"io"
+	_ "net/http/pprof"
+	"runtime"
+
+	"github.com/icexin/eggos/app/sh"
+	"github.com/icexin/eggos/cga/fbcon"
+	"github.com/icexin/eggos/console"
+	"github.com/icexin/eggos/fs"
+	"github.com/icexin/eggos/inet"
+
+	_ "github.com/icexin/eggos/e1000"
+	"github.com/icexin/eggos/kbd"
+	"github.com/icexin/eggos/kernel"
+	"github.com/icexin/eggos/pci"
+	"github.com/icexin/eggos/uart"
+	"github.com/icexin/eggos/vbe"
+)
+
+func main() {
+	runtime.GOMAXPROCS(3)
+	uart.Init()
+	kbd.Init()
+	console.Init()
+	kernel.Init()
+
+	fs.Init()
+	vbe.Init()
+	fbcon.Init()
+	pci.Init()
+
+	err := inet.Init()
+	if err != nil {
+		panic(err)
+	}
+
+	w := console.Console()
+	io.WriteString(w, "\nwelcome to eggos\n")
+	sh.Bootstrap()
+}
