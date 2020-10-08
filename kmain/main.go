@@ -6,7 +6,7 @@ import (
 	"runtime"
 
 	"github.com/icexin/eggos/app/sh"
-	"github.com/icexin/eggos/cga/fbcon"
+	"github.com/icexin/eggos/cga/fbcga"
 	"github.com/icexin/eggos/console"
 	"github.com/icexin/eggos/fs"
 	"github.com/icexin/eggos/inet"
@@ -28,7 +28,7 @@ func main() {
 
 	fs.Init()
 	vbe.Init()
-	fbcon.Init()
+	fbcga.Init()
 	pci.Init()
 
 	err := inet.Init()

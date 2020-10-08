@@ -1,4 +1,4 @@
-package fbcon
+package fbcga
 
 import (
 	"image"
@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	BACKSPACE = 0x100
+	BACKSPACE = 0x7f
 
 	TERM_WIDTH  = 80
 	TERM_HEIGHT = 25
@@ -25,6 +25,8 @@ var (
 	view   *vbe.View
 	face   *basicfont.Face
 	drawer *font.Drawer
+
+	Backend = fbbackend{}
 )
 
 func clear(pos int) image.Rectangle {
@@ -52,20 +54,28 @@ func scrollup() {
 	}
 }
 
-func Write(b []byte) (int, error) {
-	for _, c := range b {
-		WriteByte(int(c))
-	}
-	return len(b), nil
+type fbbackend struct {
 }
 
-func WriteString(s string) {
-	for _, c := range s {
-		WriteByte(int(c))
-	}
+func (f *fbbackend) SetPos(n int) {
+	pos = n
 }
 
-func WriteByte(c int) {
+func (f *fbbackend) GetPos() int {
+	return pos
+}
+
+func (f *fbbackend) WritePos(n int, ch byte) {
+	var rect image.Rectangle
+	if ch == 0 {
+		rect = clear(n)
+	} else {
+		rect = drawByte(n, ch)
+	}
+	view.CommitRect(rect)
+}
+
+func (f *fbbackend) WriteByte(c byte) {
 	var rect image.Rectangle
 
 	switch c {
@@ -77,7 +87,7 @@ func WriteByte(c int) {
 			rect = clear(pos)
 		}
 	default:
-		rect = drawByte(pos, byte(c))
+		rect = drawByte(pos, c)
 		pos++
 	}
 

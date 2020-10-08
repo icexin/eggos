@@ -7,10 +7,8 @@ import (
 	"unsafe"
 
 	"github.com/icexin/eggos/cga"
-	"github.com/icexin/eggos/cga/fbcon"
 	"github.com/icexin/eggos/kbd"
 	"github.com/icexin/eggos/uart"
-	"github.com/icexin/eggos/vbe"
 )
 
 const (
@@ -88,13 +86,7 @@ func (c *console) handleInput(ch byte) {
 	case 0x7f, ctrl('H'):
 		if c.e > c.w {
 			c.e--
-			c.putc(BACKSPACE)
-		}
-		return
-	case ctrl('U'):
-		for c.e != c.w && c.buf[(c.e-1)%CON_BUFLEN] != '\n' {
-			c.e--
-			c.putc(BACKSPACE)
+			c.putc(0x7f)
 		}
 		return
 	}
@@ -108,7 +100,7 @@ func (c *console) handleInput(ch byte) {
 	idx := c.e % CON_BUFLEN
 	c.e++
 	c.buf[idx] = byte(ch)
-	c.putc(int(ch))
+	c.putc(ch)
 	if ch == '\n' || c.e == c.r+CON_BUFLEN {
 		c.w = c.e
 		c.notify.Broadcast()
@@ -121,20 +113,9 @@ func (c *console) loop() {
 	}
 }
 
-func (c *console) putc(ch int) {
-	if ch == BACKSPACE {
-		uart.WriteByte('\b')
-		uart.WriteByte(' ')
-		uart.WriteByte('\b')
-	} else {
-		uart.WriteByte(byte(ch))
-	}
-
-	if vbe.IsEnable() {
-		fbcon.WriteByte(ch)
-	} else {
-		cga.WriteByte(ch)
-	}
+func (c *console) putc(ch byte) {
+	uart.WriteByte(ch)
+	cga.WriteByte(ch)
 }
 
 func (c *console) read(p []byte) int {
@@ -164,7 +145,7 @@ func (c *console) Read(p []byte) (int, error) {
 
 func (c *console) Write(p []byte) (int, error) {
 	for _, ch := range p {
-		c.putc(int(ch))
+		c.putc(ch)
 	}
 	return len(p), nil
 }

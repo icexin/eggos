@@ -58,10 +58,10 @@ multiboot.elf: boot/multiboot_header.S boot/multiboot.c kernel.elf
 	$(LD) $(LDFLAGS) -N -e _start -Ttext 0x3200000 -o multiboot.elf multiboot.o multiboot_header.o -b binary kernel.elf
 
 qemu-debug:
-	qemu-system-i386 $(QEMU_DEBUG_OPT) -nographic -kernel multiboot.elf
+	qemu-system-i386 $(QEMU_DEBUG_OPT) -kernel multiboot.elf # -nographic
 	
 qemu:
-	qemu-system-x86_64 $(QEMU_OPT) -nographic -M accel=hvf -kernel multiboot.elf
+	qemu-system-x86_64 $(QEMU_OPT)  -M accel=hvf -kernel multiboot.elf # -nographic
 
 grub: multiboot.elf
 	mount -t msdos /dev/disk2s1 osimg

@@ -136,7 +136,7 @@ func canForward(tf *TrapFrame) bool {
 		return false
 	}
 	// handle panic write
-	if no == SYS_write && (tf.BX == 1 || tf.BX == 2) {
+	if no == SYS_write && tf.BX == 2 {
 		return false
 	}
 	for i := 0; i < len(kernelCalls); i++ {

@@ -1,67 +1,75 @@
 package cga
 
 import (
-	"unsafe"
-
-	"github.com/icexin/eggos/sys"
-)
-
-const (
-	CRTPORT = 0x3d4
-
-	BACKSPACE = 0x100
+	"strconv"
 )
 
 var (
-	crt = (*[25 * 80]uint16)(unsafe.Pointer(uintptr(0xb8000)))
+	parser  = ansiParser{}
+	backend = cgabackend{}
 )
 
-//go:nosplit
 func WriteString(s string) {
-	for _, c := range s {
-		WriteByte(int(c))
+	for i := range s {
+		WriteByte(s[i])
 	}
 }
 
-//go:nosplit
-func WriteByte(c int) {
-	var pos int
+func setCursorColumn(n int) {
+	pos := getbackend().GetPos()
+	pos = pos - (pos % 80) + n - 1
+	getbackend().SetPos(pos)
+}
 
-	// Cursor position: col + 80*row.
-	sys.Outb(CRTPORT, 14)
-	pos = int(sys.Inb(CRTPORT+1)) << 8
-	sys.Outb(CRTPORT, 15)
-	pos |= int(sys.Inb(CRTPORT + 1))
-
-	switch c {
-	case '\n':
-		pos += 80 - pos%80
-	case BACKSPACE:
-		if pos > 0 {
-			pos--
+func eraseLine(method int) {
+	backend := getbackend()
+	pos := backend.GetPos()
+	switch method {
+	case 0:
+		for i := pos; i%80 != 0; i++ {
+			backend.WritePos(pos, 0)
 		}
 	default:
-		// black on white
-		crt[pos] = uint16((c & 0xff) | 0x0700)
-		pos++
+		panic("unsupported erase line method")
 	}
+}
 
-	// Scroll up
-	if pos/80 >= 24 {
-		copy(crt[:], crt[80:24*80])
-		pos -= 80
-		s := crt[pos : 24*80]
-		for i := range s {
-			// 在mac下开启qemu的-M accel=hvf,在滚屏的时候会出现`failed to decode instruction f 7f`
-			// 猜测是memclrNoHeapPointer造成的，具体原因未知
-			if false {
-			}
-			s[i] = 0
+func writeCSI(action byte, params []string) {
+	// fmt.Fprintf(os.Stderr, "action:%c, params:%v\n", action, params)
+	switch action {
+	// set cursor
+	case 'G':
+		if len(params) == 0 {
+			setCursorColumn(0)
+		} else {
+			n, _ := strconv.Atoi(params[0])
+			setCursorColumn(n)
 		}
+	// erase line
+	case 'K':
+		if len(params) == 0 {
+			eraseLine(0)
+		} else {
+			n, _ := strconv.Atoi(params[0])
+			eraseLine(n)
+		}
+	default:
+		panic("unsupported CSI action")
 	}
-	sys.Outb(CRTPORT, 14)
-	sys.Outb(CRTPORT+1, byte(pos>>8))
-	sys.Outb(CRTPORT, 15)
-	sys.Outb(CRTPORT+1, byte(pos))
-	crt[pos] = ' ' | 0x0700
+}
+
+func WriteByte(ch byte) {
+	switch parser.step(ch) {
+	case errNormalChar:
+		getbackend().WriteByte(ch)
+		// do normal char
+	case errCSIDone:
+		// do csi
+		writeCSI(parser.Action(), parser.Params())
+		parser.Reset()
+	case errInvalidChar:
+		parser.Reset()
+	default:
+		// ignore
+	}
 }
