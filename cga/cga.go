@@ -17,7 +17,7 @@ func WriteString(s string) {
 
 func setCursorColumn(n int) {
 	pos := getbackend().GetPos()
-	pos = pos - (pos % 80) + n - 1
+	pos = (pos/80)*80 + n - 1
 	getbackend().SetPos(pos)
 }
 
@@ -26,7 +26,8 @@ func eraseLine(method int) {
 	pos := backend.GetPos()
 	switch method {
 	case 0:
-		for i := pos; i%80 != 0; i++ {
+		end := (pos/80 + 1) * 80
+		for i := pos; i < end; i++ {
 			backend.WritePos(pos, 0)
 		}
 	default:
