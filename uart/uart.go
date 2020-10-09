@@ -12,7 +12,7 @@ const (
 )
 
 var (
-	inputCallback func(getc func() int)
+	inputCallback func(byte)
 )
 
 //go:nosplit
@@ -53,8 +53,15 @@ func WriteString(s string) (int, error) {
 
 //go:nosplit
 func intr() {
-	if inputCallback != nil {
-		inputCallback(ReadByte)
+	if inputCallback == nil {
+		return
+	}
+	for {
+		ch := ReadByte()
+		if ch == -1 {
+			break
+		}
+		inputCallback(byte(ch))
 	}
 	pic.EOI(_IRQ_COM1)
 }
@@ -74,7 +81,7 @@ func PreInit() {
 	sys.Outb(com1+1, 0x01)
 }
 
-func OnInput(callback func(getc func() int)) {
+func OnInput(callback func(byte)) {
 	inputCallback = callback
 }
 

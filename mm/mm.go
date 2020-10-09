@@ -265,8 +265,12 @@ func findMemTop() uintptr {
 		if e.Type != multiboot.MemoryAvailable {
 			continue
 		}
-		if top < uintptr(e.Addr+e.Len) {
-			top = uintptr(e.Addr + e.Len)
+		ptop := e.Addr + e.Len
+		if ptop > VMSTART {
+			ptop = VMSTART
+		}
+		if top < uintptr(ptop) {
+			top = uintptr(ptop)
 		}
 	}
 	if top == 0 {

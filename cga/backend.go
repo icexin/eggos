@@ -72,10 +72,10 @@ func (c *cgabackend) WriteByte(ch byte) {
 	}
 
 	// Scroll up
-	if pos/80 >= 24 {
-		copy(crt[:], crt[80:24*80])
+	if pos/80 >= 25 {
+		copy(crt[:], crt[80:25*80])
 		pos -= 80
-		s := crt[pos : 24*80]
+		s := crt[pos : 25*80]
 		for i := range s {
 			// 在mac下开启qemu的-M accel=hvf,在滚屏的时候会出现`failed to decode instruction f 7f`
 			// 猜测是memclrNoHeapPointer造成的，具体原因未知

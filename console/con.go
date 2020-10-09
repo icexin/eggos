@@ -49,14 +49,8 @@ func ctrl(c byte) byte {
 }
 
 //go:nosplit
-func (c *console) intr(getc func() int) {
-	for {
-		ch := getc()
-		if ch <= 0 {
-			break
-		}
-		c.handleInput(byte(ch))
-	}
+func (c *console) intr(ch byte) {
+	c.handleInput(ch)
 }
 
 func (c *console) rawmode() bool {

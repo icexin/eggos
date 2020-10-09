@@ -28,7 +28,7 @@ func eraseLine(method int) {
 	case 0:
 		end := (pos/80 + 1) * 80
 		for i := pos; i < end; i++ {
-			backend.WritePos(pos, 0)
+			backend.WritePos(pos, ' ')
 		}
 	default:
 		panic("unsupported erase line method")
@@ -62,7 +62,11 @@ func writeCSI(action byte, params []string) {
 func WriteByte(ch byte) {
 	switch parser.step(ch) {
 	case errNormalChar:
-		getbackend().WriteByte(ch)
+		backend := getbackend()
+
+		if (ch >= 32 && ch <= 127) || ch == '\n' || ch == '\r' || ch == '\b' {
+			backend.WriteByte(ch)
+		}
 		// do normal char
 	case errCSIDone:
 		// do csi

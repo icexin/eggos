@@ -41,7 +41,7 @@ const (
 )
 
 var (
-	inputCallback func(getc func() int)
+	inputCallback func(byte)
 	keyPressed    [255]bool
 )
 
@@ -174,15 +174,51 @@ func ReadByte() int {
 	return int(c)
 }
 
+const (
+	csiUp    = "\x1b[A"
+	csiDown  = "\x1b[B"
+	csiLeft  = "\x1b[D"
+	csiRight = "\x1b[C"
+)
+
+func csiEscape(ch byte) string {
+	switch ch {
+	case KEY_UP:
+		return csiUp
+	case KEY_DN:
+		return csiDown
+	case KEY_LF:
+		return csiLeft
+	case KEY_RT:
+		return csiRight
+	default:
+		return ""
+	}
+}
+
 //go:nosplit
 func intr() {
-	if inputCallback != nil {
-		inputCallback(ReadByte)
+	if inputCallback == nil {
+		return
+	}
+	for {
+		ch := ReadByte()
+		if ch <= 0 {
+			break
+		}
+		esc := csiEscape(byte(ch))
+		if esc == "" {
+			inputCallback(byte(ch))
+		} else {
+			for i := range esc {
+				inputCallback(esc[i])
+			}
+		}
 	}
 	pic.EOI(_IRQ_KBD)
 }
 
-func OnInput(callback func(getc func() int)) {
+func OnInput(callback func(byte)) {
 	inputCallback = callback
 }
 
