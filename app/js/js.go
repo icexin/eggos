@@ -2,13 +2,12 @@ package js
 
 import (
 	"github.com/icexin/eggos/app"
-	"github.com/icexin/eggos/fs"
 	"github.com/robertkrimen/otto"
 	"github.com/spf13/afero"
 )
 
-func runFile(vm *otto.Otto, fname string) error {
-	buf, err := afero.ReadFile(fs.Root, fname)
+func runFile(ctx *app.Context, vm *otto.Otto, fname string) error {
+	buf, err := afero.ReadFile(ctx.Chdirfs, fname)
 	if err != nil {
 		return err
 	}
@@ -25,7 +24,7 @@ func jsmain(ctx *app.Context) error {
 		return repl(ctx, vm)
 	}
 
-	return runFile(vm, flag.Arg(0))
+	return runFile(ctx, vm, flag.Arg(0))
 }
 
 func init() {

@@ -26,6 +26,7 @@ func nsshmain(ctx *app.Context) error {
 				Stdout: conn,
 				Stderr: conn,
 			}
+			ctx.Init()
 			shell(ctx)
 			conn.Close()
 			fmt.Fprintf(ctx.Stdout, "conn %s closed\n", conn.RemoteAddr())

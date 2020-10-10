@@ -16,7 +16,7 @@ const prompt = "root@eggos# "
 func main(ctx *app.Context) error {
 	r := ctx.LineReader()
 	defer r.Close()
-	r.SetAutoComplete(autocomplete)
+	r.SetAutoComplete(autocompleteWrapper(ctx))
 	for {
 		line, err := r.Prompt(prompt)
 		if err != nil {
@@ -80,6 +80,7 @@ func Bootstrap() {
 		Stdout: con,
 		Stderr: con,
 	}
+	ctx.Init()
 	main(ctx)
 }
 

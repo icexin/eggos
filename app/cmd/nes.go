@@ -12,7 +12,6 @@ import (
 
 	"github.com/icexin/eggos/app"
 	"github.com/icexin/eggos/debug"
-	"github.com/icexin/eggos/fs"
 	"github.com/icexin/eggos/kbd"
 	"github.com/icexin/eggos/vbe"
 
@@ -55,7 +54,7 @@ func nesmain(ctx *app.Context) error {
 		return errors.New("-rom required")
 	}
 
-	rom, err := fs.Root.Open(*gameName)
+	rom, err := ctx.Open(*gameName)
 	if err != nil {
 		return err
 	}

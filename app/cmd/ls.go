@@ -7,7 +7,6 @@ import (
 	"text/tabwriter"
 
 	"github.com/icexin/eggos/app"
-	"github.com/icexin/eggos/fs"
 )
 
 func printfiles(w io.Writer, files ...os.FileInfo) {
@@ -28,7 +27,7 @@ func lsmain(ctx *app.Context) error {
 	if ctx.Flag().NArg() > 0 {
 		name = ctx.Flag().Arg(0)
 	}
-	f, err := fs.Root.Open(name)
+	f, err := ctx.Open(name)
 	if err != nil {
 		return err
 	}

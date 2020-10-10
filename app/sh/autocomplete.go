@@ -5,10 +5,16 @@ import (
 	"strings"
 
 	"github.com/icexin/eggos/app"
-	"github.com/icexin/eggos/fs"
+	"github.com/spf13/afero"
 )
 
-func autocomplete(line string) []string {
+func autocompleteWrapper(ctx *app.Context) func(line string) []string {
+	return func(line string) []string {
+		return autocomplete(ctx, line)
+	}
+}
+
+func autocomplete(ctx *app.Context, line string) []string {
 	line = strings.TrimLeft(line, " ")
 
 	list := strings.Split(line, " ")
@@ -35,7 +41,7 @@ func autocomplete(line string) []string {
 	if !hascmd {
 		l = app.AppNames()
 	} else {
-		l = completeFile(last)
+		l = completeFile(ctx, last)
 	}
 
 	var r []string
@@ -48,7 +54,7 @@ func autocomplete(line string) []string {
 	return r
 }
 
-func completeFile(prefix string) []string {
+func completeFile(fs afero.Fs, prefix string) []string {
 	if prefix == "" {
 		prefix = "."
 	}
@@ -60,7 +66,7 @@ func completeFile(prefix string) []string {
 		return l
 	}
 
-	f, err := fs.Root.Open(prefix)
+	f, err := fs.Open(prefix)
 	// user input a complete file name
 	if err == nil {
 		defer f.Close()
@@ -81,7 +87,7 @@ func completeFile(prefix string) []string {
 
 	// complete dir entries
 	dir := path.Dir(prefix)
-	f, err = fs.Root.Open(dir)
+	f, err = fs.Open(dir)
 	if err != nil {
 		return nil
 	}

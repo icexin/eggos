@@ -6,7 +6,7 @@ import (
 	"io"
 
 	"github.com/icexin/eggos/app"
-	"github.com/icexin/eggos/fs"
+	"github.com/spf13/afero"
 )
 
 func catmain(ctx *app.Context) error {
@@ -19,7 +19,11 @@ func catmain(ctx *app.Context) error {
 		return errors.New("usage: cat $filename")
 	}
 	name := ctx.Flag().Arg(0)
-	f, err := fs.Root.Open(name)
+	if isdir, _ := afero.IsDir(ctx, name); isdir {
+		return errors.New("can't cat dir")
+	}
+
+	f, err := ctx.Open(name)
 	if err != nil {
 		return err
 	}

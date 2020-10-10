@@ -48,6 +48,7 @@ func main(ctx *app.Context) error {
 			Stdout: s,
 			Stderr: s,
 		}
+		ctx.Init()
 		shell(ctx)
 	})
 	l, err := net.Listen("tcp", "0.0.0.0:22")
