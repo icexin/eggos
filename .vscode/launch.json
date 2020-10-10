@@ -13,7 +13,7 @@
             "remote": true,
             "cwd": "${workspaceRoot}",
             "valuesFormatting": "parseText",
-            "gdbpath": "gdb",
+            "gdbpath": "i386-elf-gdb",
         },
     ]
 }

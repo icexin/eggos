@@ -28,7 +28,7 @@ func eraseLine(method int) {
 	case 0:
 		end := (pos/80 + 1) * 80
 		for i := pos; i < end; i++ {
-			backend.WritePos(pos, ' ')
+			backend.WritePos(i, ' ')
 		}
 	default:
 		panic("unsupported erase line method")
@@ -41,7 +41,7 @@ func writeCSI(action byte, params []string) {
 	// set cursor
 	case 'G':
 		if len(params) == 0 {
-			setCursorColumn(0)
+			setCursorColumn(1)
 		} else {
 			n, _ := strconv.Atoi(params[0])
 			setCursorColumn(n)
