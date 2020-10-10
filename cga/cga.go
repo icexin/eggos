@@ -64,9 +64,19 @@ func WriteByte(ch byte) {
 	case errNormalChar:
 		backend := getbackend()
 
-		if (ch >= 32 && ch <= 127) || ch == '\n' || ch == '\r' || ch == '\b' {
+		switch ch {
+		case '\n', '\r', '\b':
 			backend.WriteByte(ch)
+		case '\t':
+			for i := 0; i < 4; i++ {
+				backend.WriteByte(' ')
+			}
+		default:
+			if ch >= 32 && ch <= 127 {
+				backend.WriteByte(ch)
+			}
 		}
+
 		// do normal char
 	case errCSIDone:
 		// do csi
