@@ -1,17 +1,10 @@
 package kernel
 
 import (
+	"syscall"
 	"unsafe"
 
 	"github.com/icexin/eggos/mm"
-)
-
-const (
-	_EPOLL_CTL_ADD = 0x1
-	_EPOLL_CTL_DEL = 0x2
-	_EPOLL_CTL_MOD = 0x3
-
-	_EPOLLHUP = 0x10
 )
 
 var (
@@ -78,21 +71,21 @@ func epollCtl(epfd, op, fd, desc uintptr) uintptr {
 	euser := (*userEpollEvent)(unsafe.Pointer(desc))
 	var e *epollEvent
 	switch op {
-	case _EPOLL_CTL_ADD:
+	case syscall.EPOLL_CTL_ADD:
 		e = newEpollEvent()
 		e.fd = fd
 		e.data = euser.data
-		e.mask = uintptr(euser.events) | _EPOLLHUP
+		e.mask = uintptr(euser.events) | syscall.EPOLLHUP
 		return 0
-	case _EPOLL_CTL_MOD:
+	case syscall.EPOLL_CTL_MOD:
 		e = findEpollEvent(fd)
 		if e == nil {
 			return errno(-1)
 		}
-		e.mask = uintptr(euser.events) | _EPOLLHUP
+		e.mask = uintptr(euser.events) | syscall.EPOLLHUP
 		e.data = euser.data
 		return 0
-	case _EPOLL_CTL_DEL:
+	case syscall.EPOLL_CTL_DEL:
 		e = findEpollEvent(fd)
 		if e == nil {
 			return errno(-1)

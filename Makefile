@@ -42,8 +42,8 @@ QEMU_DEBUG_OPT = $(QEMU_OPT) -d int -D qemu.log \
 	-object filter-dump,id=f1,netdev=eth0,file=qemu.pcap \
 	-s -S
 
-# TAGS = "gin sshd nes jsapp"
-TAGS = "jsapp"
+# TAGS = "gin sshd nes"
+TAGS = ""
 
 .PHONY: all clean kernel.elf
 
@@ -61,7 +61,7 @@ qemu-debug:
 	qemu-system-i386 $(QEMU_DEBUG_OPT) -kernel multiboot.elf # -nographic
 	
 qemu:
-	qemu-system-x86_64 $(QEMU_OPT)  -M accel=hvf -kernel multiboot.elf # -nographic
+	qemu-system-x86_64 $(QEMU_OPT) -kernel multiboot.elf # -nographic
 
 grub: multiboot.elf
 	mount -t msdos /dev/disk2s1 osimg

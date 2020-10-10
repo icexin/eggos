@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/hirochachacha/go-smb2"
+	"github.com/icexin/eggos/inet"
 	"github.com/spf13/afero"
 )
 
@@ -23,7 +24,7 @@ type Fs struct {
 }
 
 func New(config *Config) (afero.Fs, error) {
-	conn, err := net.Dial("tcp", config.Host)
+	conn, err := inet.DialTCP("tcp", config.Host)
 	if err != nil {
 		return nil, err
 	}

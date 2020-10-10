@@ -10,14 +10,17 @@ import (
 
 type Backend interface {
 	GetPos() int
-	SetPos(int)
-	WritePos(int, byte)
+	SetPos(pos int)
+	// WritePos write char at given pos but not update pos
+	WritePos(pos int, char byte)
+	// WriteByte write char and advance pos
 	WriteByte(ch byte)
 }
 
 const (
-	CRTPORT   = 0x3d4
-	BACKSPACE = 0x7f
+	CRTPORT = 0x3d4
+	bs      = '\b'
+	del     = 0x7f
 )
 
 var (
@@ -61,7 +64,7 @@ func (c *cgabackend) WriteByte(ch byte) {
 	switch ch {
 	case '\n':
 		pos += 80 - pos%80
-	case BACKSPACE:
+	case bs, del:
 		if pos > 0 {
 			pos--
 		}

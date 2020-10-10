@@ -17,8 +17,8 @@ const (
 	del = 0x7f
 	bs  = '\b'
 
-	TERM_WIDTH  = 80
-	TERM_HEIGHT = 25
+	twidth  = 80
+	theight = 25
 )
 
 var (
@@ -26,17 +26,20 @@ var (
 	face   *basicfont.Face
 	drawer *font.Drawer
 
+	foreColor = color.RGBA{199, 199, 199, 0}
+	backColor = color.Black
+
 	Backend = fbbackend{}
 )
 
 type fbbackend struct {
 	pos    int
 	cursor int
-	buffer [TERM_WIDTH * TERM_HEIGHT]byte
+	buffer [twidth * theight]byte
 }
 
 func (f *fbbackend) xy(pos int) (int, int) {
-	x, y := pos%TERM_WIDTH*face.Advance, (pos/TERM_WIDTH+1)*face.Height
+	x, y := pos%twidth*face.Advance, (pos/twidth+1)*face.Height
 	if face.Left < 0 {
 		x += -face.Left
 	}
@@ -48,7 +51,7 @@ func (f *fbbackend) glyphPos(pos int) fixed.Point26_6 {
 	return fixed.Point26_6{X: fixed.I(x), Y: fixed.I(y)}
 }
 
-func (f *fbbackend) drawByte(pos int, c byte, overide bool) {
+func (f *fbbackend) drawChar(pos int, c byte, overide bool) {
 	if c == 0 {
 		return
 	}
@@ -56,22 +59,22 @@ func (f *fbbackend) drawByte(pos int, c byte, overide bool) {
 	rect, _, _, _, _ := face.Glyph(fpos, rune(c))
 	if overide {
 		// clear old font
-		draw.Draw(drawer.Dst, rect, image.NewUniform(color.Black), image.Point{}, draw.Src)
+		draw.Draw(drawer.Dst, rect, image.NewUniform(backColor), image.Point{}, draw.Src)
 	}
 	drawer.Dot = fpos
 	drawer.DrawBytes([]byte{c})
 	view.CommitRect(rect)
 }
 
-func (f *fbbackend) setByte(pos int, c byte) {
-	f.drawByte(pos, c, true)
+func (f *fbbackend) setChar(pos int, c byte) {
+	f.drawChar(pos, c, true)
 	f.buffer[pos] = c
 }
 
 func (f *fbbackend) scrollup(pos int) int {
-	copy(f.buffer[:], f.buffer[TERM_WIDTH:TERM_HEIGHT*TERM_WIDTH])
-	pos -= TERM_WIDTH
-	s := f.buffer[pos : TERM_HEIGHT*TERM_WIDTH]
+	copy(f.buffer[:], f.buffer[twidth:theight*twidth])
+	pos -= twidth
+	s := f.buffer[pos : theight*twidth]
 	for i := range s {
 		s[i] = 0
 	}
@@ -80,13 +83,13 @@ func (f *fbbackend) scrollup(pos int) int {
 }
 
 func (f *fbbackend) refresh() {
-	rect := image.Rect(0, 0, TERM_WIDTH*face.Advance+face.Left, TERM_HEIGHT*face.Height+face.Descent)
-	draw.Draw(drawer.Dst, rect, image.NewUniform(color.Black), image.Point{}, draw.Src)
+	rect := image.Rect(0, 0, twidth*face.Advance+face.Left, theight*face.Height+face.Descent)
+	draw.Draw(drawer.Dst, rect, image.NewUniform(backColor), image.Point{}, draw.Src)
 
-	for i := 0; i < TERM_HEIGHT; i++ {
+	for i := 0; i < theight; i++ {
 		y := (i + 1) * face.Height
 		drawer.Dot = fixed.Point26_6{X: fixed.I(0), Y: fixed.I(y)}
-		drawer.DrawBytes(f.buffer[i*TERM_WIDTH : (i+1)*TERM_WIDTH])
+		drawer.DrawBytes(f.buffer[i*twidth : (i+1)*twidth])
 	}
 	view.CommitRect(rect)
 }
@@ -94,9 +97,9 @@ func (f *fbbackend) refresh() {
 func (f *fbbackend) updateCursor(n int) {
 	old := f.cursor
 	ch := f.buffer[old]
-	f.drawByte(old, ch, true)
+	f.drawChar(old, ch, true)
 
-	f.drawByte(n, '_', false)
+	f.drawChar(n, '_', false)
 	f.cursor = n
 }
 
@@ -110,30 +113,30 @@ func (f *fbbackend) GetPos() int {
 }
 
 func (f *fbbackend) WritePos(n int, ch byte) {
-	f.setByte(n, ch)
+	f.setChar(n, ch)
 }
 
 func (f *fbbackend) WriteByte(c byte) {
 	pos := f.GetPos()
 	switch c {
 	case '\n', '\r':
-		pos += TERM_WIDTH - pos%TERM_WIDTH
+		pos += twidth - pos%twidth
 	case bs, del:
 		if pos > 0 {
-			f.setByte(pos, ' ')
+			f.setChar(pos, ' ')
 			pos--
-			f.setByte(pos, ' ')
+			f.setChar(pos, ' ')
 		}
 	default:
-		f.setByte(pos, c)
+		f.setChar(pos, c)
 		pos++
 	}
 
 	// Scroll up
-	if pos/TERM_WIDTH >= TERM_HEIGHT {
+	if pos/twidth >= theight {
 		pos = f.scrollup(pos)
 	}
-	f.setByte(pos, ' ')
+	f.setChar(pos, ' ')
 	f.SetPos(pos)
 }
 
@@ -146,7 +149,7 @@ func Init() {
 	view = vbe.DefaultView
 	drawer = &font.Drawer{
 		Dst:  view.Canvas(),
-		Src:  image.NewUniform(color.RGBA{199, 199, 199, 0}),
+		Src:  image.NewUniform(foreColor),
 		Face: face,
 	}
 }

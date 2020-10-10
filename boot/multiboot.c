@@ -26,15 +26,6 @@ stosb(void *addr, int data, int cnt)
                  : "memory", "cc");
 }
 
-struct framebuffer_info
-{
-    multiboot_uint64_t magic;
-    multiboot_uint64_t addr;
-    multiboot_uint32_t pitch;
-    multiboot_uint32_t width;
-    multiboot_uint32_t height;
-};
-
 void multibootmain(unsigned long magic, multiboot_info_t *mbi)
 {
     struct elfhdr *elf;
@@ -66,7 +57,6 @@ void multibootmain(unsigned long magic, multiboot_info_t *mbi)
 }
 
 // Read 'count' bytes at 'offset' from kernel into physical address 'pa'.
-// Might copy more than asked.
 void readseg(uchar *pa, uint count, uint offset)
 {
     memcpy((char *)pa, (char *)(_binary_kernel_elf_start + offset), count);
