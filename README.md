@@ -12,7 +12,7 @@ Run a single Go applications on x86 bare metal, written entirely in Go (a small 
 
 # Feature list
 
-- Basic Go features, eg GC, goroutine, channel.
+- Basic Go features, such as GC, goroutine, channel.
 - A simple console support basic line editting.
 - Network stack support tcp/udp.
 - Go style vfs abstraction using [afero](https://github.com/spf13/afero)
@@ -30,17 +30,17 @@ Run a single Go applications on x86 bare metal, written entirely in Go (a small 
 
 ## MacOS
 
-On MacOS, those can be done using
-
 ``` bash
 $ brew tap nativeos/i386-elf-toolchain
 $ brew install brew install i386-elf-binutils i386-elf-gcc i386-elf-gdb
 $ brew install qemu
 ```
 
-## Linux
+## Ubuntu
 
-TODO
+``` bash
+$ sudo apt-get install build-essential qemu
+```
 
 # Quickstart
 
@@ -48,3 +48,27 @@ TODO
 $ make
 $ make qemu
 ```
+
+# Debug
+
+Debug can directly use gdb for debugging, or use vscode for graphical debugging
+
+First you need to install gdb, if you are under macos, execute the following command
+
+``` bash
+brew install i386-elf-gdb
+```
+
+Use the extension `Native Debug` in vscode to support debugging with gdb
+
+If you need to debug, first execute the `make qemu-debug` command to let qemu start the gdb server, and then use gdb's `target remote: 1234` to attach to qemu's gdb server, or use vscode debug directly, the project has built-in vscode debug configuration file.
+
+![vscode-gdb](https://i.imgur.com/KIg6l5A.png)
+
+# Grub boot
+
+TODO
+
+# Documentations
+
+TODO
