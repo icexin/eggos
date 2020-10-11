@@ -83,3 +83,11 @@ TODO
 # Documents
 
 TODO
+
+# Bugs
+
+The program still has a lot of bugs, and often loses response or panic. If you are willing to contribute, please submit a PR, thank you!
+
+# Special thanks
+
+The birth of my little daughter brought a lot of joy to the family. This project was named after her name `xiao dan dan`. My wife also gave me a lot of support and let me update this project in my spare time. :heart: :heart: :heart:
