@@ -12,9 +12,7 @@ import (
 )
 
 const (
-	RAW_BUFLEN = 128
 	CON_BUFLEN = 128
-	BACKSPACE  = 0x100
 )
 
 type console struct {
@@ -35,7 +33,6 @@ var (
 
 func newConsole() *console {
 	c := &console{
-		rawch: make(chan byte, RAW_BUFLEN),
 		tios: syscall.Termios{
 			Lflag: syscall.ICANON | syscall.ECHO,
 		},
@@ -176,7 +173,6 @@ func Console() io.ReadWriter {
 
 func Init() {
 	con = newConsole()
-	// go con.loop()
 	uart.OnInput(con.intr)
 	kbd.OnInput(con.intr)
 }

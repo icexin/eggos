@@ -20,7 +20,10 @@ import (
 )
 
 func main() {
+	// trap and syscall threads use two Ps,
+	// and the remaining one is for other goroutines
 	runtime.GOMAXPROCS(3)
+
 	uart.Init()
 	kbd.Init()
 	console.Init()
