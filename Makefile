@@ -43,7 +43,7 @@ QEMU_DEBUG_OPT = $(QEMU_OPT) -d int -D qemu.log \
 	-s -S
 
 # TAGS = "gin sshd nes"
-TAGS = ""
+TAGS = "nes sshd"
 
 .PHONY: all clean kernel.elf
 

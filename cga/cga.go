@@ -74,6 +74,8 @@ func WriteByte(ch byte) {
 		default:
 			if ch >= 32 && ch <= 127 {
 				backend.WriteByte(ch)
+			} else {
+				backend.WriteByte('?')
 			}
 		}
 
