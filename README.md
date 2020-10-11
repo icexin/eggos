@@ -1,5 +1,7 @@
 # EggOS
 
+![CI](https://github.com/icexin/eggos/workflows/CI/badge.svg)
+
 A Go unikernel running on x86 bare metal
 
 Run a single Go applications on x86 bare metal, written entirely in Go (a small amount of c and some assembly), support most features of Go (like GC, goroutine) and standard libraries, also come with a network stack that can run most `net` based libraries.
