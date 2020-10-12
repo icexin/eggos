@@ -27,7 +27,7 @@ In general, using Go to operate hardware is a pleasure. On the one hand, it gave
 - A simple console support basic line editting.
 - Network stack support tcp/udp.
 - Go style vfs abstraction using [afero](https://github.com/spf13/afero)
-- A nes game simulator using [nes](https://github.com/fogleman/nes)
+- A nes game emulator using [nes](https://github.com/fogleman/nes)
 - A Javascript interpreter using [otto](https://github.com/robertkrimen/otto)
 - VBE based frame buffer.
 - Some simple network apps(httpd, sshd).
@@ -80,11 +80,13 @@ Go provides simple support for gdb, see [Debugging Go Code with GDB](https://gol
 
 # Grub boot
 
-TODO
+If you want eggos to run on bare metal, it is recommended to use grub as the bootloader.
+
+The multiboot.elf generated after executing the make command is a kernel image conforming to the multiboot specification, which can be directly recognized by grub and booted on a bare metal. The sample configuration file refer to `boot/grub.cfg`
 
 # Documents
 
-TODO
+For some design details see [docs/internal.md](docs/internal.md)
 
 # Bugs
 
@@ -92,4 +94,4 @@ The program still has a lot of bugs, and often loses response or panic. If you a
 
 # Special thanks
 
-The birth of my little daughter brought a lot of joy to the family. This project was named after her name `xiao dan dan`. My wife also gave me a lot of support and let me update this project in my spare time. :heart: :heart: :heart:
+The birth of my little daughter brought a lot of joy to the family. This project was named after her name `xiao dan dan`. My wife and mother also gave me a lot of support and let me update this project in my spare time. :heart: :heart: :heart:
