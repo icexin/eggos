@@ -8,6 +8,25 @@ Basic initialization actions are performed in our own entry function, such as `g
 
 # Memory layout
 
+```
+.------------------------------------------.
+|  Virtual memory(managed by go runtime)   |
+:------------------------------------------: 1GB
+| ........                                 |
+:------------------------------------------: memtop(256MB or more)
+| Physical memory(managed by eggos kernel) |
+:------------------------------------------: 20MB
+| Kernel image                             |
+:------------------------------------------: 1MB
+| Unused                                   |
+'------------------------------------------' 0 
+```
+
+The first 1KB of memory is not page-mapped, and the subsequent memory until `memtop` is a direct mapping from virtual memory to physical memory.
+
+The virtual address space available for go runtime starts from 1GB, and it manages the virtual address space itself, so what the kernel does is allocate physical pages according to the mmap system call of go runtime and map them to virtual memory.
+
+
 # Trap
 
 # Syscall
