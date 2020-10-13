@@ -4,7 +4,7 @@
 
 A Go unikernel running on x86 bare metal
 
-Run a single Go applications on x86 bare metal, written entirely in Go (a small amount of c and some assembly), support most features of Go (like GC, goroutine) and standard libraries, also come with a network stack that can run most `net` based libraries.
+Run a single Go applications on x86 bare metal, written entirely in Go (only a small amount of C and some assembly), support most features of Go (like GC, goroutine) and standard libraries, also come with a network stack that can run most `net` based libraries.
 
 # Background
 
@@ -84,9 +84,17 @@ If you want eggos to run on bare metal, it is recommended to use grub as the boo
 
 The multiboot.elf generated after executing the make command is a kernel image conforming to the multiboot specification, which can be directly recognized by grub and booted on a bare metal. The sample configuration file refer to `boot/grub.cfg`
 
-# Documents
+# Documentation
 
 For some design details see [docs/internal.md](docs/internal.md)
+
+# Roadmap
+
+- [ ] WASM runner
+- [ ] GUI support
+- [ ] 3D graphic
+- [ ] x86_64 support
+- [ ] SMP support
 
 # Bugs
 

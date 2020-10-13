@@ -33,6 +33,8 @@ ifneq ($(shell $(CC) -dumpspecs 2>/dev/null | grep -e '[^f]nopie'),)
 CFLAGS += -fno-pie -nopie
 endif
 
+GOVERSION=$(shell go version | awk '{print $$3}')
+
 QEMU_OPT = -m 256M -no-reboot -serial mon:stdio \
 	-netdev user,id=eth0,hostfwd=tcp::8080-:80,hostfwd=tcp::8081-:22 \
 	-device e1000,netdev=eth0 \
@@ -50,6 +52,7 @@ TAGS = "nes sshd"
 all: multiboot.elf
 
 kernel.elf:
+	@if [[ ${GOVERSION} != go1.13* ]]; then echo "eggos only tested on go1.13.x"; exit 1; fi;
 	GOOS=linux GOARCH=386 go build -o kernel.elf -tags $(TAGS) -ldflags '-E github.com/icexin/eggos/kernel.rt0 -T 0x100000' ./kmain
 
 multiboot.elf: boot/multiboot_header.S boot/multiboot.c kernel.elf
