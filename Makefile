@@ -1,3 +1,4 @@
+SHELL = /bin/bash
 #TOOLPREFIX=i386-elf-
 ifndef TOOLPREFIX
 TOOLPREFIX := $(shell if i386-elf-objdump -i 2>&1 | grep '^elf32-i386$$' >/dev/null 2>&1; \
