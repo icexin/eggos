@@ -43,7 +43,7 @@ In general, using Go to operate hardware is a pleasure. On the one hand, it gave
 
 ``` bash
 $ brew tap nativeos/i386-elf-toolchain
-$ brew install brew install i386-elf-binutils i386-elf-gcc i386-elf-gdb
+$ brew install i386-elf-binutils i386-elf-gcc i386-elf-gdb
 $ brew install qemu
 ```
 
