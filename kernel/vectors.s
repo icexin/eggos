@@ -2,2036 +2,2036 @@
 #include "textflag.h"
 
 TEXT ·trap0(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $0
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $0
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap1(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $1
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $1
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap2(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $2
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $2
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap3(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $3
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $3
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap4(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $4
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $4
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap5(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $5
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $5
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap6(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $6
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $6
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap7(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $7
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $7
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap8(SB), NOSPLIT, $0-0
-  PUSHL    $8
-  JMP    alltraps(SB)
-  POPL    AX
-  RET
+	PUSHL $8
+	JMP   alltraps(SB)
+	POPL AX
+	RET
 
 TEXT ·trap9(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $9
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $9
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap10(SB), NOSPLIT, $0-0
-  PUSHL    $10
-  JMP    alltraps(SB)
-  POPL    AX
-  RET
+	PUSHL $10
+	JMP   alltraps(SB)
+	POPL AX
+	RET
 
 TEXT ·trap11(SB), NOSPLIT, $0-0
-  PUSHL    $11
-  JMP    alltraps(SB)
-  POPL    AX
-  RET
+	PUSHL $11
+	JMP   alltraps(SB)
+	POPL AX
+	RET
 
 TEXT ·trap12(SB), NOSPLIT, $0-0
-  PUSHL    $12
-  JMP    alltraps(SB)
-  POPL    AX
-  RET
+	PUSHL $12
+	JMP   alltraps(SB)
+	POPL AX
+	RET
 
 TEXT ·trap13(SB), NOSPLIT, $0-0
-  PUSHL    $13
-  JMP    alltraps(SB)
-  POPL    AX
-  RET
+	PUSHL $13
+	JMP   alltraps(SB)
+	POPL AX
+	RET
 
 TEXT ·trap14(SB), NOSPLIT, $0-0
-  PUSHL    $14
-  JMP    alltraps(SB)
-  POPL    AX
-  RET
+	PUSHL $14
+	JMP   alltraps(SB)
+	POPL AX
+	RET
 
 TEXT ·trap15(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $15
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $15
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap16(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $16
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $16
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap17(SB), NOSPLIT, $0-0
-  PUSHL    $17
-  JMP    alltraps(SB)
-  POPL    AX
-  RET
+	PUSHL $17
+	JMP   alltraps(SB)
+	POPL AX
+	RET
 
 TEXT ·trap18(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $18
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $18
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap19(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $19
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $19
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap20(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $20
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $20
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap21(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $21
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $21
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap22(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $22
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $22
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap23(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $23
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $23
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap24(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $24
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $24
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap25(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $25
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $25
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap26(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $26
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $26
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap27(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $27
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $27
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap28(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $28
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $28
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap29(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $29
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $29
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap30(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $30
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $30
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap31(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $31
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $31
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap32(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $32
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $32
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap33(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $33
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $33
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap34(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $34
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $34
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap35(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $35
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $35
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap36(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $36
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $36
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap37(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $37
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $37
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap38(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $38
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $38
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap39(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $39
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $39
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap40(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $40
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $40
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap41(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $41
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $41
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap42(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $42
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $42
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap43(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $43
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $43
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap44(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $44
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $44
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap45(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $45
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $45
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap46(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $46
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $46
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap47(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $47
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $47
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap48(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $48
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $48
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap49(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $49
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $49
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap50(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $50
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $50
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap51(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $51
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $51
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap52(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $52
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $52
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap53(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $53
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $53
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap54(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $54
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $54
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap55(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $55
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $55
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap56(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $56
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $56
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap57(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $57
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $57
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap58(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $58
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $58
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap59(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $59
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $59
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap60(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $60
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $60
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap61(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $61
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $61
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap62(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $62
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $62
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap63(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $63
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $63
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap64(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $64
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $64
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap65(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $65
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $65
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap66(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $66
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $66
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap67(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $67
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $67
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap68(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $68
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $68
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap69(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $69
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $69
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap70(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $70
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $70
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap71(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $71
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $71
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap72(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $72
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $72
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap73(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $73
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $73
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap74(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $74
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $74
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap75(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $75
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $75
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap76(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $76
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $76
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap77(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $77
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $77
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap78(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $78
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $78
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap79(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $79
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $79
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap80(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $80
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $80
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap81(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $81
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $81
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap82(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $82
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $82
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap83(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $83
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $83
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap84(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $84
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $84
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap85(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $85
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $85
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap86(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $86
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $86
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap87(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $87
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $87
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap88(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $88
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $88
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap89(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $89
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $89
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap90(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $90
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $90
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap91(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $91
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $91
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap92(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $92
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $92
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap93(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $93
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $93
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap94(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $94
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $94
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap95(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $95
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $95
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap96(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $96
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $96
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap97(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $97
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $97
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap98(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $98
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $98
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap99(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $99
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $99
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap100(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $100
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $100
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap101(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $101
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $101
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap102(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $102
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $102
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap103(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $103
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $103
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap104(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $104
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $104
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap105(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $105
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $105
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap106(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $106
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $106
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap107(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $107
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $107
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap108(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $108
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $108
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap109(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $109
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $109
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap110(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $110
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $110
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap111(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $111
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $111
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap112(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $112
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $112
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap113(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $113
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $113
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap114(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $114
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $114
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap115(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $115
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $115
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap116(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $116
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $116
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap117(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $117
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $117
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap118(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $118
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $118
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap119(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $119
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $119
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap120(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $120
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $120
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap121(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $121
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $121
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap122(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $122
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $122
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap123(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $123
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $123
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap124(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $124
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $124
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap125(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $125
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $125
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap126(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $126
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $126
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap127(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $127
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $127
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap128(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $128
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $128
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap129(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $129
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $129
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap130(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $130
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $130
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap131(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $131
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $131
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap132(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $132
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $132
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap133(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $133
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $133
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap134(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $134
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $134
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap135(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $135
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $135
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap136(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $136
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $136
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap137(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $137
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $137
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap138(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $138
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $138
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap139(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $139
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $139
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap140(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $140
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $140
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap141(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $141
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $141
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap142(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $142
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $142
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap143(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $143
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $143
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap144(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $144
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $144
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap145(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $145
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $145
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap146(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $146
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $146
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap147(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $147
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $147
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap148(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $148
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $148
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap149(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $149
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $149
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap150(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $150
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $150
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap151(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $151
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $151
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap152(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $152
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $152
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap153(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $153
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $153
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap154(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $154
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $154
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap155(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $155
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $155
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap156(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $156
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $156
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap157(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $157
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $157
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap158(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $158
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $158
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap159(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $159
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $159
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap160(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $160
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $160
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap161(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $161
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $161
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap162(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $162
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $162
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap163(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $163
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $163
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap164(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $164
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $164
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap165(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $165
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $165
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap166(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $166
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $166
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap167(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $167
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $167
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap168(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $168
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $168
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap169(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $169
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $169
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap170(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $170
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $170
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap171(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $171
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $171
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap172(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $172
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $172
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap173(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $173
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $173
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap174(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $174
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $174
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap175(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $175
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $175
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap176(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $176
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $176
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap177(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $177
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $177
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap178(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $178
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $178
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap179(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $179
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $179
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap180(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $180
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $180
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap181(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $181
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $181
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap182(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $182
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $182
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap183(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $183
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $183
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap184(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $184
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $184
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap185(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $185
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $185
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap186(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $186
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $186
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap187(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $187
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $187
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap188(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $188
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $188
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap189(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $189
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $189
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap190(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $190
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $190
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap191(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $191
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $191
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap192(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $192
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $192
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap193(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $193
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $193
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap194(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $194
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $194
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap195(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $195
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $195
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap196(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $196
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $196
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap197(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $197
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $197
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap198(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $198
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $198
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap199(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $199
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $199
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap200(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $200
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $200
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap201(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $201
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $201
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap202(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $202
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $202
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap203(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $203
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $203
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap204(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $204
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $204
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap205(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $205
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $205
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap206(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $206
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $206
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap207(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $207
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $207
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap208(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $208
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $208
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap209(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $209
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $209
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap210(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $210
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $210
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap211(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $211
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $211
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap212(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $212
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $212
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap213(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $213
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $213
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap214(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $214
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $214
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap215(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $215
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $215
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap216(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $216
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $216
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap217(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $217
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $217
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap218(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $218
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $218
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap219(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $219
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $219
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap220(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $220
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $220
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap221(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $221
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $221
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap222(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $222
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $222
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap223(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $223
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $223
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap224(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $224
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $224
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap225(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $225
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $225
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap226(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $226
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $226
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap227(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $227
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $227
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap228(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $228
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $228
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap229(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $229
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $229
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap230(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $230
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $230
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap231(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $231
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $231
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap232(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $232
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $232
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap233(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $233
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $233
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap234(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $234
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $234
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap235(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $235
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $235
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap236(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $236
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $236
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap237(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $237
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $237
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap238(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $238
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $238
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap239(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $239
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $239
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap240(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $240
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $240
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap241(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $241
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $241
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap242(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $242
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $242
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap243(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $243
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $243
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap244(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $244
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $244
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap245(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $245
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $245
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap246(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $246
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $246
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap247(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $247
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $247
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap248(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $248
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $248
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap249(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $249
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $249
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap250(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $250
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $250
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap251(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $251
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $251
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap252(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $252
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $252
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap253(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $253
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $253
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap254(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $254
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $254
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
 TEXT ·trap255(SB), NOSPLIT, $0-0
-  PUSHL    $0
-  PUSHL    $255
-  JMP    alltraps(SB)
-  POPL    AX
-  POPL    AX
-  RET
+	PUSHL $0
+	PUSHL $255
+	JMP   alltraps(SB)
+	POPL AX
+	POPL AX
+	RET
 
