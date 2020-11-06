@@ -4,6 +4,7 @@
 *.pcap
 *.img
 *.hdd
+.DS_Store
 
 bootblock
 serial
