@@ -15,7 +15,7 @@ jobs:
 
     - name: Install Grub
       run: |
-        sudo apt install grub-common grub-pc-bin
+        sudo apt install grub-common grub-pc-bin xorriso
 
     - name: Checkout code
       uses: actions/checkout@v2
@@ -41,15 +41,10 @@ jobs:
       run: |
         brew install x86_64-elf-gcc
 
-    - name: Install Grub
-      run: |
-        brew install autogen
-        brew install hawkw/homebrew-grub/grub
-
     - name: Checkout code
       uses: actions/checkout@v2
 
     - name: Build
       run: |
         diff -u <(echo -n) <(gofmt -d $(find . -type f -name '*.go')) 
-        mage -v iso
+        mage -v multiboot
