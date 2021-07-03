@@ -1,4 +1,4 @@
-on: [push, pull_request]
+on: [pull_request]
 name: CI
 jobs:
   ubuntu-latest:
@@ -13,15 +13,19 @@ jobs:
       run: |
         go get github.com/magefile/mage
 
+    - name: Install Grub
+      run: |
+        sudo apt install grub-common grub-pc-bin xorriso mtools
+
     - name: Checkout code
       uses: actions/checkout@v2
 
     - name: Build
       run: |
         diff -u <(echo -n) <(gofmt -d $(find . -type f -name '*.go')) 
-        mage iso
+        mage -v iso
 
-   macos-latest:
+  macos-latest:
     runs-on: macos-latest
     steps:
     - name: Install Go
@@ -43,4 +47,4 @@ jobs:
     - name: Build
       run: |
         diff -u <(echo -n) <(gofmt -d $(find . -type f -name '*.go')) 
-        mage iso
+        mage -v multiboot
