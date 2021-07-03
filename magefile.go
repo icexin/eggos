@@ -26,7 +26,7 @@ var (
 )
 
 var (
-	GOTAGS = ""
+	GOTAGS = "nes"
 )
 
 var (

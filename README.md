@@ -38,28 +38,29 @@ In general, writing kernel in Go is a very interesting experience. On the one ha
 # Dependencies
 
 - Go 1.13.x (only tested on Go1.13.x)
-- i386-elf-gcc
+- gcc
 - qemu
+- mage
 
 ## MacOS
 
 ``` bash
-$ brew tap nativeos/i386-elf-toolchain
-$ brew install i386-elf-binutils i386-elf-gcc i386-elf-gdb
+$ go get github.com/magefile/mage
+$ brew install x86_64-elf-binutils x86_64-elf-gcc x86_64-elf-gdb
 $ brew install qemu
 ```
 
 ## Ubuntu
 
 ``` bash
+$ go get github.com/magefile/mage
 $ sudo apt-get install build-essential qemu
 ```
 
 # Quickstart
 
 ``` bash
-$ make
-$ make qemu
+$ mage qemu
 ```
 
 # Debug
@@ -69,12 +70,12 @@ You can directly use the gdb command to debug, or use vscode for graphical debug
 First you need to install gdb, if you are under macos, execute the following command
 
 ``` bash
-brew install i386-elf-gdb
+brew install x86_64-elf-gdb
 ```
 
 Use the extension `Native Debug` in vscode to support debugging with gdb
 
-First execute the `make qemu-debug` command to let qemu start the gdb server, and then use the debug function of vscode to start a debug session. The debug configuration file of vscode is built into the project.
+First execute the `mage qemudebug` command to let qemu start the gdb server, and then use the debug function of vscode to start a debug session. The debug configuration file of vscode is built into the project.
 
 Go provides simple support for gdb, see [Debugging Go Code with GDB](https://golang.org/doc/gdb) for details
 
