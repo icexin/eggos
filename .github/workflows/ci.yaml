@@ -43,6 +43,7 @@ jobs:
 
     - name: Install Grub
       run: |
+        brew install autogen
         brew install hawkw/homebrew-grub/grub
 
     - name: Checkout code
