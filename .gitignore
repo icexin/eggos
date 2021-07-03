@@ -5,6 +5,7 @@
 *.img
 *.hdd
 
+eggos.iso
 bootblock
 serial
 trace.txt

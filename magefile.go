@@ -4,8 +4,10 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"runtime"
 	"strings"
@@ -35,6 +37,7 @@ var (
 	QEMU_DEBUG_OPT = initQemuDebugOpt()
 )
 
+// Kernel target build the elf kernel for eggos, generate kernel.elf
 func Kernel() error {
 	detectGoVersion()
 	env := map[string]string{
@@ -46,6 +49,7 @@ func Kernel() error {
 		"-ldflags", goLdflags, "./kmain")
 }
 
+// Multiboot target build Multiboot specification compatible elf format, generate multiboot.elf
 func Multiboot() error {
 	mg.Deps(Kernel)
 	compileCfile("boot/multiboot.c")
@@ -56,19 +60,68 @@ func Multiboot() error {
 	return sh.RunV(LD, ldArgs...)
 }
 
-func Qemu(accel bool, graphic bool) error {
+// Qemu run multiboot.elf on qemu.
+// If env QEMU_ACCEL is set，QEMU acceleration will be enabled.
+// If env QEMU_GRAPHIC is set QEMU will run in graphic mode.
+// Use Crtl+a c to switch console, and type `quit`
+func Qemu() error {
 	mg.Deps(Multiboot)
 
 	detectQemu()
 	args := append([]string{}, QEMU_OPT...)
-	if accel {
-		args = append(args, accelArg()...)
-	}
-	if !graphic {
-		args = append(args, "-nographic")
-	}
 	args = append(args, "-kernel", "multiboot.elf")
 	return sh.RunV(QEMU64, args...)
+}
+
+// QemuDebug run multiboot.elf in debug mode.
+// Monitor GDB connection on port 1234
+func QemuDebug() error {
+	mg.Deps(Multiboot)
+
+	detectQemu()
+	args := append([]string{}, QEMU_DEBUG_OPT...)
+	args = append(args, "-kernel", "multiboot.elf")
+	return sh.RunV(QEMU32, args...)
+}
+
+// Iso generate eggos.iso, which can be used with qemu -cdrom option.
+func Iso() error {
+	tmpdir, err := ioutil.TempDir("", "eggos-iso")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(tmpdir)
+	grubDir := filepath.Join(tmpdir, "boot", "grub")
+	os.MkdirAll(grubDir, 0755)
+	sh.Copy(
+		filepath.Join(grubDir, "grub.cfg"),
+		filepath.Join("boot", "grub.cfg"),
+	)
+	sh.Copy(
+		filepath.Join(tmpdir, "boot", "multiboot.elf"),
+		"multiboot.elf",
+	)
+	return sh.RunV("grub-mkrescue", "-o", "eggos.iso", tmpdir)
+}
+
+// Graphic run eggos.iso on qemu, which vbe is enabled.
+func Graphic() error {
+	detectQemu()
+
+	mg.Deps(Iso)
+	args := append([]string{}, QEMU_OPT...)
+	args = append(args, "-cdrom", "eggos.iso")
+	return sh.RunV(QEMU64, args...)
+}
+
+// GraphicDebug run eggos.iso on qemu in debug mode.
+func GraphicDebug() error {
+	detectQemu()
+
+	mg.Deps(Iso)
+	args := append([]string{}, QEMU_DEBUG_OPT...)
+	args = append(args, "-cdrom", "eggos.iso")
+	return sh.RunV(QEMU32, args...)
 }
 
 func detectToolPrefix() string {
@@ -148,7 +201,14 @@ func initQemuOpt() []string {
 	-netdev user,id=eth0,hostfwd=tcp::8080-:80,hostfwd=tcp::8081-:22
 	-device e1000,netdev=eth0
 	`
-	return strings.Fields(opts)
+	out := strings.Fields(opts)
+	if os.Getenv("QEMU_ACCEL") != "" {
+		out = append(out, accelArg()...)
+	}
+	if os.Getenv("QEMU_GRAPHIC") == "" {
+		out = append(out, "-nographic")
+	}
+	return out
 }
 
 func initQemuDebugOpt() []string {
@@ -157,7 +217,7 @@ func initQemuDebugOpt() []string {
 	-object filter-dump,id=f1,netdev=eth0,file=qemu.pcap
 	-s -S
 	`
-	ret := append([]string{}, QEMU_OPT...)
+	ret := append([]string{}, initQemuOpt()...)
 	return append(ret, strings.Fields(opts)...)
 }
 
