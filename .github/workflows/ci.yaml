@@ -15,7 +15,7 @@ jobs:
 
     - name: Install Grub
       run: |
-        sudo apt install grub-common grub-pc-bin xorriso
+        sudo apt install grub-common grub-pc-bin xorriso mtools
 
     - name: Checkout code
       uses: actions/checkout@v2
