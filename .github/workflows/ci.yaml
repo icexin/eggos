@@ -21,7 +21,7 @@ jobs:
         diff -u <(echo -n) <(gofmt -d $(find . -type f -name '*.go')) 
         mage iso
 
-   macos-latest:
+  macos-latest:
     runs-on: macos-latest
     steps:
     - name: Install Go
