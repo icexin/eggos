@@ -13,6 +13,7 @@ require (
 	github.com/hirochachacha/go-smb2 v1.0.3
 	github.com/jakecoffman/cp v1.0.0
 	github.com/klauspost/cpuid v1.3.1
+	github.com/magefile/mage v1.11.0
 	github.com/mattn/go-shellwords v1.0.10
 	github.com/peterh/liner v1.2.0
 	github.com/rakyll/statik v0.1.7
