@@ -15,7 +15,7 @@ jobs:
 
     - name: Install Grub
       run: |
-        apt install grub-common grub-pc-bin
+        sudo apt install grub-common grub-pc-bin
 
     - name: Checkout code
       uses: actions/checkout@v2
