@@ -1,20 +1,46 @@
 on: [push, pull_request]
 name: CI
 jobs:
-  test:
-    strategy:
-      matrix:
-        go-version: [1.13.x]
-        platform: [ubuntu-latest, macos-latest]
-    runs-on: ${{ matrix.platform }}
+  ubuntu-latest:
+    runs-on: ubuntu-latest
     steps:
     - name: Install Go
-      uses: actions/setup-go@v1
+      uses: actions/setup-go@v2
       with:
-        go-version: ${{ matrix.go-version }}
+        go-version: 1.13.x
+
+    - name: Install Mage
+      run: |
+        go get github.com/magefile/mage
+
     - name: Checkout code
       uses: actions/checkout@v2
-    - name: Test
+
+    - name: Build
       run: |
         diff -u <(echo -n) <(gofmt -d $(find . -type f -name '*.go')) 
-        make kernel.elf
+        mage iso
+
+   macos-latest:
+    runs-on: macos-latest
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.13.x
+
+    - name: Install Mage
+      run: |
+        go get github.com/magefile/mage
+
+    - name: Install Elf Gcc
+      run: |
+        brew install x86_64-elf-gcc
+
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Build
+      run: |
+        diff -u <(echo -n) <(gofmt -d $(find . -type f -name '*.go')) 
+        mage iso

@@ -86,6 +86,8 @@ func QemuDebug() error {
 
 // Iso generate eggos.iso, which can be used with qemu -cdrom option.
 func Iso() error {
+	mg.Deps(Multiboot)
+
 	tmpdir, err := ioutil.TempDir("", "eggos-iso")
 	if err != nil {
 		return err
