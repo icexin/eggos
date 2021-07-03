@@ -1,4 +1,4 @@
-on: [pull_request]
+on: [push, pull_request]
 name: CI
 jobs:
   ubuntu-latest:
@@ -24,6 +24,15 @@ jobs:
       run: |
         diff -u <(echo -n) <(gofmt -d $(find . -type f -name '*.go')) 
         mage -v iso
+
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+          files: eggos.iso
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
   macos-latest:
     runs-on: macos-latest
