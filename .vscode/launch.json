@@ -5,6 +5,19 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "dlv-gdb",
+            "type": "go",
+            "request": "attach",
+            "mode": "local",
+            "cwd": "${workspaceFolder}",
+            "debugAdapter": "legacy",
+            "processId": 1234,
+            "backend": "gdbstub",
+            "dlvFlags": [
+                "${workspaceRoot}/kernel.elf",
+            ],
+        },
+        {
             "type": "gdb",
             "request": "attach",
             "name": "Attach to qemu",
@@ -13,7 +26,8 @@
             "remote": true,
             "cwd": "${workspaceRoot}",
             "valuesFormatting": "parseText",
-            "gdbpath": "gdb",
+            // "gdbpath": "gdb",
+            "gdbpath": "x86_64-elf-gdb",
         },
     ]
 }

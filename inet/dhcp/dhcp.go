@@ -100,7 +100,7 @@ func (h header) isValid() bool {
 	if h[1] != 0x01 || h[2] != 0x06 || h[3] != 0x00 {
 		return false
 	}
-	return bytes.Equal(h[236:240], magicCookie) && h[len(h)-1] == 0
+	return bytes.Equal(h[236:240], magicCookie)
 }
 
 func (h header) op() op           { return op(h[0]) }
