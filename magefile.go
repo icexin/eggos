@@ -26,7 +26,8 @@ var (
 )
 
 var (
-	GOTAGS = "nes"
+	GOTAGS    = "nes"
+	GOGCFLAGS = ""
 )
 
 var (
@@ -46,7 +47,7 @@ func Kernel() error {
 	}
 	goLdflags := "-E github.com/icexin/eggos/kernel.rt0 -T 0x100000"
 	return sh.RunWithV(env, "go", "build", "-o", "kernel.elf", "-tags", GOTAGS,
-		"-ldflags", goLdflags, "./kmain")
+		"-ldflags", goLdflags, "-gcflags", GOGCFLAGS, "./kmain")
 }
 
 // Multiboot target build Multiboot specification compatible elf format, generate multiboot.elf
@@ -76,6 +77,7 @@ func Qemu() error {
 // QemuDebug run multiboot.elf in debug mode.
 // Monitor GDB connection on port 1234
 func QemuDebug() error {
+	GOGCFLAGS += " -N -l"
 	mg.Deps(Multiboot)
 
 	detectQemu()
@@ -120,6 +122,7 @@ func Graphic() error {
 func GraphicDebug() error {
 	detectQemu()
 
+	GOGCFLAGS += " -N -l"
 	mg.Deps(Iso)
 	args := append([]string{}, QEMU_DEBUG_OPT...)
 	args = append(args, "-cdrom", "eggos.iso")
