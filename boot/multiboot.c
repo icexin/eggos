@@ -1,9 +1,11 @@
-// Boot loader.
+// According to the multiboot specification,
+// the multiboot header must appear in the first 8192 bytes of the kernel image,
+// and the go image is often megabytes in size.
 //
-// Part of the boot block, along with bootasm.S, which calls bootmain().
-// bootasm.S has put the processor into protected 32-bit mode.
-// bootmain() loads an ELF kernel image from the disk starting at
-// sector 1 and then jumps to the kernel entry routine.
+// Therefore, we first write the elf loader in C language,
+// and then load the kernel image in go language.
+//
+// https://www.gnu.org/software/grub/manual/multiboot/multiboot.html#OS-image-format
 
 typedef unsigned int uint;
 typedef unsigned short ushort;
@@ -14,17 +16,9 @@ typedef unsigned char uchar;
 
 extern char _binary_kernel_elf_start[];
 
-void readseg(uchar *, uint, uint);
-void memcpy(char *, char *, int);
-
-static inline void
-stosb(void *addr, int data, int cnt)
-{
-    asm volatile("cld; rep stosb"
-                 : "=D"(addr), "=c"(cnt)
-                 : "0"(addr), "1"(cnt), "a"(data)
-                 : "memory", "cc");
-}
+void readseg(uchar *pa, uint count, uint offset);
+void memcpy(char *dst, char *src, int count);
+void memset(char *addr, char data, int cnt);
 
 void multibootmain(unsigned long magic, multiboot_info_t *mbi)
 {
@@ -47,7 +41,9 @@ void multibootmain(unsigned long magic, multiboot_info_t *mbi)
         pa = (uchar *)ph->paddr;
         readseg(pa, ph->filesz, ph->off);
         if (ph->memsz > ph->filesz)
-            stosb(pa + ph->filesz, 0, ph->memsz - ph->filesz);
+        {
+            memset((char *)(pa + ph->filesz), 0, ph->memsz - ph->filesz);
+        }
     }
 
     // Call the entry point from the ELF header.
@@ -68,5 +64,14 @@ void memcpy(char *dst, char *src, int count)
     for (; i < count; i++)
     {
         *dst++ = *src++;
+    }
+}
+
+void memset(char *addr, char data, int count)
+{
+    int i = 0;
+    for (; i < count; i++)
+    {
+        *addr++ = data;
     }
 }

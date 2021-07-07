@@ -6,27 +6,9 @@
 #define MULTIBOOT_HEADER_FLAGS  MULTIBOOT_PAGE_ALIGN | MULTIBOOT_MEMORY_INFO | MULTIBOOT_VIDEO_MODE
 // #define MULTIBOOT_HEADER_FLAGS  MULTIBOOT_PAGE_ALIGN | MULTIBOOT_MEMORY_INFO
 
-
-.p2align 2
-.text
-.globl multiboot_header
-multiboot_header:
-  #define magic 0xe85250d6
-  #define flags 0
-  #define length (multiboot_header_end - multiboot_header)
-  .long magic
-  .long flags
-  .long length
-  .long (-magic-flags-length)
-  .word 0
-  .word 0
-  .long 8
-multiboot_header_end:
-
-
 .align  4
-.global multiboot1_header
-multiboot1_header:
+.global multiboot_header
+multiboot_header:
   .long MULTIBOOT_HEADER_MAGIC
   .long MULTIBOOT_HEADER_FLAGS
   .long -(MULTIBOOT_HEADER_MAGIC + MULTIBOOT_HEADER_FLAGS)
