@@ -129,6 +129,14 @@ func GraphicDebug() error {
 	return sh.RunV(QEMU32, args...)
 }
 
+func Clean() {
+	rmGlob("*.o")
+	rmGlob("kernel.elf")
+	rmGlob("multiboot.elf")
+	rmGlob("qemu.log")
+	rmGlob("qemu.pcap")
+}
+
 func detectToolPrefix() string {
 	prefix := os.Getenv("TOOLPREFIX")
 	if prefix != "" {
@@ -256,4 +264,18 @@ func hasOutput(regstr, cmd string, args ...string) bool {
 		return false
 	}
 	return match
+}
+
+func rmGlob(patten string) error {
+	match, err := filepath.Glob(patten)
+	if err != nil {
+		return err
+	}
+	for _, file := range match {
+		err = os.Remove(file)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
