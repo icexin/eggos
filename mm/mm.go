@@ -193,13 +193,13 @@ func Mmap(va, size uintptr) uintptr {
 	if va == 0 {
 		va = kmm.sbrk(size)
 	}
-	vmm.mmap(va, size, PTE_P|PTE_W)
+	vmm.mmap(va, size, PTE_P|PTE_W|PTE_U)
 	return va
 }
 
 //go:nosplit
 func Fixmap(va, pa, size uintptr) {
-	vmm.fixmap(va, pa, size, PTE_P|PTE_W)
+	vmm.fixmap(va, pa, size, PTE_P|PTE_W|PTE_U)
 }
 
 //go:nosplit
@@ -250,7 +250,7 @@ func (v *vmmt) walkpgdir(va uintptr, alloc bool) *pdet {
 		return nil
 	}
 	sys.Memclr(addr, PGSIZE)
-	*pde = pdet(addr | PTE_P | PTE_W)
+	*pde = pdet(addr | PTE_P | PTE_W | PTE_U)
 	pgtab := pde.pgtab()
 	return &pgtab[pageTabIdx(va)]
 }
@@ -289,7 +289,7 @@ func Init() {
 	sys.Memclr(uintptr(unsafe.Pointer(vmm.pgdir)), PGSIZE)
 	// 4096-MEMTOP 用来让微内核访问到所有的地址空间
 	// identity map all phy memory
-	vmm.fixmap(4096, 4096, memtop-4096, PTE_P|PTE_W)
+	vmm.fixmap(4096, 4096, memtop-4096, PTE_P|PTE_W|PTE_U)
 
 	lcr3(vmm.pgdir)
 	page_enable()

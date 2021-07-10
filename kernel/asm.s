@@ -2,7 +2,10 @@
 
 #define SYS_clone	     120
 #define SYS_sched_yield	 158
-#define _GO_TLS_IDX 3
+
+#define _KCODE_IDX 1
+#define _KDATA_IDX 2
+#define _TSS_IDX 5
 
 // copy from go_tls.h
 #define get_tls(r)	MOVL TLS, r
@@ -46,9 +49,10 @@ TEXT load_cs(SB), NOSPLIT, $0
 	// save ip
 	MOVL 0(SP), AX
 
-	ADDL  $4, SP
+	// rerange the stack, as in an interrupt stack
+	ADDL  $4, SP // skip old IP register in stack
 	PUSHFL
-	PUSHL $0x08
+	PUSHL $_KCODE_IDX<<3
 	PUSHL AX
 
 	// IRET
@@ -58,7 +62,7 @@ TEXT ·gdt_init(SB), NOSPLIT, $0
 	CALL ·fillgdt(SB)
 
 	LGDT ·gdtptr(SB)
-	MOVL $0x10, AX
+	MOVL $_KDATA_IDX<<3, AX
 	MOVW AX, DS
 	MOVW AX, ES
 	MOVW AX, SS
@@ -66,6 +70,9 @@ TEXT ·gdt_init(SB), NOSPLIT, $0
 	MOVL $0x00, AX
 	MOVW AX, FS
 	MOVW AX, GS
+
+	MOVL $_TSS_IDX<<3, AX
+	LTR  AX
 
 	CALL load_cs(SB)
 
