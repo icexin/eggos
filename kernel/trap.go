@@ -52,9 +52,9 @@ func trapret()
 func setGateDesc(gate *gateDesc, handler func(), tp, pl uint8) {
 	base := uint32(sys.FuncPC(handler))
 	gate.offsetLow = uint16(base & 0xffff)
-	gate.selector = 0x08
+	gate.selector = _KCODE_IDX << 3
 	gate.dcount = 0
-	gate.attr = tp | pl<<5
+	gate.attr = tp | pl
 	gate.offsetHigh = uint16((base >> 16) & 0xffff)
 }
 
@@ -67,6 +67,8 @@ func fillidt() {
 	for i := 0; i < 256; i++ {
 		setGateDesc(&idt[i], vectors[i], STS_IG32, DPL_KERN)
 	}
+	// set syscall gate to user mode
+	setGateDesc(&idt[0x80], vectors[0x80], STS_IG32, DPL_USER)
 
 	limit := (*uint16)(unsafe.Pointer(&idtptr[0]))
 	base := (*uint32)(unsafe.Pointer(&idtptr[2]))
@@ -80,13 +82,14 @@ func ignoreHandler() {
 
 //go:nosplit
 func pageFaultHandler() {
-	Signal(uintptr(syscall.SIGSEGV), 2, sys.Cr2())
+	t := Mythread()
+	PreparePanic(t.tf)
 }
 
 //go:nosplit
 func faultHandler() {
-	my := Mythread()
-	Signal(uintptr(syscall.SIGABRT), my.tf.Trapno, 0)
+	t := Mythread()
+	PreparePanic(t.tf)
 }
 
 //go:nosplit
@@ -103,8 +106,12 @@ func PreparePanic(tf *TrapFrame) {
 // must be called in trap handler
 //go:nosplit
 func ChangeReturnPC(tf *TrapFrame, pc uintptr) {
-	tf.Err, tf.IP, tf.CS, tf.FLAGS = pc, tf.CS, tf.FLAGS, tf.IP
-	tf.SP -= sys.PtrSize
+	// tf.Err, tf.IP, tf.CS, tf.FLAGS = pc, tf.CS, tf.FLAGS, tf.IP
+	sp := tf.SP
+	sp -= sys.PtrSize
+	*(*uintptr)(unsafe.Pointer(sp)) = tf.IP
+	tf.SP = sp
+	tf.IP = pc
 }
 
 //go:nosplit

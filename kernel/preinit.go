@@ -21,7 +21,7 @@ const (
 )
 
 var (
-	gdt    [5]segDesc
+	gdt    [8]segDesc
 	gdtptr [6]byte
 )
 
@@ -54,12 +54,35 @@ func setSegDesc(seg *segDesc, base, limit uint32, flag uint16) {
 }
 
 //go:nosplit
+func setTssSegDesc(seg *segDesc, base, limit uint32) {
+	seg.limitLow = uint16(limit & 0xffff)
+	seg.baseLow = uint16(base & 0xffff)
+	seg.baseMid = uint8((base >> 16) & 0xff)
+	seg.attr1 = uint8(0x89)                              // P=1 DPL=0 TYPE=1001
+	seg.limitHightAttr2 = uint8(0x00 | (limit>>16)&0x0f) // G=0
+	seg.baseHigh = uint8((base >> 24) & 0xff)
+}
+
+//go:nosplit
 func fillgdt() {
 	gdt[0] = segDesc{}
+	// kernel code
 	setSegDesc(&gdt[1], 0, 0xffffffff, STA_X|STA_R)
+	// kernel data
 	setSegDesc(&gdt[2], 0, 0xffffffff, STA_W)
-	setSegDesc(&gdt[3], 0, 0xffffffff, STA_W)
-	setSegDesc(&gdt[4], 0, 0xffffffff, STA_W)
+	// user code
+	setSegDesc(&gdt[3], 0, 0xffffffff, STA_X|STA_R|DPL_USER)
+	// user data
+	setSegDesc(&gdt[4], 0, 0xffffffff, STA_W|DPL_USER)
+	// task state(TSS)
+	tssBase := uint32(uintptr(unsafe.Pointer(&taskstate)))
+	tssLimit := uint32(unsafe.Sizeof(taskstate)) - 1
+	setTssSegDesc(&gdt[5], tssBase, tssLimit)
+	// go runtime tls
+	setSegDesc(&gdt[6], tssBase, tssLimit, STA_W)
+	// kernel tls
+	setSegDesc(&gdt[7], tssBase, tssLimit, STA_W)
+
 	limit := (*uint16)(unsafe.Pointer(&gdtptr[0]))
 	base := (*uint32)(unsafe.Pointer(&gdtptr[2]))
 	*limit = uint16(unsafe.Sizeof(gdt) - 1)

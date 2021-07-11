@@ -9,9 +9,6 @@ TEXT ·idt_init(SB), NOSPLIT, $0
 #define m_tf 4
 
 TEXT alltraps(SB), NOSPLIT, $0
-	// 因为我们没有切换ring，因此需要显式保存一下sp指针，
-	// 便于在中断处理程序中修改sp
-	PUSHL SP
 	PUSHAL
 	PUSHW DS
 	PUSHW ES
@@ -36,7 +33,6 @@ TEXT ·trapret(SB), NOSPLIT, $0
 	POPW ES
 	POPW DS
 	POPAL
-	POPL SP
 
 	ADDL $8, SP // skip trapno and errcode
 

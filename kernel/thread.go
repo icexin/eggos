@@ -8,9 +8,20 @@ import (
 )
 
 const (
-	_NTHREDS    = 20
-	_GO_TLS_IDX = 3
-	_KTLS_IDX   = 4
+	_NTHREDS = 20
+
+	_KCODE_IDX  = 1
+	_KDATA_IDX  = 2
+	_UCODE_IDX  = 3
+	_UDATA_IDX  = 4
+	_TSS_IDX    = 5
+	_GO_TLS_IDX = 6
+	_KTLS_IDX   = 7
+
+	_RPL_USER = 3
+
+	_FLAGS_IF        = 0x200
+	_FLAGS_IOPL_USER = 0x3000
 
 	_THREAD_STACK_SIZE = 32 << 10
 )
@@ -24,10 +35,16 @@ const (
 	EXIT
 )
 
+const (
+	_TSS_ESP0 = 1
+	_TSS_SS0  = 2
+)
+
 var (
 	threads     [_NTHREDS]Thread
 	ktls        [16]unsafe.Pointer
 	scheduler   *context
+	taskstate   [27]uint32
 	idle_thread threadptr
 )
 
@@ -41,17 +58,20 @@ type context struct {
 
 type TrapFrame struct {
 	GS, FS, ES, DS                  uint16
-	DI, SI, BP, SP0, BX, DX, CX, AX uintptr
-	SP                              uintptr
-	Trapno, Err                     uintptr
-	IP, CS, FLAGS                   uintptr
+	DI, SI, BP, _SP, BX, DX, CX, AX uintptr
+	Trapno                          uintptr
+
+	// pushed by hardware
+	Err           uintptr
+	IP, CS, FLAGS uintptr
+	SP, SS        uintptr
 }
 
 type Thread struct {
-	// position of stack and tf must be synced with trap.s
-	// Kstack uintptr
-	stack uintptr
-	tf    *TrapFrame
+	// position of tf must be synced with trap.s
+	stack  uintptr
+	tf     *TrapFrame
+	kstack uintptr
 
 	sigstack stackt
 	sigset   sigset
@@ -85,6 +105,7 @@ func allocThread() *Thread {
 	t.sigstack.ss_sp = mm.Alloc()
 	t.sigstack.ss_size = mm.PGSIZE
 	t.state = INITING
+	t.kstack = mm.Mmap(0, _THREAD_STACK_SIZE) + _THREAD_STACK_SIZE
 	return t
 }
 
@@ -108,8 +129,13 @@ func set_gs(idx int)
 
 //go:nosplit
 func switchThreadContext(t *Thread) {
+	// set go tls base address
 	settls(_GO_TLS_IDX, uint32(t.tls.baseAddr), uint32(t.tls.limit))
+	// flush cache for invisible gs register
 	set_gs(_GO_TLS_IDX)
+	// use current thread esp0 in tss
+	taskstate[_TSS_SS0] = _KDATA_IDX << 3
+	taskstate[_TSS_ESP0] = uint32(t.kstack)
 }
 
 //go:nosplit
@@ -128,12 +154,28 @@ func thread0_init() {
 	t.stack = mm.Mmap(0, _THREAD_STACK_SIZE)
 	t.stack += _THREAD_STACK_SIZE
 
-	sp := t.stack
+	sp := t.kstack
+
+	// for trap frame
+	sp -= unsafe.Sizeof(TrapFrame{})
+	tf := (*TrapFrame)(unsafe.Pointer(sp))
+
+	tf.DS = _UDATA_IDX<<3 | _RPL_USER
+	tf.ES = _UDATA_IDX<<3 | _RPL_USER
+	tf.FS = _KTLS_IDX<<3 | _RPL_USER
+	tf.GS = _GO_TLS_IDX<<3 | _RPL_USER
+	tf.SS = _UDATA_IDX<<3 | _RPL_USER
+	tf.SP = t.stack
+	// enable interrupt and io port
+	tf.FLAGS = _FLAGS_IF | _FLAGS_IOPL_USER
+	tf.CS = _UCODE_IDX<<3 | _RPL_USER
+	tf.IP = sys.FuncPC(thread0)
+	t.tf = tf
 
 	// for context
 	sp -= unsafe.Sizeof(*t.context)
 	ctx := (*context)(unsafe.Pointer(sp))
-	ctx.ip = sys.FuncPC(thread0)
+	ctx.ip = sys.FuncPC(trapret)
 	t.context = ctx
 
 	t.state = RUNNABLE
@@ -145,14 +187,20 @@ func sys_clone(pc, stack uintptr) uintptr
 //go:nosplit
 func sys_yield()
 
+//go:nosplit
+func sys_hlt()
+
 // thread0 is the first thread
 //go:nosplit
 func thread0() {
-	sys.Sti()
-
+	// thread0 clone idle thread
 	stack := mm.Mmap(0, _THREAD_STACK_SIZE) + _THREAD_STACK_SIZE
 	tid := sys_clone(sys.FuncPC(idle), stack)
 	idle_thread = (threadptr)(unsafe.Pointer(&threads[tid]))
+
+	// make idle thread running at ring0, so that it can call HLT instruction.
+	tf := idle_thread.ptr().tf
+	tf.CS = _KCODE_IDX << 3
 
 	// jump to go rt0
 	go_entry()
@@ -168,15 +216,16 @@ func idle() {
 }
 
 //go:nosplit
-func clone(pc, sp uintptr) int {
+func clone(pc, usp uintptr) int {
 	my := Mythread()
 	chld := allocThread()
 
+	sp := chld.kstack
 	// for trap frame
 	sp -= unsafe.Sizeof(TrapFrame{})
 	tf := (*TrapFrame)(unsafe.Pointer(sp))
 	*tf = *my.tf
-	tf.SP = sp + unsafe.Offsetof(tf.Trapno)
+	tf.SP = usp
 	tf.IP = pc
 	tf.AX = 0
 
@@ -185,9 +234,10 @@ func clone(pc, sp uintptr) int {
 	ctx := (*context)(unsafe.Pointer(sp))
 	ctx.ip = sys.FuncPC(trapret)
 
-	// chld.context = ctx
-	*(*uintptr)(unsafe.Pointer(&chld.context)) = sp
-	chld.stack = sp
+	chld.context = ctx
+	// *(*uintptr)(unsafe.Pointer(&chld.context)) = sp
+	chld.tf = tf
+	chld.stack = usp
 	chld.state = RUNNABLE
 	return chld.id
 }
