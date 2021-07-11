@@ -54,3 +54,8 @@ TEXT ·Flags(SB), NOSPLIT, $0-4
 TEXT ·Mfence(SB), NOSPLIT, $0
 	MFENCE
 	RET
+
+TEXT ·Fxsave(SB), NOSPLIT, $0-4
+	MOVL addr+0(FP), AX
+	FXSAVE (AX)
+	RET

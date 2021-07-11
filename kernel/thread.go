@@ -68,10 +68,13 @@ type TrapFrame struct {
 }
 
 type Thread struct {
-	// position of tf must be synced with trap.s
+	// position of tf and fpstate must be synced with trap.s
 	stack  uintptr
 	tf     *TrapFrame
 	kstack uintptr
+
+	// the state of fpu
+	fpstate uintptr
 
 	sigstack stackt
 	sigset   sigset
@@ -106,6 +109,7 @@ func allocThread() *Thread {
 	t.sigstack.ss_size = mm.PGSIZE
 	t.state = INITING
 	t.kstack = mm.Mmap(0, _THREAD_STACK_SIZE) + _THREAD_STACK_SIZE
+	t.fpstate = mm.Alloc()
 	return t
 }
 
@@ -160,6 +164,9 @@ func thread0_init() {
 	sp -= unsafe.Sizeof(TrapFrame{})
 	tf := (*TrapFrame)(unsafe.Pointer(sp))
 
+	// Because trapret restore fpstate
+	// we need a valid fpstate here
+	sys.Fxsave(t.fpstate)
 	tf.DS = _UDATA_IDX<<3 | _RPL_USER
 	tf.ES = _UDATA_IDX<<3 | _RPL_USER
 	tf.FS = _KTLS_IDX<<3 | _RPL_USER
@@ -225,6 +232,12 @@ func clone(pc, usp uintptr) int {
 	sp -= unsafe.Sizeof(TrapFrame{})
 	tf := (*TrapFrame)(unsafe.Pointer(sp))
 	*tf = *my.tf
+
+	// copy fpstate
+	fpsrc := (*[512]byte)(unsafe.Pointer(my.fpstate))
+	fpdst := (*[512]byte)(unsafe.Pointer(chld.fpstate))
+	*fpdst = *fpsrc
+
 	tf.SP = usp
 	tf.IP = pc
 	tf.AX = 0

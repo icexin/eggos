@@ -62,8 +62,8 @@ func addBox(space *cp.Space) {
 	body.SetAngularVelocity(v)
 	body.SetAngle(math.Atan2(pos.Y, pos.X))
 
-	//shape := space.AddShape(cp.NewPolyShape(body, 4, verts, cp.NewTransformIdentity(), 0))
-	shape := space.AddShape(cp.NewCircle(body, float64(size), cp.Vector{0, 0}))
+	shape := space.AddShape(cp.NewPolyShape(body, 4, verts, cp.NewTransformIdentity(), 0))
+	// shape := space.AddShape(cp.NewCircle(body, float64(size), cp.Vector{0, 0}))
 	shape.SetElasticity(0)
 	shape.SetFriction(0.7)
 }
@@ -95,7 +95,7 @@ func (g *Game) Init() {
 	planetBody = g.space.AddBody(cp.NewKinematicBody())
 	planetBody.SetAngularVelocity(0.2)
 
-	N := 1
+	N := 50
 	for i := 0; i < N; i++ {
 		addBox(g.space)
 	}
