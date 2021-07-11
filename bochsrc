@@ -5,8 +5,8 @@ vga: extension=vbe
 #floppya: image="images/floppy.img", status=inserted
 #floppyb: image="images/b.img", status=inserted
 #ata0-master: type=disk, path=os.img, cylinders=20, heads=16, spt=63
-ata0-master: type=disk, path=os.img
-boot: c
+ata0-master: type=cdrom, path=eggos.iso, status=inserted
+boot: cdrom
 
 com1: enabled=1,mode=file,dev="serial"
 mouse: enabled=0

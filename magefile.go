@@ -26,7 +26,7 @@ var (
 )
 
 var (
-	GOTAGS    = "nes"
+	GOTAGS    = "nes phy"
 	GOGCFLAGS = ""
 )
 
