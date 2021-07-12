@@ -36,12 +36,12 @@ func repl(ctx *app.Context, vm *otto.Otto) error {
 		}
 		prompt = promptstr
 		d = nil
-		_, err = vm.Eval(s)
+		v, err := vm.Eval(s)
 		if err != nil {
 			fmt.Fprintf(ctx.Stderr, "%s\n", err)
 			continue
 		}
-		// fmt.Fprintf(ctx.Stdout, "%s\n", v.String())
+		fmt.Fprintf(ctx.Stdout, "%s\n", v.String())
 	}
 	return nil
 }

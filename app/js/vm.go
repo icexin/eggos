@@ -2,9 +2,11 @@ package js
 
 import (
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
+	"github.com/icexin/eggos/sys"
 	"github.com/robertkrimen/otto"
 )
 
@@ -25,6 +27,18 @@ func addBuiltins(vm *otto.Otto) {
 			buf, _ := ioutil.ReadAll(resp.Body)
 			return string(buf)
 		},
+	})
+	vm.Set("sys", map[string]interface{}{
+		"in8": func(port uint16) byte {
+			return sys.Inb(port)
+		},
+		"out8": func(port uint16, data byte) {
+			sys.Outb(port, data)
+		},
+	})
+	vm.Set("printf", func(fmtstr string, args ...interface{}) int {
+		n, _ := fmt.Printf(fmtstr, args...)
+		return n
 	})
 }
 
