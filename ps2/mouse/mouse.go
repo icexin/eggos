@@ -16,7 +16,14 @@ var (
 	packet     [3]byte
 	status     byte
 	xpos, ypos int
+
+	eventch chan Packet
 )
+
+type Packet struct {
+	X, Y        int
+	Left, Right bool
+}
 
 func Cursor() (int, int) {
 	return xpos, ypos
@@ -65,6 +72,17 @@ func handlePacket(v byte) {
 		status = packet[0]
 		xpos += xrel(status, int(packet[1]))
 		ypos -= yrel(status, int(packet[2]))
+
+		p := Packet{
+			X:     xpos,
+			Y:     ypos,
+			Left:  LeftClick(),
+			Right: RightClick(),
+		}
+		select {
+		case eventch <- p:
+		default:
+		}
 	}
 	// debug.Logf("x:%d y:%d packet:%v status:%8b", xpos, ypos, packet, status)
 }
@@ -85,6 +103,10 @@ func yrel(status byte, value int) int {
 	}
 	ret |= byte(value)
 	return int(int8(ret))
+}
+
+func EventQueue() chan Packet {
+	return eventch
 }
 
 func Init() {
@@ -109,4 +131,6 @@ func Init() {
 
 	trap.Register(_IRQ_MOUSE, intr)
 	pic.EnableIRQ(pic.LINE_MOUSE)
+
+	eventch = make(chan Packet, 10)
 }

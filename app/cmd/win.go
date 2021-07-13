@@ -1,3 +1,5 @@
+// +build nk
+
 package cmd
 
 import (
