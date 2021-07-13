@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"unsafe"
@@ -58,7 +59,6 @@ func drawImage() image.Image {
 		Rect:   image.Rect(0, 0, wptr, hptr),
 		Stride: wptr * 4,
 	}
-	fauxgl.SavePNG("font.png", img)
 	tex := fauxgl.NewImageTexture(img)
 	// m := fauxgl.Scale(fauxgl.V(1, -1, 0)).Translate(fauxgl.V(0, 480, 0)).Orthographic(0, 600, 0, 480, -1, 1)
 	// m := fauxgl.Orthographic(0, 600, 0, 480, -1, 1)
@@ -74,7 +74,6 @@ func drawImage() image.Image {
 		nk.Xnk_style_set_font(ctx, uintptr(unsafe.Pointer(&default_font.Handle)))
 	}
 
-	nk.Xnk_begin(ctx, uintptr(unsafe.Pointer(&title[0])), nk.Xnk_rect(50, 50, 220, 220), nk.NK_WINDOW_BORDER|nk.NK_WINDOW_MOVABLE|nk.NK_WINDOW_CLOSABLE|nk.NK_WINDOW_SCALABLE)
 	x, y := mouse.Cursor()
 	left := int32(0)
 	if mouse.LeftClick() {
@@ -88,8 +87,13 @@ func drawImage() image.Image {
 	nk.Xnk_input_button(ctx, nk.NK_BUTTON_LEFT, int32(x), int32(y), left)
 	nk.Xnk_input_button(ctx, nk.NK_BUTTON_RIGHT, int32(x), int32(y), right)
 
-	nk.Xnk_layout_row_static(ctx, 30, 80, 1)
-	nk.Xnk_button_label(ctx, uintptr(unsafe.Pointer(&title[0])))
+	ok := nk.Xnk_begin(ctx, uintptr(unsafe.Pointer(&title[0])), nk.Xnk_rect(50, 50, 220, 220), nk.NK_WINDOW_BORDER|nk.NK_WINDOW_MOVABLE|nk.NK_WINDOW_CLOSABLE|nk.NK_WINDOW_SCALABLE)
+	if ok != 0 {
+		nk.Xnk_layout_row_static(ctx, 30, 80, 1)
+		str := []byte(fmt.Sprintf("x:%d y:%d", x, y))
+		// nk.Xnk_label(ctx, uintptr(unsafe.Pointer(&str[0])), 0)
+		nk.Xnk_button_label(ctx, uintptr(unsafe.Pointer(&str[0])))
+	}
 	nk.Xnk_end(ctx)
 
 	var vertex_layout = [...]nk.Nk_draw_vertex_layout_element{

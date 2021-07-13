@@ -1,7 +1,6 @@
 package mouse
 
 import (
-	"github.com/icexin/eggos/debug"
 	"github.com/icexin/eggos/kernel/trap"
 	"github.com/icexin/eggos/pic"
 	"github.com/icexin/eggos/ps2"
@@ -35,12 +34,12 @@ func intr() {
 	pic.EOI(_IRQ_MOUSE)
 	for {
 		st := ps2.ReadCmd()
-		debug.Logf("status:%08b", st)
+		// debug.Logf("status:%08b", st)
 		if st&0x01 == 0 {
 			break
 		}
 		x := ps2.ReadDataNoWait()
-		debug.Logf("data:%08b", x)
+		// debug.Logf("data:%08b", x)
 		handlePacket(x)
 	}
 }
@@ -67,7 +66,7 @@ func handlePacket(v byte) {
 		xpos += xrel(status, int(packet[1]))
 		ypos += yrel(status, int(packet[2]))
 	}
-	debug.Logf("x:%d y:%d packet:%v status:%08b", xpos, ypos, packet, status)
+	// debug.Logf("x:%d y:%d packet:%v status:%08b", xpos, ypos, packet, status)
 }
 
 func xrel(status byte, value int) int {
