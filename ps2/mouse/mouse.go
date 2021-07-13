@@ -64,23 +64,27 @@ func handlePacket(v byte) {
 		}
 		status = packet[0]
 		xpos += xrel(status, int(packet[1]))
-		ypos += yrel(status, int(packet[2]))
+		ypos -= yrel(status, int(packet[2]))
 	}
-	// debug.Logf("x:%d y:%d packet:%v status:%08b", xpos, ypos, packet, status)
+	// debug.Logf("x:%d y:%d packet:%v status:%8b", xpos, ypos, packet, status)
 }
 
 func xrel(status byte, value int) int {
-	if status&0x10 != 0 && value != 0 {
-		return value - 0x100
+	var ret byte
+	if status&0x10 != 0 {
+		ret |= 0x80
 	}
-	return value
+	ret |= byte(value)
+	return int(int8(ret))
 }
 
 func yrel(status byte, value int) int {
-	if status&0x20 != 0 && value != 0 {
-		return value - 0x100
+	var ret byte
+	if status&0x20 != 0 {
+		ret |= 0x80
 	}
-	return value
+	ret |= byte(value)
+	return int(int8(ret))
 }
 
 func Init() {

@@ -21,9 +21,24 @@ type vertex struct {
 	color [4]byte
 }
 
+type window struct {
+	ctx    *nk.Nk_context
+	ctxptr uintptr
+
+	atlas    *nk.Nk_font_atlas
+	atlasptr uintptr
+
+	fctx   *fauxgl.Context
+	tex    fauxgl.Texture
+	shader *glshader
+}
+
 func winMain(ctx *app.Context) error {
+	w := newWindow()
 	for !kbd.Pressed('q') {
-		img := drawImage()
+		w.newFrame()
+		w.logic()
+		img := w.drawImage()
 		screen := vbe.DefaultView
 		draw.Draw(screen.Canvas(), img.Bounds(), img, image.ZP, draw.Src)
 		screen.Commit()
@@ -31,7 +46,7 @@ func winMain(ctx *app.Context) error {
 	return nil
 }
 
-func drawImage() image.Image {
+func newWindow() *window {
 	fctx := fauxgl.NewContext(600, 480)
 	fctx.Cull = fauxgl.CullNone
 	fctx.ReadDepth = false
@@ -39,20 +54,19 @@ func drawImage() image.Image {
 
 	null := nk.Nk_draw_null_texture{}
 
-	var mem [64 * 1024]byte
-	var title = [...]byte{'h', 'e', 'l', 'l', 'o', 0}
-	var ctx = uintptr(unsafe.Pointer(new(nk.Nk_context)))
-	nk.Xnk_init_fixed(ctx, uintptr(unsafe.Pointer(&mem[0])), 64*1024, 0)
+	var ctx = new(nk.Nk_context)
+	var ctxptr = uintptr(unsafe.Pointer(ctx))
+	nk.Xnk_init_default(ctxptr, 0)
 
-	atlasptr := new(nk.Nk_font_atlas)
-	var atlas = uintptr(unsafe.Pointer(atlasptr))
-	nk.Xnk_font_atlas_init_default(atlas)
+	atlas := new(nk.Nk_font_atlas)
+	var atlasptr = uintptr(unsafe.Pointer(atlas))
+	nk.Xnk_font_atlas_init_default(atlasptr)
 	wptr, hptr := 0, 0
 	w, h := uintptr(unsafe.Pointer(&wptr)), uintptr(unsafe.Pointer(&hptr))
-	piximg := nk.Xnk_font_atlas_bake(atlas, w, h, nk.NK_FONT_ATLAS_RGBA32)
+	piximg := nk.Xnk_font_atlas_bake(atlasptr, w, h, nk.NK_FONT_ATLAS_RGBA32)
 	pix := make([]byte, wptr*hptr*4)
 	copy(pix, (*[1 << 20]byte)(unsafe.Pointer(piximg))[:wptr*hptr*4])
-	nk.Xnk_font_atlas_end(atlas, nk.Xnk_handle_id(1), uintptr(unsafe.Pointer(&null)))
+	nk.Xnk_font_atlas_end(atlasptr, nk.Xnk_handle_id(1), uintptr(unsafe.Pointer(&null)))
 
 	img := &image.RGBA{
 		Pix:    pix,
@@ -68,12 +82,26 @@ func drawImage() image.Image {
 	}
 	fctx.Shader = shader
 
-	nk.Xnk_style_load_all_cursors(ctx, uintptr(unsafe.Pointer(&atlasptr.Cursors)))
-	if atlasptr.Default_font != 0 {
-		default_font := (*nk.Nk_font)(unsafe.Pointer(atlasptr.Default_font))
-		nk.Xnk_style_set_font(ctx, uintptr(unsafe.Pointer(&default_font.Handle)))
+	nk.Xnk_style_load_all_cursors(ctxptr, uintptr(unsafe.Pointer(&atlas.Cursors)))
+	if atlas.Default_font != 0 {
+		default_font := (*nk.Nk_font)(unsafe.Pointer(atlas.Default_font))
+		nk.Xnk_style_set_font(ctxptr, uintptr(unsafe.Pointer(&default_font.Handle)))
 	}
+	return &window{
+		ctx:    ctx,
+		ctxptr: ctxptr,
 
+		atlas:    atlas,
+		atlasptr: atlasptr,
+
+		fctx:   fctx,
+		tex:    tex,
+		shader: shader,
+	}
+}
+
+func (w *window) newFrame() {
+	ctx := w.ctxptr
 	x, y := mouse.Cursor()
 	left := int32(0)
 	if mouse.LeftClick() {
@@ -83,18 +111,39 @@ func drawImage() image.Image {
 	if mouse.RightClick() {
 		right = 1
 	}
+	nk.Xnk_input_begin(ctx)
 	nk.Xnk_input_motion(ctx, int32(x), int32(y))
 	nk.Xnk_input_button(ctx, nk.NK_BUTTON_LEFT, int32(x), int32(y), left)
 	nk.Xnk_input_button(ctx, nk.NK_BUTTON_RIGHT, int32(x), int32(y), right)
+	nk.Xnk_input_end(ctx)
+}
 
+var title = []byte("hello")
+
+func (w *window) logic() {
+	ctx := w.ctxptr
 	ok := nk.Xnk_begin(ctx, uintptr(unsafe.Pointer(&title[0])), nk.Xnk_rect(50, 50, 220, 220), nk.NK_WINDOW_BORDER|nk.NK_WINDOW_MOVABLE|nk.NK_WINDOW_CLOSABLE|nk.NK_WINDOW_SCALABLE)
 	if ok != 0 {
+		x, y := mouse.Cursor()
+		left, right := mouse.LeftClick(), mouse.RightClick()
 		nk.Xnk_layout_row_static(ctx, 30, 80, 1)
-		str := []byte(fmt.Sprintf("x:%d y:%d", x, y))
-		// nk.Xnk_label(ctx, uintptr(unsafe.Pointer(&str[0])), 0)
-		nk.Xnk_button_label(ctx, uintptr(unsafe.Pointer(&str[0])))
+		str := []byte(fmt.Sprintf("l:%v r:%v", left, right))
+		nk.Xnk_label(ctx, uintptr(unsafe.Pointer(&str[0])), nk.NK_TEXT_LEFT)
+		nk.Xnk_layout_row_static(ctx, 30, 80, 1)
+		str1 := []byte(fmt.Sprintf("x:%d y:%d", x, y))
+		nk.Xnk_button_label(ctx, uintptr(unsafe.Pointer(&str1[0])))
 	}
 	nk.Xnk_end(ctx)
+
+}
+func (w *window) drawImage() image.Image {
+	ctx := w.ctxptr
+	fctx := w.fctx
+	tex := w.tex
+	shader := w.shader
+
+	fctx.ClearColorBuffer()
+	fctx.ClearDepthBuffer()
 
 	var vertex_layout = [...]nk.Nk_draw_vertex_layout_element{
 		{nk.NK_VERTEX_POSITION, nk.NK_FORMAT_FLOAT, nk.Nk_size(unsafe.Offsetof(vertex{}.pos))},
@@ -112,6 +161,7 @@ func drawImage() image.Image {
 	cfg.Curve_segment_count = 22
 	cfg.Arc_segment_count = 22
 	cfg.Global_alpha = 1.0
+	null := nk.Nk_draw_null_texture{}
 	cfg.Null = null
 
 	cmdbuf := uintptr(unsafe.Pointer(new(nk.Nk_buffer)))
@@ -166,6 +216,7 @@ func drawImage() image.Image {
 		}
 		idxs = idxs[cmdp.Elem_count:]
 	}
+	nk.Xnk_clear(ctx)
 
 	nk.Xnk_buffer_free(cmdbuf)
 	nk.Xnk_buffer_free(vertbuf)
