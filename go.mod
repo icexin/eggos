@@ -12,7 +12,7 @@ require (
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/google/netstack v0.0.0-20191123085552-55fcc16cd0eb
 	github.com/hirochachacha/go-smb2 v1.0.3
-	github.com/icexin/nk v0.0.0-00010101000000-000000000000
+	github.com/icexin/nk v0.1.0
 	github.com/jakecoffman/cp v1.0.0
 	github.com/klauspost/cpuid v1.3.1
 	github.com/magefile/mage v1.11.0
@@ -30,5 +30,4 @@ require (
 replace (
 	github.com/fogleman/nes v0.0.0-20200820131603-8c4b9cf54c35 => github.com/icexin/nes v0.0.0-20200906065456-8ff789fac016
 	github.com/google/netstack v0.0.0-20191123085552-55fcc16cd0eb => github.com/icexin/netstack v0.0.0-20201005132454-bd9d0399feb1
-	github.com/icexin/nk => ../nk
 )
