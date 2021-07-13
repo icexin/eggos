@@ -1,13 +1,14 @@
 package cmd
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"unsafe"
 
 	"github.com/fogleman/fauxgl"
 	"github.com/icexin/eggos/app"
+	"github.com/icexin/eggos/kbd"
+	"github.com/icexin/eggos/ps2/mouse"
 	"github.com/icexin/eggos/vbe"
 	"github.com/icexin/nk"
 	"golang.org/x/image/draw"
@@ -20,10 +21,12 @@ type vertex struct {
 }
 
 func winMain(ctx *app.Context) error {
-	img := drawImage()
-	screen := vbe.DefaultView
-	draw.Draw(screen.Canvas(), img.Bounds(), img, image.ZP, draw.Src)
-	screen.Commit()
+	for !kbd.Pressed('q') {
+		img := drawImage()
+		screen := vbe.DefaultView
+		draw.Draw(screen.Canvas(), img.Bounds(), img, image.ZP, draw.Src)
+		screen.Commit()
+	}
 	return nil
 }
 
@@ -65,12 +68,26 @@ func drawImage() image.Image {
 	}
 	fctx.Shader = shader
 
+	nk.Xnk_style_load_all_cursors(ctx, uintptr(unsafe.Pointer(&atlasptr.Cursors)))
 	if atlasptr.Default_font != 0 {
 		default_font := (*nk.Nk_font)(unsafe.Pointer(atlasptr.Default_font))
 		nk.Xnk_style_set_font(ctx, uintptr(unsafe.Pointer(&default_font.Handle)))
 	}
 
 	nk.Xnk_begin(ctx, uintptr(unsafe.Pointer(&title[0])), nk.Xnk_rect(50, 50, 220, 220), nk.NK_WINDOW_BORDER|nk.NK_WINDOW_MOVABLE|nk.NK_WINDOW_CLOSABLE|nk.NK_WINDOW_SCALABLE)
+	x, y := mouse.Cursor()
+	left := int32(0)
+	if mouse.LeftClick() {
+		left = 1
+	}
+	right := int32(0)
+	if mouse.RightClick() {
+		right = 1
+	}
+	nk.Xnk_input_motion(ctx, int32(x), int32(y))
+	nk.Xnk_input_button(ctx, nk.NK_BUTTON_LEFT, int32(x), int32(y), left)
+	nk.Xnk_input_button(ctx, nk.NK_BUTTON_RIGHT, int32(x), int32(y), right)
+
 	nk.Xnk_layout_row_static(ctx, 30, 80, 1)
 	nk.Xnk_button_label(ctx, uintptr(unsafe.Pointer(&title[0])))
 	nk.Xnk_end(ctx)
@@ -116,7 +133,7 @@ func drawImage() image.Image {
 		if cmdp.Elem_count == 0 {
 			continue
 		}
-		fmt.Printf("verts:%d, tex:%d\n", cmdp.Elem_count, cmdp.Texture.Ptr)
+		// fmt.Printf("verts:%d, tex:%d\n", cmdp.Elem_count, cmdp.Texture.Ptr)
 		if cmdp.Texture.Ptr != 0 {
 			shader.Texture = tex
 		} else {

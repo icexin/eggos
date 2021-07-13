@@ -8,29 +8,31 @@ const (
 )
 
 func waitCanWrite() {
-	for {
+	timeout := 1000
+	for timeout > 0 {
+		timeout--
 		x := sys.Inb(_CMD_PORT)
-		if x&0x01 == 0 {
+		// input buffer empty means we can write to controller
+		if x&0x02 == 0 {
 			return
 		}
 	}
 }
 
 func waitCanRead() {
-	for {
+	timeout := 1000
+	for timeout > 0 {
+		timeout--
 		x := sys.Inb(_CMD_PORT)
+		// output buffer full means we can read from controller
 		if x&0x01 != 0 {
 			return
 		}
 	}
 }
 
-func ReadDataNoWait() int {
-	x := sys.Inb(_CMD_PORT)
-	if x&0x01 == 0 {
-		return -1
-	}
-	return int(sys.Inb(_DATA_PORT))
+func ReadDataNoWait() byte {
+	return sys.Inb(_DATA_PORT)
 }
 
 func ReadData() byte {
@@ -65,4 +67,10 @@ func WriteCmd(x byte) {
 func WriteMouseData(x byte) {
 	WriteCmd(0xD4)
 	WriteData(x, true)
+}
+
+func ReadMouseData(x byte) byte {
+	WriteCmd(0xD4)
+	WriteData(x, true)
+	return ReadData()
 }

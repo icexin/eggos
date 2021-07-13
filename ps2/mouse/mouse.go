@@ -1,6 +1,7 @@
 package mouse
 
 import (
+	"github.com/icexin/eggos/debug"
 	"github.com/icexin/eggos/kernel/trap"
 	"github.com/icexin/eggos/pic"
 	"github.com/icexin/eggos/ps2"
@@ -32,21 +33,32 @@ func RightClick() bool {
 
 func intr() {
 	pic.EOI(_IRQ_MOUSE)
-
-	x := ps2.ReadDataNoWait()
-	if x < 0 {
-		return
+	for {
+		st := ps2.ReadCmd()
+		debug.Logf("status:%08b", st)
+		if st&0x01 == 0 {
+			break
+		}
+		x := ps2.ReadDataNoWait()
+		debug.Logf("data:%08b", x)
+		handlePacket(x)
 	}
+}
 
+func handlePacket(v byte) {
 	switch mouseCnt {
 	case 0:
-		packet[0] = byte(x)
+		packet[0] = v
+		if v&0x08 == 0 {
+			return
+		}
 		mouseCnt++
 	case 1:
-		packet[1] = byte(x)
+		packet[1] = v
 		mouseCnt++
 	case 2:
-		packet[2] = byte(x)
+		packet[2] = v
+		mouseCnt = 0
 		// x overflow or y overflow, discard packet
 		if packet[0]&0xC0 != 0 {
 			return
@@ -54,20 +66,19 @@ func intr() {
 		status = packet[0]
 		xpos += xrel(status, int(packet[1]))
 		ypos += yrel(status, int(packet[2]))
-		mouseCnt = 0
 	}
-	// debug.Logf("x:%d y:%d status:%08b", xpos, ypos, status)
+	debug.Logf("x:%d y:%d packet:%v status:%08b", xpos, ypos, packet, status)
 }
 
 func xrel(status byte, value int) int {
-	if status&0x10 != 0 {
+	if status&0x10 != 0 && value != 0 {
 		return value - 0x100
 	}
 	return value
 }
 
 func yrel(status byte, value int) int {
-	if status&0x20 != 0 {
+	if status&0x20 != 0 && value != 0 {
 		return value - 0x100
 	}
 	return value
