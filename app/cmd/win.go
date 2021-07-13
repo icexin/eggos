@@ -134,8 +134,8 @@ func (w *window) logic() {
 		nk.Xnk_button_label(ctx, uintptr(unsafe.Pointer(&str1[0])))
 	}
 	nk.Xnk_end(ctx)
-
 }
+
 func (w *window) drawImage() image.Image {
 	ctx := w.ctxptr
 	fctx := w.fctx

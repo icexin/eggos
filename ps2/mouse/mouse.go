@@ -88,13 +88,22 @@ func yrel(status byte, value int) int {
 }
 
 func Init() {
-	// enable ps2 mouse port
-	ps2.WriteCmd(0xA8)
-	// enable mouse device and IRQ of mouse(12)
 	status := ps2.ReadCmd()
+	// enable mouse IRQ and port clock
 	status |= 0x22
+	// enable keyboard IRQ and port clock
+	status |= 0x11
+	// enable keyboard translation
+	status |= 0x40
 	ps2.WriteCmd(0x60)
 	ps2.WriteData(status, false)
+
+	// enable ps2 mouse port
+	ps2.WriteCmd(0xA8)
+
+	// enable ps2 keyboard port
+	ps2.WriteCmd(0xAE)
+
 	// enable mouse send packet
 	ps2.WriteMouseData(0xF4)
 

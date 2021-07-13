@@ -140,6 +140,10 @@ func ReadByte() int {
 	if st&KBS_DIB == 0 {
 		return -1
 	}
+	// from mouse?
+	if st&0x20 != 0 {
+		return -1
+	}
 	data = byte(sys.Inb(KBDATAP))
 
 	switch {
