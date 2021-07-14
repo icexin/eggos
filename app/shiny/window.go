@@ -11,7 +11,6 @@ import (
 	"github.com/icexin/eggos/vbe"
 	"golang.org/x/exp/shiny/screen"
 	"golang.org/x/image/math/f64"
-	"golang.org/x/mobile/event/mouse"
 )
 
 type windowImpl struct {
@@ -24,6 +23,8 @@ type windowImpl struct {
 	updateRect image.Rectangle
 
 	lastPaint *image.RGBA
+
+	eventch chan interface{}
 }
 
 func newWindow() *windowImpl {
@@ -38,11 +39,15 @@ func newWindow() *windowImpl {
 	ctx.Fill()
 	img := ctx.Image()
 
-	return &windowImpl{
+	w := &windowImpl{
 		view:      vbe.DefaultView,
 		cursorImg: img,
 		lastPaint: image.NewRGBA(vbe.DefaultView.Canvas().Bounds()),
+		eventch:   make(chan interface{}, 10),
 	}
+	go w.listenKeyboardEvent()
+	go w.listenMouseEvent()
+	return w
 }
 
 // Release closes the window.
@@ -76,43 +81,7 @@ func (w *windowImpl) SendFirst(event interface{}) {
 // from the golang.org/x/mobile/event/... packages. Other packages may send
 // events, of those types above or of other types, via Send or SendFirst.
 func (w *windowImpl) NextEvent() interface{} {
-	p := imouse.EventQueue()
-	e := <-p
-	var btn mouse.Button
-	var dir mouse.Direction
-
-	if e.Left {
-		if !w.cursor.Left {
-			btn = mouse.ButtonLeft
-			dir = mouse.DirPress
-		}
-	} else {
-		if w.cursor.Left {
-			btn = mouse.ButtonLeft
-			dir = mouse.DirRelease
-		}
-	}
-	if e.Right {
-		if !w.cursor.Right {
-			btn = mouse.ButtonRight
-			dir = mouse.DirPress
-		}
-	} else {
-		if w.cursor.Right {
-			btn = mouse.ButtonRight
-			dir = mouse.DirRelease
-		}
-	}
-
-	w.cursor = e
-	w.updateCursor()
-
-	return mouse.Event{
-		X:         float32(e.X),
-		Y:         float32(e.Y),
-		Button:    btn,
-		Direction: dir,
-	}
+	return <-w.eventch
 }
 
 type writer struct {
