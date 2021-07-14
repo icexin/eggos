@@ -17,6 +17,7 @@ const (
 	LINE_KBD   = 1
 	LINE_COM1  = 4
 	LINE_COM2  = 3
+	LINE_MOUSE = 12
 )
 
 //go:nosplit
