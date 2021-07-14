@@ -4,8 +4,9 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
+	"image/png"
 
-	"github.com/fogleman/gg"
+	"github.com/icexin/eggos/assets"
 	imouse "github.com/icexin/eggos/ps2/mouse"
 	"github.com/icexin/eggos/uart"
 	"github.com/icexin/eggos/vbe"
@@ -28,26 +29,28 @@ type windowImpl struct {
 }
 
 func newWindow() *windowImpl {
-	ctx := gg.NewContext(10, 10)
-	// ctx.SetRGBA(0, 0, 0, 0)
-	// ctx.Clear()
-	ctx.SetRGB(0, 0, 0)
-	ctx.MoveTo(0, 10)
-	ctx.LineTo(0, 0)
-	ctx.LineTo(10, 10)
-	ctx.LineTo(0, 10)
-	ctx.Fill()
-	img := ctx.Image()
-
 	w := &windowImpl{
 		view:      vbe.DefaultView,
-		cursorImg: img,
 		lastPaint: image.NewRGBA(vbe.DefaultView.Canvas().Bounds()),
 		eventch:   make(chan interface{}, 10),
 	}
+	w.loadMouseCursor()
 	go w.listenKeyboardEvent()
 	go w.listenMouseEvent()
 	return w
+}
+
+func (w *windowImpl) loadMouseCursor() {
+	f, err := assets.Open("/cursor.png")
+	if err != nil {
+		panic(err)
+	}
+	img, err := png.Decode(f)
+	if err != nil {
+		panic(err)
+	}
+	f.Close()
+	w.cursorImg = img
 }
 
 // Release closes the window.
