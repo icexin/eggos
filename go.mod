@@ -26,6 +26,7 @@ require (
 	golang.org/x/exp v0.0.0-20210712160552-8235cf48b5f6
 	golang.org/x/image v0.0.0-20200801110659-972c09e46d76
 	golang.org/x/mobile v0.0.0-20201217150744-e6ae53a27f4f
+	golang.org/x/sys v0.0.0-20210304124612-50617c2ba197
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
 )
 
