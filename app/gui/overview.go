@@ -1,9 +1,12 @@
-package cmd
+package gui
 
 import (
 	"fmt"
 	"image"
 	"image/color"
+	"image/draw"
+	"image/jpeg"
+	"os"
 	"time"
 
 	"github.com/aarzilli/nucular"
@@ -11,31 +14,9 @@ import (
 	"github.com/aarzilli/nucular/label"
 	"github.com/aarzilli/nucular/rect"
 	nstyle "github.com/aarzilli/nucular/style"
-	"github.com/icexin/eggos/app"
-	"github.com/icexin/eggos/app/shiny"
-	"golang.org/x/mobile/event/key"
+
 	"golang.org/x/mobile/event/mouse"
 )
-
-const scaling = 1.0
-
-var Wnd nucular.MasterWindow
-
-//var theme nucular.Theme = nucular.WhiteTheme
-var theme nstyle.Theme = nstyle.DarkTheme
-
-func uimain(ctx *app.Context) error {
-
-	nucular.DriverMain = shiny.Main
-	od := newOverviewDemo()
-	od.Theme = theme
-
-	Wnd = nucular.NewMasterWindow(0, "Overview", od.overviewDemo)
-	Wnd.SetStyle(nstyle.FromTheme(theme, scaling))
-	Wnd.Main()
-
-	return nil
-}
 
 type OptionEnum int
 
@@ -92,7 +73,6 @@ type overviewDemo struct {
 	TimeSelected               int
 	Text0Editor, Text1Editor   nucular.TextEditor
 	FieldEditor                nucular.TextEditor
-	PasswordEditor             nucular.TextEditor
 	BoxEditor                  nucular.TextEditor
 
 	// Popup
@@ -189,12 +169,18 @@ func newOverviewDemo() (od *overviewDemo) {
 	od.GroupWidth = 320
 	od.GroupHeight = 200
 
+	fh, err := os.Open("rob.pike.mixtape.jpg")
+	if err == nil {
+		defer fh.Close()
+		img, _ := jpeg.Decode(fh)
+		od.Img = image.NewRGBA(img.Bounds())
+		draw.Draw(od.Img, img.Bounds(), img, image.Point{}, draw.Src)
+	}
+
 	od.Text0Editor.Flags = nucular.EditSimple
 	od.Text0Editor.Maxlen = 64
 	od.FieldEditor.Flags = nucular.EditField
 	od.FieldEditor.Maxlen = 64
-	od.PasswordEditor.Flags = nucular.EditField
-	od.PasswordEditor.PasswordChar = '*'
 	od.BoxEditor.Flags = nucular.EditBox | nucular.EditNeverInsertMode
 	od.Text1Editor.Flags = nucular.EditField | nucular.EditSigEnter
 	od.Text1Editor.Maxlen = 64
@@ -210,24 +196,6 @@ func newOverviewDemo() (od *overviewDemo) {
 	od.FitWidthEditor.Buffer = []rune("test")
 
 	return od
-}
-
-func keybindings(w *nucular.Window) {
-	mw := w.Master()
-	if in := w.Input(); in != nil {
-		k := in.Keyboard
-		for _, e := range k.Keys {
-			scaling := mw.Style().Scaling
-			switch {
-			case (e.Modifiers == key.ModControl || e.Modifiers == key.ModControl|key.ModShift) && (e.Code == key.CodeEqualSign):
-				mw.Style().Scale(scaling + 0.1)
-			case (e.Modifiers == key.ModControl || e.Modifiers == key.ModControl|key.ModShift) && (e.Code == key.CodeHyphenMinus):
-				mw.Style().Scale(scaling - 0.1)
-			case (e.Modifiers == key.ModControl) && (e.Code == key.CodeF):
-				mw.SetPerf(!mw.GetPerf())
-			}
-		}
-	}
 }
 
 func (od *overviewDemo) overviewDemo(w *nucular.Window) {
@@ -298,12 +266,6 @@ func (od *overviewDemo) overviewDemo(w *nucular.Window) {
 			od.Text0Editor.Edit(w)
 			w.Label("Field:", "LC")
 			od.FieldEditor.Edit(w)
-			w.Row(25).Static(120, 150)
-			w.Label("Password: ", "LC")
-			od.PasswordEditor.Edit(w)
-			w.Row(25).Dynamic(1)
-			w.Label(fmt.Sprintf("password value: %q", string(od.PasswordEditor.Buffer)), "LC")
-			w.Row(25).Static(120, 150)
 			w.Label("Box:", "LC")
 			w.Row(180).Static(278)
 			od.BoxEditor.Edit(w)
@@ -367,6 +329,9 @@ func (od *overviewDemo) overviewMenubar(w *nucular.Window) {
 		perf := w.Master().GetPerf()
 		w.CheckboxText("Show perf", &perf)
 		w.Master().SetPerf(perf)
+		if w.MenuItem(label.TA("Close", "LC")) {
+			go w.Master().Close()
+		}
 	}
 	if w := w.Menu(label.TA("THEME", "CC"), 180, nil); w != nil {
 		w.Row(25).Dynamic(1)
@@ -1088,8 +1053,4 @@ func (od *overviewDemo) showAppAbout(mw nucular.MasterWindow) {
 	}
 
 	mw.PopupOpen("About", wf, rect.Rect{20, 100, 300, 190}, true, od.aboutPopup)
-}
-
-func init() {
-	app.Register("ui", uimain)
 }

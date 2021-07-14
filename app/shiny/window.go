@@ -1,7 +1,6 @@
 package shiny
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
@@ -16,22 +15,30 @@ import (
 )
 
 type windowImpl struct {
-	view   *vbe.View
-	img    image.Image
-	cursor imouse.Packet
+	view *vbe.View
+
+	cursorImg  image.Image
+	lastCursor imouse.Packet
+	cursor     imouse.Packet
+
+	lastPaint *image.RGBA
 }
 
 func newWindow() *windowImpl {
-	ctx := gg.NewContext(100, 100)
-	ctx.SetRGBA(1, 1, 1, 1)
-	ctx.Clear()
-	ctx.SetRGB(0, 0, 0)
-	ctx.DrawCircle(5, 5, 5)
+	ctx := gg.NewContext(10, 10)
+	// ctx.SetRGBA(0, 0, 0, 0)
+	// ctx.Clear()
+	ctx.SetRGB(1, 1, 1)
+	ctx.MoveTo(0, 10)
+	ctx.LineTo(0, 0)
+	ctx.LineTo(10, 10)
 	ctx.Stroke()
 	img := ctx.Image()
+
 	return &windowImpl{
-		view: vbe.DefaultView,
-		img:  img,
+		view:      vbe.DefaultView,
+		cursorImg: img,
+		lastPaint: image.NewRGBA(vbe.DefaultView.Canvas().Bounds()),
 	}
 }
 
@@ -69,22 +76,38 @@ func (w *windowImpl) NextEvent() interface{} {
 	p := imouse.EventQueue()
 	e := <-p
 	var btn mouse.Button
+	var dir mouse.Direction
+
 	if e.Left {
-		btn = mouse.ButtonLeft
+		if !w.cursor.Left {
+			btn = mouse.ButtonLeft
+			dir = mouse.DirPress
+		}
+	} else {
+		if w.cursor.Left {
+			btn = mouse.ButtonLeft
+			dir = mouse.DirRelease
+		}
 	}
 	if e.Right {
-		btn = mouse.ButtonRight
+		if !w.cursor.Right {
+			btn = mouse.ButtonRight
+			dir = mouse.DirPress
+		}
+	} else {
+		if w.cursor.Right {
+			btn = mouse.ButtonRight
+			dir = mouse.DirRelease
+		}
 	}
-	var dir mouse.Direction
-	if btn != mouse.ButtonNone {
-		dir = mouse.DirPress
-	}
-	pt := image.Pt(e.X-5, e.Y-5)
-	draw.Draw(w.view.Canvas(), w.img.Bounds(), w.img, pt, draw.Src)
-	w.view.Commit()
+
+	w.cursor = e
+	w.updateCursor(true)
+
 	return mouse.Event{
 		X:         float32(e.X),
 		Y:         float32(e.Y),
+		Button:    btn,
 		Direction: dir,
 	}
 }
@@ -114,8 +137,8 @@ func (w writer) Write(b []byte) (int, error) {
 // When uploading to a Window, there will not be any visible effect until
 // Publish is called.
 func (w *windowImpl) Upload(dp image.Point, src screen.Buffer, sr image.Rectangle) {
-	fmt.Fprintf(writer{}, "upload\n")
 	draw.Draw(w.view.Canvas(), sr, src.RGBA(), dp, draw.Src)
+	draw.Draw(w.lastPaint, sr, src.RGBA(), dp, draw.Src)
 }
 
 // Fill fills that part of the destination (the method receiver) defined by
@@ -163,9 +186,20 @@ func (w *windowImpl) Scale(dr image.Rectangle, src screen.Texture, sr image.Rect
 // Publish flushes any pending Upload and Draw calls to the window, and
 // swaps the back buffer to the front.
 func (w *windowImpl) Publish() screen.PublishResult {
-	fmt.Fprintf(writer{}, "publish\n")
-	// p := image.Pt(w.cursor.X-5, w.cursor.Y-5)
-	// draw.Draw(w.view.Canvas(), w.img.Bounds(), w.img, p, draw.Src)
+	w.updateCursor(false)
 	w.view.Commit()
 	return screen.PublishResult{}
+}
+
+func (w *windowImpl) updateCursor(commit bool) {
+	// draw.Draw(w.view.Canvas(), w.view.Canvas().Bounds(), w.lastPaint, image.ZP, draw.Src)
+	rect := image.Rect(w.lastCursor.X, w.lastCursor.Y, w.lastCursor.X+10, w.lastCursor.Y+10)
+	draw.Draw(w.view.Canvas(), rect, w.lastPaint, rect.Min, draw.Src)
+
+	rect = image.Rect(w.cursor.X, w.cursor.Y, w.cursor.X+10, w.cursor.Y+10)
+	draw.Draw(w.view.Canvas(), rect, w.cursorImg, image.ZP, draw.Over)
+	if commit {
+		w.view.Commit()
+	}
+	w.lastCursor = w.cursor
 }

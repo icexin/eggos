@@ -30,7 +30,7 @@ require (
 )
 
 replace (
-	github.com/aarzilli/nucular => ../../aarzilli/nucular
+	github.com/aarzilli/nucular => ../nucular
 	github.com/fogleman/nes v0.0.0-20200820131603-8c4b9cf54c35 => github.com/icexin/nes v0.0.0-20200906065456-8ff789fac016
 	github.com/google/netstack v0.0.0-20191123085552-55fcc16cd0eb => github.com/icexin/netstack v0.0.0-20201005132454-bd9d0399feb1
 )
