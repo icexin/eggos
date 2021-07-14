@@ -21,6 +21,8 @@ type windowImpl struct {
 	lastCursor imouse.Packet
 	cursor     imouse.Packet
 
+	updateRect image.Rectangle
+
 	lastPaint *image.RGBA
 }
 
@@ -28,11 +30,12 @@ func newWindow() *windowImpl {
 	ctx := gg.NewContext(10, 10)
 	// ctx.SetRGBA(0, 0, 0, 0)
 	// ctx.Clear()
-	ctx.SetRGB(1, 1, 1)
+	ctx.SetRGB(0, 0, 0)
 	ctx.MoveTo(0, 10)
 	ctx.LineTo(0, 0)
 	ctx.LineTo(10, 10)
-	ctx.Stroke()
+	ctx.LineTo(0, 10)
+	ctx.Fill()
 	img := ctx.Image()
 
 	return &windowImpl{
@@ -102,7 +105,7 @@ func (w *windowImpl) NextEvent() interface{} {
 	}
 
 	w.cursor = e
-	w.updateCursor(true)
+	w.updateCursor()
 
 	return mouse.Event{
 		X:         float32(e.X),
@@ -139,6 +142,7 @@ func (w writer) Write(b []byte) (int, error) {
 func (w *windowImpl) Upload(dp image.Point, src screen.Buffer, sr image.Rectangle) {
 	draw.Draw(w.view.Canvas(), sr, src.RGBA(), dp, draw.Src)
 	draw.Draw(w.lastPaint, sr, src.RGBA(), dp, draw.Src)
+	w.updateRect = sr
 }
 
 // Fill fills that part of the destination (the method receiver) defined by
@@ -186,20 +190,24 @@ func (w *windowImpl) Scale(dr image.Rectangle, src screen.Texture, sr image.Rect
 // Publish flushes any pending Upload and Draw calls to the window, and
 // swaps the back buffer to the front.
 func (w *windowImpl) Publish() screen.PublishResult {
-	w.updateCursor(false)
-	w.view.Commit()
+	w.updateCursor()
+	// w.view.Commit()
+	w.view.CommitRect(w.updateRect)
 	return screen.PublishResult{}
 }
 
-func (w *windowImpl) updateCursor(commit bool) {
+func (w *windowImpl) updateCursor() {
 	// draw.Draw(w.view.Canvas(), w.view.Canvas().Bounds(), w.lastPaint, image.ZP, draw.Src)
-	rect := image.Rect(w.lastCursor.X, w.lastCursor.Y, w.lastCursor.X+10, w.lastCursor.Y+10)
-	draw.Draw(w.view.Canvas(), rect, w.lastPaint, rect.Min, draw.Src)
+	pt := image.Pt(w.lastCursor.X, w.lastCursor.Y)
+	rect1 := w.cursorImg.Bounds().Add(pt)
+	// rect := image.Rect(w.lastCursor.X, w.lastCursor.Y, w.lastCursor.X+10, w.lastCursor.Y+10)
+	draw.Draw(w.view.Canvas(), rect1, w.lastPaint, pt, draw.Src)
 
-	rect = image.Rect(w.cursor.X, w.cursor.Y, w.cursor.X+10, w.cursor.Y+10)
-	draw.Draw(w.view.Canvas(), rect, w.cursorImg, image.ZP, draw.Over)
-	if commit {
-		w.view.Commit()
-	}
+	pt = image.Pt(w.cursor.X, w.cursor.Y)
+	rect2 := w.cursorImg.Bounds().Add(pt)
+	// rect = image.Rect(w.cursor.X, w.cursor.Y, w.cursor.X+10, w.cursor.Y+10)
+	draw.Draw(w.view.Canvas(), rect2, w.cursorImg, image.ZP, draw.Over)
+	w.view.CommitRect(rect1)
+	w.view.CommitRect(rect2)
 	w.lastCursor = w.cursor
 }

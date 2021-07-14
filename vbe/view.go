@@ -25,6 +25,15 @@ func (v *View) Clear() {
 	}
 }
 
+func fixRect(rect image.Rectangle) image.Rectangle {
+	rect = rect.Canon()
+	rect1 := image.Rectangle{
+		Min: image.Pt(0, 0),
+		Max: rect.Max,
+	}
+	return rect1.Union(rect)
+}
+
 func (v *View) CommitRect(rect image.Rectangle) {
 	if fbbuf == nil {
 		return
@@ -32,6 +41,10 @@ func (v *View) CommitRect(rect image.Rectangle) {
 	if v != currentView {
 		return
 	}
+
+	// let rect in the range of view rect
+	rect = v.buffer.Rect.Intersect(rect).Canon()
+
 	bufcopy(buffer, v.buffer.Pix, v.buffer.Stride, rect, func(dst, src []uint8) {
 		for i := 0; i < len(dst); i += 4 {
 			_ = dst[i+3]

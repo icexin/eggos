@@ -171,6 +171,8 @@ github.com/icexin/netstack v0.0.0-20201005132454-bd9d0399feb1 h1:am4EYOgJKph24WD
 github.com/icexin/netstack v0.0.0-20201005132454-bd9d0399feb1/go.mod h1:D16pRH6AlyU61JJe0QOKB7sHU448lCZ6KXeWxn9zI+k=
 github.com/icexin/nk v0.1.0 h1:+ZvZOiO7mIEP9/BSDmPEYvHJtDLS1LpW+/W3QwLe4Us=
 github.com/icexin/nk v0.1.0/go.mod h1:G0wK4ax2BLZM3llZTdwNsrT1linJncjV7iMOsKGnokE=
+github.com/icexin/nucular v0.0.0-20210713192454-c3f236ca56cb h1:TksHIpWQ9i81zzg0YlLbu15rXwt1spF7+SzPp3i3v8U=
+github.com/icexin/nucular v0.0.0-20210713192454-c3f236ca56cb/go.mod h1:lluRCgvXjI+vUUV2Jc07GMFCBLVc/GQx8NaUPgXY+R0=
 github.com/inconshreveable/mousetrap v1.0.0/go.mod h1:PxqpIevigyE2G7u3NXJIT2ANytuPF1OarO4DADm73n8=
 github.com/influxdata/influxdb1-client v0.0.0-20191209144304-8bf82d3c094d/go.mod h1:qj24IKcXYK6Iy9ceXlo3Tc+vtHo9lIhSX5JddghvEPo=
 github.com/jakecoffman/cp v1.0.0 h1:4qi6RDQxnEgH2aonA5Wa67VYy9onrlzsIg0Uk7tlf0o=

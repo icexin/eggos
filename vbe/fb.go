@@ -28,7 +28,6 @@ var (
 )
 
 func bufcopy(dst, src []uint8, stride int, rect image.Rectangle, op func([]uint8, []uint8)) {
-	rect = rect.Canon()
 	miny := rect.Min.Y
 	maxy := rect.Max.Y
 	minx := rect.Min.X * 4
