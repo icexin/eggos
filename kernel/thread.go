@@ -115,6 +115,7 @@ func allocThread() *Thread {
 
 type threadptr uintptr
 
+//go:nosplit
 func (t threadptr) ptr() *Thread {
 	return (*Thread)(unsafe.Pointer(t))
 }
