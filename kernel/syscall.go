@@ -262,6 +262,7 @@ func doBootSyscall(no, a0, a1, a2, a3, a4, a5 uintptr) uintptr {
 	}
 }
 
+//go:nosplit
 func mmap(addr unsafe.Pointer, n uintptr, prot, flags, fd int32, off uint32) uintptr {
 	// called on sysReserve
 	if prot == _PROT_NONE {
