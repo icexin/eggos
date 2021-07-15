@@ -20,7 +20,14 @@ const (
 )
 
 var (
-	counter   int64 = 1
+	// the counter of sched clock
+	counter int64 = 1
+
+	// the unix time of cmos read time
+	baseUnixTime int64
+	// the counter of cmos read time
+	clockBaseCounter int64
+
 	sleeplock uintptr
 )
 
@@ -47,8 +54,9 @@ func nanosecond() int64 {
 //go:nosplit
 func clocktime() timespec {
 	var ts timespec
-	ts.tv_sec = int32(counter) / _HZ
-	ts.tv_nsec = int32(counter) % _HZ * (second / _HZ)
+	n := counter - clockBaseCounter
+	ts.tv_sec = int32(n)/_HZ + int32(baseUnixTime)
+	ts.tv_nsec = int32(n) % _HZ * (second / _HZ)
 	ts.tv_nsec += int32(pitCounter()) * (second / _PIT_HZ)
 	return ts
 }
