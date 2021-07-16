@@ -201,18 +201,21 @@ func sys_hlt()
 // thread0 is the first thread
 //go:nosplit
 func thread0() {
+	// jump to go rt0
+	go_entry()
+	panic("main return")
+}
+
+// run when after main init
+func idle_init() {
 	// thread0 clone idle thread
-	stack := mm.Mmap(0, _THREAD_STACK_SIZE) + _THREAD_STACK_SIZE
+	stack := mm.SysMmap(0, _THREAD_STACK_SIZE) + _THREAD_STACK_SIZE
 	tid := sys_clone(sys.FuncPC(idle), stack)
 	idle_thread = (threadptr)(unsafe.Pointer(&threads[tid]))
 
 	// make idle thread running at ring0, so that it can call HLT instruction.
 	tf := idle_thread.ptr().tf
 	tf.CS = _KCODE_IDX << 3
-
-	// jump to go rt0
-	go_entry()
-	panic("main return")
 }
 
 //go:nosplit

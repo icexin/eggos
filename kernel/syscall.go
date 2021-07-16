@@ -44,6 +44,7 @@ const (
 
 	SYS_WAIT_IRQ     = 500
 	SYS_WAIT_SYSCALL = 501
+	SYS_FIXED_MMAP   = 502
 )
 
 const (
@@ -70,9 +71,9 @@ var (
 		SYS_EXIT, SYS_set_thread_area, SYS_sched_yield, SYS_nanosleep, SYS_brk,
 		SYS_munmap, SYS_mmap2, SYS_madvise, SYS_clone, SYS_gettid,
 		SYS_futex, SYS_rt_sigaction, SYS_rt_sigprocmask, SYS_sigaltstack,
-		SYS_clock_gettime, SYS_exit_group, SYS_WAIT_IRQ, SYS_WAIT_SYSCALL,
+		SYS_clock_gettime, SYS_exit_group,
 		syscall.SYS_EPOLL_CREATE1, syscall.SYS_EPOLL_CTL, syscall.SYS_EPOLL_WAIT,
-		// SYS_RANDOM,
+		SYS_WAIT_IRQ, SYS_WAIT_SYSCALL, SYS_FIXED_MMAP,
 	}
 
 	syscalltask threadptr
@@ -253,6 +254,8 @@ func doBootSyscall(no, a0, a1, a2, a3, a4, a5 uintptr) uintptr {
 		return waitIRQ()
 	case SYS_WAIT_SYSCALL:
 		return fetchPendingCall()
+	case SYS_FIXED_MMAP:
+		return fixedmmap(a0, a1)
 
 	default:
 		uart.WriteString("unknown syscall\n")
@@ -265,12 +268,18 @@ func doBootSyscall(no, a0, a1, a2, a3, a4, a5 uintptr) uintptr {
 //go:nosplit
 func mmap(addr unsafe.Pointer, n uintptr, prot, flags, fd int32, off uint32) uintptr {
 	// called on sysReserve
-	if prot == _PROT_NONE {
+	if prot == syscall.PROT_NONE {
 		return mm.Sbrk(n)
 	}
 
 	// called on sysMap and sysAlloc
 	return mm.Mmap(uintptr(addr), n)
+}
+
+//go:nopslit
+func fixedmmap(addr uintptr, size uintptr) uintptr {
+	mm.Fixmap(addr, addr, size)
+	return addr
 }
 
 //go:nosplit
