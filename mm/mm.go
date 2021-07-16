@@ -194,12 +194,14 @@ func Mmap(va, size uintptr) uintptr {
 		va = kmm.sbrk(size)
 	}
 	vmm.mmap(va, size, PTE_P|PTE_W|PTE_U)
+	lcr3(vmm.pgdir)
 	return va
 }
 
 //go:nosplit
 func Fixmap(va, pa, size uintptr) {
 	vmm.fixmap(va, pa, size, PTE_P|PTE_W|PTE_U)
+	lcr3(vmm.pgdir)
 }
 
 //go:nosplit

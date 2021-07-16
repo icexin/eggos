@@ -5,6 +5,7 @@ import "github.com/icexin/eggos/clock"
 // called when go runtime init done
 func Init() {
 	initClockTime()
+	idle_init()
 	go traploop()
 	go handleForward()
 	bootstrapDone = true
