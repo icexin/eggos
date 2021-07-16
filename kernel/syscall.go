@@ -11,51 +11,13 @@ import (
 	"github.com/icexin/eggos/mm"
 	"github.com/icexin/eggos/sys"
 	"github.com/icexin/eggos/uart"
+	"golang.org/x/sys/unix"
 )
 
 const (
-	SYS_read              = 3
-	SYS_write             = 4
-	SYS_open              = 5
-	SYS_close             = 6
-	SYS_brk               = 45
-	SYS_munmap            = 91
-	SYS_clone             = 120
-	SYS_uname             = 122
-	SYS_sched_yield       = 158
-	SYS_nanosleep         = 162
-	SYS_rt_sigaction      = 174
-	SYS_rt_sigprocmask    = 175
-	SYS_sigaltstack       = 186
-	SYS_mmap2             = 192
-	SYS_madvise           = 219
-	SYS_gettid            = 224
-	SYS_futex             = 240
-	SYS_sched_getaffinity = 242
-	SYS_set_thread_area   = 243
-	SYS_exit_group        = 252
-	SYS_clock_gettime     = 265
-
-	SYS_EXIT       = 1
-	SYS_FCNTL      = 55
-	SYS_FCNTL64    = 221
-	SYS_READLINKAT = 305
-	SYS_RANDOM     = 355
-
 	SYS_WAIT_IRQ     = 500
 	SYS_WAIT_SYSCALL = 501
 	SYS_FIXED_MMAP   = 502
-)
-
-const (
-	_PROT_NONE  = 0x0
-	_PROT_READ  = 0x1
-	_PROT_WRITE = 0x2
-	_PROT_EXEC  = 0x4
-
-	_MAP_ANON    = 0x20
-	_MAP_PRIVATE = 0x2
-	_MAP_FIXED   = 0x10
 )
 
 const (
@@ -68,11 +30,26 @@ var (
 
 	// kernelCalls is the syscalls must be implement in kernel
 	kernelCalls = [...]uintptr{
-		SYS_EXIT, SYS_set_thread_area, SYS_sched_yield, SYS_nanosleep, SYS_brk,
-		SYS_munmap, SYS_mmap2, SYS_madvise, SYS_clone, SYS_gettid,
-		SYS_futex, SYS_rt_sigaction, SYS_rt_sigprocmask, SYS_sigaltstack,
-		SYS_clock_gettime, SYS_exit_group,
-		syscall.SYS_EPOLL_CREATE1, syscall.SYS_EPOLL_CTL, syscall.SYS_EPOLL_WAIT,
+		syscall.SYS_EXIT,
+		syscall.SYS_SET_THREAD_AREA,
+		syscall.SYS_SCHED_YIELD,
+		syscall.SYS_NANOSLEEP,
+		syscall.SYS_BRK,
+		syscall.SYS_MUNMAP,
+		syscall.SYS_MMAP2,
+		syscall.SYS_MADVISE,
+		syscall.SYS_CLONE,
+		syscall.SYS_GETTID,
+		syscall.SYS_FUTEX,
+		syscall.SYS_RT_SIGACTION,
+		syscall.SYS_RT_SIGPROCMASK,
+		syscall.SYS_SIGALTSTACK,
+		syscall.SYS_CLOCK_GETTIME,
+		syscall.SYS_EXIT_GROUP,
+		syscall.SYS_EPOLL_CREATE1,
+		syscall.SYS_EPOLL_CTL,
+		syscall.SYS_EPOLL_WAIT,
+
 		SYS_WAIT_IRQ, SYS_WAIT_SYSCALL, SYS_FIXED_MMAP,
 	}
 
@@ -137,7 +114,7 @@ func canForward(tf *TrapFrame) bool {
 		return false
 	}
 	// handle panic write
-	if no == SYS_write && tf.BX == 2 {
+	if no == syscall.SYS_WRITE && tf.BX == 2 {
 		return false
 	}
 	for i := 0; i < len(kernelCalls); i++ {
@@ -165,81 +142,81 @@ func doBootSyscall(no, a0, a1, a2, a3, a4, a5 uintptr) uintptr {
 	my := Mythread()
 
 	switch no {
-	case SYS_EXIT:
+	case syscall.SYS_EXIT:
 		exit()
 		return 0
-	case SYS_set_thread_area:
+	case syscall.SYS_SET_THREAD_AREA:
 		desc := (*userDesc)(unsafe.Pointer(a0))
 		settls(_GO_TLS_IDX, uint32(desc.baseAddr), uint32(desc.limit))
 		desc.entryNumber = _GO_TLS_IDX
 		my.tls = *desc
 		return 0
-	case SYS_read:
+	case syscall.SYS_READ:
 		return a2
-	case SYS_write:
+	case syscall.SYS_WRITE:
 		fd, p, n := a0, a1, a2
 		if fd == 1 || fd == 2 {
 			buf := sys.UnsafeBuffer(p, int(n))
 			uart.Write(buf)
 		}
 		return n
-	case SYS_open:
+	case syscall.SYS_OPEN:
 		return errno(-1)
-	case SYS_close:
+	case syscall.SYS_CLOSE:
 		return 0
-	case SYS_uname:
+	case syscall.SYS_UNAME:
 		return 0
-	case SYS_sched_yield:
+	case syscall.SYS_SCHED_YIELD:
 		Yield()
 		return 0
-	case SYS_nanosleep:
+	case syscall.SYS_NANOSLEEP:
 		tc := (*timespec)(unsafe.Pointer(a0))
 		nanosleep(tc)
 		return 0
-	case SYS_brk:
+	case syscall.SYS_BRK:
 		return mm.Sbrk(0)
-	case SYS_munmap:
+	case syscall.SYS_MUNMAP:
 		return 0
-	case SYS_mmap2:
+	case syscall.SYS_MMAP2:
 		return mmap(unsafe.Pointer(a0), a1, int32(a2), int32(a3), int32(a4), uint32(a5))
-	case SYS_madvise:
+	case syscall.SYS_MADVISE:
 		return 0
-	case SYS_clone:
+	case syscall.SYS_CLONE:
 		return uintptr(clone(my.tf.IP, a1))
-	case SYS_gettid:
+	case syscall.SYS_GETTID:
 		return uintptr(my.id)
-	case SYS_futex:
+	case syscall.SYS_FUTEX:
 		futex((*uintptr)(unsafe.Pointer(a0)), a1, a2, (*timespec)(unsafe.Pointer(a3)))
 		return 0
-	case SYS_sched_getaffinity:
+	case syscall.SYS_SCHED_GETAFFINITY:
 		return ^uintptr(0)
-	case SYS_rt_sigaction:
+	case syscall.SYS_RT_SIGACTION:
 		_new := (*sigactiont)(unsafe.Pointer(a1))
 		old := (*sigactiont)(unsafe.Pointer(a2))
 		return uintptr(rt_sigaction(a0, _new, old, a3))
-	case SYS_rt_sigprocmask:
+	case syscall.SYS_RT_SIGPROCMASK:
 		_new := (*sigset)(unsafe.Pointer(a1))
 		old := (*sigset)(unsafe.Pointer(a2))
 		rtsigprocmask(int32(a0), _new, old, int32(a3))
 		return 0
-	case SYS_sigaltstack:
+	case syscall.SYS_SIGALTSTACK:
 		_new := (*stackt)(unsafe.Pointer(a0))
 		old := (*stackt)(unsafe.Pointer(a1))
 		sigaltstack(_new, old)
 		return 0
-	case SYS_clock_gettime:
+	case syscall.SYS_CLOCK_GETTIME:
 		tspec := (*timespec)(unsafe.Pointer(a1))
 		*tspec = clocktime()
 		// tspec.tv_sec = int32(counter) / _HZ
 		// tspec.tv_nsec = int32(counter) % _HZ * (second / _HZ)
 		return 0
-	case SYS_exit_group:
+	case syscall.SYS_EXIT_GROUP:
 		for {
 			sys.Hlt()
 		}
-	case SYS_FCNTL, SYS_FCNTL64:
+	case syscall.SYS_FCNTL, syscall.SYS_FCNTL64:
 		return errno(-1)
-	case SYS_READLINKAT:
+	case syscall.SYS_READLINKAT:
 		return errno(-1)
 	case syscall.SYS_EPOLL_CREATE1:
 		return 3
@@ -247,7 +224,7 @@ func doBootSyscall(no, a0, a1, a2, a3, a4, a5 uintptr) uintptr {
 		return epollCtl(a0, a1, a2, a3)
 	case syscall.SYS_EPOLL_WAIT:
 		return epollWait(a0, a1, a2, a3)
-	case SYS_RANDOM:
+	case unix.SYS_GETRANDOM:
 		// the lenth arg
 		return a1
 	case SYS_WAIT_IRQ:
@@ -258,9 +235,7 @@ func doBootSyscall(no, a0, a1, a2, a3, a4, a5 uintptr) uintptr {
 		return fixedmmap(a0, a1)
 
 	default:
-		uart.WriteString("unknown syscall\n")
-		// PreparePanic(my.tf)
-		Signal(uintptr(syscall.SIGABRT), no, 0)
+		PreparePanic(my.tf)
 		return 0
 	}
 }

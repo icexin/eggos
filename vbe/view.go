@@ -25,15 +25,6 @@ func (v *View) Clear() {
 	}
 }
 
-func fixRect(rect image.Rectangle) image.Rectangle {
-	rect = rect.Canon()
-	rect1 := image.Rectangle{
-		Min: image.Pt(0, 0),
-		Max: rect.Max,
-	}
-	return rect1.Union(rect)
-}
-
 func (v *View) CommitRect(rect image.Rectangle) {
 	if fbbuf == nil {
 		return
