@@ -1,6 +1,8 @@
 package app
 
 import (
+	"fmt"
+	"runtime/debug"
 	"sort"
 )
 
@@ -23,4 +25,21 @@ func AppNames() []string {
 	}
 	sort.Strings(l)
 	return l
+}
+
+func Run(name string, ctx *Context) error {
+	entry := Get(name)
+	if entry == nil {
+		return fmt.Errorf("command not found: %s", name)
+	}
+	defer func() {
+		err := recover()
+		if err == nil {
+			return
+		}
+		stack := debug.Stack()
+		fmt.Fprintf(ctx.Stderr, "panic:%s\n", err)
+		ctx.Stderr.Write(stack)
+	}()
+	return entry(ctx)
 }
