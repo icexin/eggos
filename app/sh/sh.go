@@ -55,20 +55,16 @@ func doline(ctx *app.Context, line string) error {
 }
 
 func runApp(ctx *app.Context, name string, args []string, bg bool) error {
-	entry := app.Get(name)
-	if entry == nil {
-		return fmt.Errorf("%s not found", name)
-	}
 	nctx := *ctx
 	nctx.Args = append([]string{name}, args...)
 	if bg {
 		go func() {
-			entry(&nctx)
+			app.Run(name, &nctx)
 			fmt.Fprintf(ctx.Stderr, "job %s done\n", name)
 		}()
 		return nil
 	}
-	return entry(&nctx)
+	return app.Run(name, &nctx)
 }
 
 func Bootstrap() {
