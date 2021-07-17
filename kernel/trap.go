@@ -83,23 +83,65 @@ func ignoreHandler() {
 //go:nosplit
 func pageFaultHandler() {
 	t := Mythread()
-	PreparePanic(t.tf)
+	checkKernelPanic(t)
+	ChangeReturnPC(t.tf, sys.FuncPC(pageFaultPanic))
 }
 
 //go:nosplit
 func faultHandler() {
 	t := Mythread()
-	PreparePanic(t.tf)
+	checkKernelPanic(t)
+	ChangeReturnPC(t.tf, sys.FuncPC(trapPanic))
 }
 
 //go:nosplit
-func trappanic() {
+func printReg(name string, reg uintptr) {
+	debug.PrintStr(name)
+	debug.PrintStr("=")
+	debug.PrintHex(reg)
+	debug.PrintStr("\n")
+}
+
+//go:nosplit
+func checkKernelPanic(t *Thread) {
+	tf := t.tf
+	if tf.CS != _KCODE_IDX<<3 {
+		return
+	}
+	debug.PrintStr("trap fault in kernel\n")
+	printReg("tid", uintptr(t.id))
+	printReg("no", tf.Trapno)
+	printReg("err", tf.Err)
+	printReg("cr2", sys.Cr2())
+	printReg("ip", tf.IP)
+	printReg("sp", tf._SP)
+	printReg("ax", tf.AX)
+	printReg("bx", tf.BX)
+	printReg("cx", tf.CX)
+	printReg("dx", tf.CX)
+	printReg("cs", tf.CS)
+	printReg("gs", uintptr(tf.GS))
+	printReg("fs", uintptr(tf.FS))
+
+	sys.Cli()
+	sys.Hlt()
+	for {
+	}
+}
+
+//go:nosplit
+func trapPanic() {
 	panic("trap panic")
 }
 
 //go:nosplit
+func pageFaultPanic() {
+	panic("nil pointer or invalid memory access")
+}
+
+//go:nosplit
 func PreparePanic(tf *TrapFrame) {
-	ChangeReturnPC(tf, sys.FuncPC(trappanic))
+	ChangeReturnPC(tf, sys.FuncPC(trapPanic))
 }
 
 // ChangeReturnPC change the return pc of a trap
