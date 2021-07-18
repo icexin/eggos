@@ -114,7 +114,6 @@ type pgtab [1024]pdet
 //go:notinheap
 type pgdir [1024]pdet
 
-//go:notinheap
 type pdet uintptr
 
 func (p pdet) present() bool {
