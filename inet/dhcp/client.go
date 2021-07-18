@@ -17,11 +17,13 @@ import (
 
 	"github.com/icexin/eggos/debug"
 
-	"github.com/google/netstack/tcpip"
-	"github.com/google/netstack/tcpip/adapters/gonet"
-	nheader "github.com/google/netstack/tcpip/header"
-	"github.com/google/netstack/tcpip/network/ipv4"
-	"github.com/google/netstack/tcpip/stack"
+	"gvisor.dev/gvisor/pkg/tcpip"
+	"gvisor.dev/gvisor/pkg/tcpip/adapters/gonet"
+	nheader "gvisor.dev/gvisor/pkg/tcpip/header"
+	"gvisor.dev/gvisor/pkg/tcpip/network/ipv4"
+	"gvisor.dev/gvisor/pkg/tcpip/stack"
+	"gvisor.dev/gvisor/pkg/tcpip/transport/udp"
+	"gvisor.dev/gvisor/pkg/waiter"
 )
 
 // Client is a DHCP client.
@@ -91,7 +93,7 @@ func (c *Client) Shutdown() {
 	}
 }
 
-func e(err *tcpip.Error) error {
+func e(err tcpip.Error) error {
 	return errors.New(err.String())
 }
 
@@ -118,7 +120,7 @@ func (c *Client) Request(ctx context.Context, requestedAddr tcpip.Address) error
 		Port: serverPort,
 	}
 
-	conn, err := gonet.DialUDP(c.stack, &clientAddr, nil, ipv4.ProtocolNumber)
+	conn, err := DialUDP(c.stack, &clientAddr, nil, ipv4.ProtocolNumber)
 	if err != nil {
 		return err
 	}
@@ -182,7 +184,7 @@ func (c *Client) Request(ctx context.Context, requestedAddr tcpip.Address) error
 	// DHCPREQUEST
 	addr := tcpip.Address(h.yiaddr())
 	if err := c.stack.AddAddress(c.nicid, ipv4.ProtocolNumber, addr); err != nil {
-		if err != tcpip.ErrDuplicateAddress {
+		if _, ok := err.(*tcpip.ErrDuplicateAddress); ok {
 			return e(err)
 		}
 	}
@@ -264,4 +266,45 @@ func (c *Client) renewAfter(d time.Duration) {
 			}
 		}
 	}()
+}
+
+func DialUDP(s *stack.Stack, laddr, raddr *tcpip.FullAddress, network tcpip.NetworkProtocolNumber) (*gonet.UDPConn, error) {
+	var wq waiter.Queue
+	ep, err := s.NewEndpoint(udp.ProtocolNumber, network, &wq)
+	if err != nil {
+		return nil, errors.New(err.String())
+	}
+	ep.SocketOptions().SetBroadcast(true)
+
+	if laddr != nil {
+		if err := ep.Bind(*laddr); err != nil {
+			ep.Close()
+			return nil, &net.OpError{
+				Op:   "bind",
+				Net:  "udp",
+				Addr: fullToUDPAddr(*laddr),
+				Err:  errors.New(err.String()),
+			}
+		}
+	}
+
+	c := gonet.NewUDPConn(s, &wq, ep)
+
+	if raddr != nil {
+		if err := ep.Connect(*raddr); err != nil {
+			ep.Close()
+			return nil, &net.OpError{
+				Op:   "connect",
+				Net:  "udp",
+				Addr: fullToUDPAddr(*raddr),
+				Err:  errors.New(err.String()),
+			}
+		}
+	}
+
+	return c, nil
+}
+
+func fullToUDPAddr(addr tcpip.FullAddress) *net.UDPAddr {
+	return &net.UDPAddr{IP: net.IP(addr.Addr), Port: int(addr.Port)}
 }

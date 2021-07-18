@@ -1,12 +1,12 @@
 package inet
 
-import "github.com/google/netstack/tcpip"
+import "gvisor.dev/gvisor/pkg/tcpip/stack"
 
 var DefaultDevice Device
 
 type Device interface {
 	Mac() [6]byte
-	Transmit(pkt tcpip.PacketBuffer) error
+	Transmit(pkt *stack.PacketBuffer) error
 	SetReceiveCallback(func(b []byte))
 }
 

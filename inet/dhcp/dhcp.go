@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/netstack/tcpip"
+	"gvisor.dev/gvisor/pkg/tcpip"
 )
 
 // Config is standard DHCP configuration.

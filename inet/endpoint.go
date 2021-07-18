@@ -3,14 +3,15 @@ package inet
 import (
 	"sync"
 
-	"github.com/google/netstack/tcpip"
-	"github.com/google/netstack/tcpip/buffer"
-	"github.com/google/netstack/tcpip/header"
-	"github.com/google/netstack/tcpip/stack"
+	"gvisor.dev/gvisor/pkg/tcpip"
+	"gvisor.dev/gvisor/pkg/tcpip/buffer"
+	"gvisor.dev/gvisor/pkg/tcpip/header"
+	"gvisor.dev/gvisor/pkg/tcpip/link/ethernet"
+	"gvisor.dev/gvisor/pkg/tcpip/stack"
 )
 
 type endpoint struct {
-	hdrsize    int
+	eth        *ethernet.Endpoint
 	cap        stack.LinkEndpointCapabilities
 	addr       tcpip.LinkAddress
 	dispatcher stack.NetworkDispatcher
@@ -31,17 +32,14 @@ type Options struct {
 
 func New(opt *Options) stack.LinkEndpoint {
 	mac := DefaultDevice.Mac()
-	caps := stack.LinkEndpointCapabilities(0)
-	caps |= stack.CapabilityResolutionRequired
 	e := &endpoint{
-		hdrsize: header.EthernetMinimumSize,
-		cap:     caps,
-		addr:    tcpip.LinkAddress(mac[:]),
-		device:  DefaultDevice,
+		addr:   tcpip.LinkAddress(mac[:]),
+		device: DefaultDevice,
 	}
+	e.eth = ethernet.New(e)
 
 	e.device.SetReceiveCallback(e.onrx)
-	return e
+	return e.eth
 }
 
 // MTU is the maximum transmission unit for this endpoint. This is
@@ -63,13 +61,18 @@ func (e *endpoint) Capabilities() stack.LinkEndpointCapabilities {
 // information to reserve space in the front of the packets they're
 // building.
 func (e *endpoint) MaxHeaderLength() uint16 {
-	return uint16(e.hdrsize)
+	return 0
 }
 
 // LinkAddress returns the link address (typically a MAC) of the
 // link endpoint.
 func (e *endpoint) LinkAddress() tcpip.LinkAddress {
 	return e.addr
+}
+
+// AddHeader adds a link layer header to pkt if required.
+func (e *endpoint) AddHeader(local tcpip.LinkAddress, remote tcpip.LinkAddress, protocol tcpip.NetworkProtocolNumber, pkt *stack.PacketBuffer) {
+	panic("not implemented") // TODO: Implement
 }
 
 // WritePacket writes a packet with the given protocol through the
@@ -80,27 +83,13 @@ func (e *endpoint) LinkAddress() tcpip.LinkAddress {
 // To participate in transparent bridging, a LinkEndpoint implementation
 // should call eth.Encode with header.EthernetFields.SrcAddr set to
 // r.LocalLinkAddress if it is provided.
-func (e *endpoint) WritePacket(r *stack.Route, gso *stack.GSO, protocol tcpip.NetworkProtocolNumber, pkt tcpip.PacketBuffer) *tcpip.Error {
-	// Add ethernet header if needed.
-	eth := header.Ethernet(pkt.Header.Prepend(header.EthernetMinimumSize))
-	pkt.LinkHeader = buffer.View(eth)
-	ethHdr := &header.EthernetFields{
-		DstAddr: r.RemoteLinkAddress,
-		Type:    protocol,
-	}
 
-	// Preserve the src address if it's set in the route.
-	if r.LocalLinkAddress != "" {
-		ethHdr.SrcAddr = r.LocalLinkAddress
-	} else {
-		ethHdr.SrcAddr = e.addr
-	}
-	eth.Encode(ethHdr)
+func (e *endpoint) WritePacket(r stack.RouteInfo, protocol tcpip.NetworkProtocolNumber, pkt *stack.PacketBuffer) tcpip.Error {
 	e.mutex.Lock()
 	err := e.device.Transmit(pkt)
 	if err != nil {
 		e.mutex.Unlock()
-		return tcpip.ErrAlreadyBound
+		return new(tcpip.ErrAlreadyBound)
 	}
 	e.mutex.Unlock()
 	return nil
@@ -112,7 +101,7 @@ func (e *endpoint) WritePacket(r *stack.Route, gso *stack.GSO, protocol tcpip.Ne
 // Right now, WritePackets is used only when the software segmentation
 // offload is enabled. If it will be used for something else, it may
 // require to change syscall filters.
-func (e *endpoint) WritePackets(r *stack.Route, gso *stack.GSO, hdrs []stack.PacketDescriptor, payload buffer.VectorisedView, protocol tcpip.NetworkProtocolNumber) (int, *tcpip.Error) {
+func (e *endpoint) WritePackets(stack.RouteInfo, stack.PacketBufferList, tcpip.NetworkProtocolNumber) (int, tcpip.Error) {
 	panic("not implemented") // TODO: Implement
 }
 
@@ -134,6 +123,10 @@ func (e *endpoint) IsAttached() bool {
 	return e.dispatcher != nil
 }
 
+func (e *endpoint) ARPHardwareType() header.ARPHardwareType {
+	return header.ARPHardwareEther
+}
+
 // Wait waits for any worker goroutines owned by the endpoint to stop.
 //
 // For now, requesting that an endpoint's worker goroutine(s) stop is
@@ -145,18 +138,7 @@ func (e *endpoint) Wait() {
 }
 
 func (e *endpoint) onrx(buf []byte) {
-	view := buffer.View(buf)
-	eth := header.Ethernet(view[:header.EthernetMinimumSize])
-	p := eth.Type()
-	remote := eth.SourceAddress()
-	local := eth.DestinationAddress()
-
-	//fmt.Printf("type:%v, remote:%s, local:%s\n", p, remote, local)
-
-	pkt := tcpip.PacketBuffer{
-		Data:       buffer.NewVectorisedView(len(buf), []buffer.View{view}),
-		LinkHeader: buffer.View(eth),
-	}
-	pkt.Data.TrimFront(e.hdrsize)
-	e.dispatcher.DeliverNetworkPacket(e, remote, local, p, pkt)
+	pkt := stack.NewPacketBuffer(stack.PacketBufferOptions{})
+	pkt.Data().AppendView(buffer.NewViewFromBytes(buf))
+	e.eth.DeliverNetworkPacket(tcpip.LinkAddress(""), tcpip.LinkAddress(""), 0, pkt)
 }

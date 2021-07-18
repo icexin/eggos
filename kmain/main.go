@@ -10,12 +10,12 @@ import (
 	"github.com/icexin/eggos/console"
 	"github.com/icexin/eggos/fs"
 	"github.com/icexin/eggos/inet"
+	"github.com/icexin/eggos/pci"
 	"github.com/icexin/eggos/ps2/mouse"
 
 	_ "github.com/icexin/eggos/e1000"
 	"github.com/icexin/eggos/kbd"
 	"github.com/icexin/eggos/kernel"
-	"github.com/icexin/eggos/pci"
 	"github.com/icexin/eggos/uart"
 	"github.com/icexin/eggos/vbe"
 )
