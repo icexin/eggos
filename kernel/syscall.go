@@ -22,6 +22,7 @@ const (
 
 const (
 	// copy from runtime, need by readgstatus
+	_Grunning = 2
 	_Gsyscall = 3
 )
 
@@ -91,7 +92,7 @@ func syscallIntr() {
 
 	// use tricks to get whether the current g has p
 	status := readgstatus(getg())
-	if status == _Gsyscall {
+	if status != _Grunning {
 		tf.AX = doForwardSyscall(tf.AX, tf.BX, tf.CX, tf.DX, tf.SI, tf.DI, tf.BP)
 	} else {
 		// making all forwarded syscall as blocked syscall, so the syscall task can acquire a P
@@ -140,6 +141,10 @@ func doForwardSyscall(no, a0, a1, a2, a3, a4, a5 uintptr) uintptr {
 //go:nosplit
 func doBootSyscall(no, a0, a1, a2, a3, a4, a5 uintptr) uintptr {
 	my := Mythread()
+	// if no != syscall.SYS_WRITE && no != syscall.SYS_SCHED_YIELD && no < 500 {
+	// 	debug.PrintStr(sysnum[no])
+	// 	debug.PrintStr("\n")
+	// }
 
 	switch no {
 	case syscall.SYS_EXIT:
@@ -227,6 +232,8 @@ func doBootSyscall(no, a0, a1, a2, a3, a4, a5 uintptr) uintptr {
 	case unix.SYS_GETRANDOM:
 		// the lenth arg
 		return a1
+	case syscall.SYS_GETPID:
+		return 0
 	case SYS_WAIT_IRQ:
 		return waitIRQ()
 	case SYS_WAIT_SYSCALL:
@@ -235,6 +242,9 @@ func doBootSyscall(no, a0, a1, a2, a3, a4, a5 uintptr) uintptr {
 		return fixedmmap(a0, a1)
 
 	default:
+		debug.PrintStr("syscall ")
+		debug.PrintStr(sysnum[no])
+		debug.PrintStr(" not found\n")
 		PreparePanic(my.tf)
 		return 0
 	}
@@ -307,7 +317,7 @@ func handleForward() {
 		call := (*isyscall.Request)(unsafe.Pointer(callptr))
 		handler := isyscall.GetHandler(call.NO)
 		if handler == nil {
-			debug.Logf("[syscall] unhandled syscall %d", call.NO)
+			debug.Logf("[syscall] unhandled syscall %s(%d)", sysnum[call.NO], call.NO)
 			call.Ret = isyscall.Errno(syscall.EINVAL)
 			// call.Ret = isyscall.Errno(syscall.EPERM)
 			call.Done()
