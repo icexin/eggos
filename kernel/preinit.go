@@ -134,9 +134,10 @@ func prepareArgs(sp uintptr) {
 	envput(&buf, 0)
 
 	// alloc memory for argv[0]
-	*argv0 = envdup(&buf, "gobare\x00")
+	*argv0 = envdup(&buf, "eggos\x00")
 
 	*envTerm = envdup(&buf, "TERM=xterm\x00")
+	*envTerm = envdup(&buf, "GODEBUG=asyncpreemptoff=1\x00")
 }
 
 //go:nosplit

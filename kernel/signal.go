@@ -141,9 +141,6 @@ func sigaltstack(new, old *stackt) {
 	if new == nil {
 		return
 	}
-	uart.WriteString("signal stack ")
-	uart.WriteByte('0' + byte(my.id))
-	uart.WriteByte('\n')
 	my.sigstack = *new
 }
 
