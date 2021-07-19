@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"strconv"
 	"strings"
 
 	"github.com/magefile/mage/mg"
@@ -38,6 +39,11 @@ var (
 	QEMU_DEBUG_OPT = initQemuDebugOpt()
 )
 
+const (
+	goMajorVersionSupported    = 1
+	maxGoMinorVersionSupported = 16
+)
+
 // Kernel target build the elf kernel for eggos, generate kernel.elf
 func Kernel() error {
 	detectGoVersion()
@@ -46,7 +52,7 @@ func Kernel() error {
 		"GOARCH": "386",
 	}
 	goLdflags := "-E github.com/icexin/eggos/kernel.rt0 -T 0x100000"
-	return sh.RunWithV(env, "go", "build", "-o", "kernel.elf", "-tags", GOTAGS,
+	return sh.RunWithV(env, gobin(), "build", "-o", "kernel.elf", "-tags", GOTAGS,
 		"-ldflags", goLdflags, "-gcflags", GOGCFLAGS, "./kmain")
 }
 
@@ -163,15 +169,43 @@ func detectToolPrefix() string {
 	`)
 }
 
-func detectGoVersion() {
-	return
-	if !hasCommand("go") {
-		panic(`go command not found`)
-	}
+var goVersionRegexp = regexp.MustCompile(`go(\d+)\.(\d+)\.?(\d?)`)
 
-	if !hasOutput("go1.13", "go", "version") {
-		panic(`eggos only tested on go1.13.x`)
+func goVersion() (string, int, int, error) {
+	versionBytes, err := cmdOutput(gobin(), "version")
+	if err != nil {
+		return "", 0, 0, err
 	}
+	version := strings.TrimSpace(string(versionBytes))
+	result := goVersionRegexp.FindStringSubmatch(version)
+	if len(result) < 3 {
+		return "", 0, 0, fmt.Errorf("use of unreleased go version `%s`, may not work", version)
+	}
+	major, _ := strconv.Atoi(result[1])
+	minor, _ := strconv.Atoi(result[2])
+	return version, major, minor, nil
+}
+
+func detectGoVersion() {
+	version, major, minor, err := goVersion()
+	if err != nil {
+		fmt.Printf("warning: %s\n", err)
+		return
+	}
+	if !(major == goMajorVersionSupported && minor <= maxGoMinorVersionSupported) {
+		fmt.Printf("warning: max supported go version go%d.%d.x, found go version `%s`, may not work\n",
+			goMajorVersionSupported, maxGoMinorVersionSupported, version,
+		)
+		return
+	}
+}
+
+func gobin() string {
+	goroot := os.Getenv("EGGOS_GOROOT")
+	if goroot != "" {
+		return filepath.Join(goroot, "bin", "go")
+	}
+	return "go"
 }
 
 func detectQemu() {

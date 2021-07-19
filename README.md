@@ -37,7 +37,7 @@ In general, writing kernel in Go is a very interesting experience. On the one ha
 
 # Dependencies
 
-- Go 1.13.x (only tested on Go1.13.x)
+- Go 1.16.x (higher versions may not work)
 - gcc
 - qemu
 - mage
