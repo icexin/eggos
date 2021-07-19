@@ -105,7 +105,7 @@ func main(ctx *app.Context) error {
 		for i := range demos {
 			fmt.Fprintf(os.Stderr, "\t%s\n", demos[i].Name)
 		}
-		os.Exit(1)
+		return nil
 	}
 
 	Wnd.SetStyle(nstyle.FromTheme(theme, scaling))
@@ -355,7 +355,7 @@ func multiDemo(w *nucular.Window) {
 	w.Label("Welcome to the multi-window demo.", "LC")
 	w.Label("Open any demo window by clicking on the buttons.", "LC")
 	w.Label("To run a demo as a stand-alone window use:", "LC")
-	w.Label("     \"./demo <demo-name>\"", "LC")
+	w.Label("     \"./uidemo <demo-name>\"", "LC")
 	w.Row(30).Static(100, 100, 100)
 	for i := range demos {
 		if w.ButtonText(demos[i].Name) {
@@ -365,5 +365,5 @@ func multiDemo(w *nucular.Window) {
 }
 
 func init() {
-	app.Register("gui", main)
+	app.Register("uidemo", main)
 }
