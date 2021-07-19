@@ -3,20 +3,18 @@ package inet
 import (
 	"context"
 	"errors"
-	"net"
 	"time"
 
 	"github.com/icexin/eggos/debug"
 	"github.com/icexin/eggos/inet/dhcp"
 
-	"github.com/google/netstack/tcpip"
-	"github.com/google/netstack/tcpip/adapters/gonet"
-	"github.com/google/netstack/tcpip/header"
-	"github.com/google/netstack/tcpip/network/arp"
-	"github.com/google/netstack/tcpip/network/ipv4"
-	"github.com/google/netstack/tcpip/stack"
-	"github.com/google/netstack/tcpip/transport/tcp"
-	"github.com/google/netstack/tcpip/transport/udp"
+	"gvisor.dev/gvisor/pkg/tcpip"
+	"gvisor.dev/gvisor/pkg/tcpip/header"
+	"gvisor.dev/gvisor/pkg/tcpip/network/arp"
+	"gvisor.dev/gvisor/pkg/tcpip/network/ipv4"
+	"gvisor.dev/gvisor/pkg/tcpip/stack"
+	"gvisor.dev/gvisor/pkg/tcpip/transport/tcp"
+	"gvisor.dev/gvisor/pkg/tcpip/transport/udp"
 )
 
 const (
@@ -27,31 +25,7 @@ var (
 	nstack *stack.Stack
 )
 
-func Listen(proto, addr string) (net.Listener, error) {
-	tcpaddr, err := net.ResolveTCPAddr("tcp", addr)
-	if err != nil {
-		return nil, err
-	}
-	return gonet.NewListener(nstack, tcpip.FullAddress{
-		NIC:  defaultNIC,
-		Addr: tcpip.Address(tcpaddr.IP),
-		Port: uint16(tcpaddr.Port),
-	}, ipv4.ProtocolNumber)
-}
-
-func DialTCP(proto, addr string) (net.Conn, error) {
-	tcpaddr, err := net.ResolveTCPAddr("tcp", addr)
-	if err != nil {
-		return nil, err
-	}
-	return gonet.DialTCP(nstack, tcpip.FullAddress{
-		NIC:  defaultNIC,
-		Addr: tcpip.Address(tcpaddr.IP),
-		Port: uint16(tcpaddr.Port),
-	}, ipv4.ProtocolNumber)
-}
-
-func e(err *tcpip.Error) error {
+func e(err tcpip.Error) error {
 	if err == nil {
 		return nil
 	}
@@ -60,18 +34,18 @@ func e(err *tcpip.Error) error {
 
 func Init() error {
 	nstack = stack.New(stack.Options{
-		NetworkProtocols:   []stack.NetworkProtocol{arp.NewProtocol(), ipv4.NewProtocol()},
-		TransportProtocols: []stack.TransportProtocol{tcp.NewProtocol(), udp.NewProtocol()},
+		NetworkProtocols:   []stack.NetworkProtocolFactory{arp.NewProtocol, ipv4.NewProtocol},
+		TransportProtocols: []stack.TransportProtocolFactory{tcp.NewProtocol, udp.NewProtocol},
 	})
 	endpoint := New(&Options{})
 	err := nstack.CreateNIC(defaultNIC, endpoint)
 	if err != nil {
 		return e(err)
 	}
-	err = nstack.AddAddress(defaultNIC, arp.ProtocolNumber, arp.ProtocolAddress)
-	if err != nil {
-		return e(err)
-	}
+	// err = nstack.AddAddress(defaultNIC, arp.ProtocolNumber, arp.ProtocolAddress)
+	// if err != nil {
+	// 	return e(err)
+	// }
 
 	err1 := dodhcp(endpoint.LinkAddress())
 	if err1 != nil {
@@ -79,12 +53,12 @@ func Init() error {
 	}
 	return nil
 
-	// nstack.AddAddress(defaultNIC, ipv4.ProtocolNumber, tcpip.Address([]byte{10, 0, 2, 15}))
-	nstack.AddAddress(defaultNIC, ipv4.ProtocolNumber, tcpip.Address([]byte{10, 0, 0, 7}))
+	nstack.AddAddress(defaultNIC, ipv4.ProtocolNumber, tcpip.Address([]byte{10, 0, 2, 15}))
+	// nstack.AddAddress(defaultNIC, ipv4.ProtocolNumber, tcpip.Address([]byte{10, 0, 0, 7}))
 	setroute(nstack, dhcp.Config{
 		SubnetMask: tcpip.AddressMask([]byte{255, 255, 255, 0}),
-		// Gateway:    tcpip.Address([]byte{10, 0, 2, 2}),
-		Gateway: tcpip.Address([]byte{10, 0, 0, 1}),
+		Gateway:    tcpip.Address([]byte{10, 0, 2, 2}),
+		// Gateway: tcpip.Address([]byte{10, 0, 0, 1}),
 	})
 
 	return nil

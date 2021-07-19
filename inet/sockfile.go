@@ -1,6 +1,7 @@
 package inet
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"net"
@@ -10,9 +11,8 @@ import (
 
 	"github.com/icexin/eggos/fs"
 
-	"github.com/google/netstack/tcpip"
-	"github.com/google/netstack/tcpip/buffer"
-	"github.com/google/netstack/waiter"
+	"gvisor.dev/gvisor/pkg/tcpip"
+	"gvisor.dev/gvisor/pkg/waiter"
 )
 
 type _sockaddr struct {
@@ -28,10 +28,6 @@ type sockFile struct {
 	fd int
 	ep tcpip.Endpoint
 	wq *waiter.Queue
-
-	// rdbuf contains bytes that have been read from the endpoint,
-	// but haven't yet been returned.
-	rdbuf buffer.View
 }
 
 func allocSockFile(ep tcpip.Endpoint, wq *waiter.Queue) *sockFile {
@@ -61,58 +57,39 @@ func findSockFile(fd uintptr) (*sockFile, error) {
 }
 
 func (s *sockFile) Read(p []byte) (int, error) {
-	var buf buffer.View
-	var terr *tcpip.Error
+	var terr tcpip.Error
+	var result tcpip.ReadResult
 
-	// if have remaining buffer
-	if s.rdbuf != nil {
-		goto read
-	}
+	w := tcpip.SliceWriter(p)
+	result, terr = s.ep.Read(&w, tcpip.ReadOptions{})
 
-	buf, _, terr = s.ep.Read(nil)
-
-	switch terr {
+	switch terr.(type) {
 	case nil:
-	case tcpip.ErrWouldBlock:
+	case *tcpip.ErrWouldBlock:
 		return 0, syscall.EAGAIN
-	case tcpip.ErrClosedForReceive:
+	case *tcpip.ErrClosedForReceive:
 		return 0, nil
 	default:
 		return 0, e(terr)
 	}
-
-	s.rdbuf = buf
-
-read:
-	n := copy(p, s.rdbuf)
-	if n == len(s.rdbuf) {
-		s.rdbuf = nil
-	} else {
-		s.rdbuf.TrimFront(n)
+	if result.Count < result.Total {
 		// make next epoll_wait success
-		s.evin(nil)
+		s.evcallback(nil, waiter.EventIn)
 	}
-	return n, nil
+	return result.Count, nil
 }
 
 func (s *sockFile) Write(p []byte) (int, error) {
-	// ep.Write takes ownership of write buffer
-	v := buffer.NewViewFromBytes(p)
-write:
-	n, ch, terr := s.ep.Write(tcpip.SlicePayload(v), tcpip.WriteOptions{})
+	n, terr := s.ep.Write(bytes.NewBuffer(p), tcpip.WriteOptions{})
 	if n != 0 {
 		return int(n), nil
 	}
 
-	switch terr {
-	case tcpip.ErrWouldBlock:
+	switch terr.(type) {
+	case *tcpip.ErrWouldBlock:
 		return 0, syscall.EAGAIN
-	case tcpip.ErrClosedForSend:
+	case *tcpip.ErrClosedForSend:
 		return 0, syscall.EPIPE
-	case tcpip.ErrNoLinkAddress:
-		<-ch
-		// try again
-		goto write
 	default:
 		return 0, e(terr)
 	}
@@ -123,45 +100,24 @@ func (s *sockFile) Close() error {
 	return nil
 }
 
-type evcallback func(*waiter.Entry)
+type evcallback func(*waiter.Entry, waiter.EventMask)
 
-func (e evcallback) Callback(entry *waiter.Entry) {
-	e(entry)
+func (e evcallback) Callback(entry *waiter.Entry, mask waiter.EventMask) {
+	e(entry, mask)
 }
 
 func (s *sockFile) setupEvent() {
 	s.wq.EventRegister(&waiter.Entry{
-		Callback: evcallback(s.evin),
-	}, waiter.EventIn)
-	s.wq.EventRegister(&waiter.Entry{
-		Callback: evcallback(s.evout),
-	}, waiter.EventOut)
-	s.wq.EventRegister(&waiter.Entry{
-		Callback: evcallback(s.everr),
-	}, waiter.EventErr)
-	s.wq.EventRegister(&waiter.Entry{
-		Callback: evcallback(s.evehup),
-	}, waiter.EventHUp)
+		Callback: evcallback(s.evcallback),
+	}, waiter.EventIn|waiter.EventOut|waiter.EventErr|waiter.EventHUp)
 }
 
 func (s *sockFile) stopEvent() {
 	s.wq.EventUnregister(nil)
 }
 
-func (s *sockFile) evin(e *waiter.Entry) {
-	evnotify(uintptr(s.fd), uintptr(waiter.EventIn.ToLinux()))
-}
-
-func (s *sockFile) evout(e *waiter.Entry) {
-	evnotify(uintptr(s.fd), uintptr(waiter.EventOut.ToLinux()))
-}
-
-func (s *sockFile) everr(e *waiter.Entry) {
-	evnotify(uintptr(s.fd), uintptr(waiter.EventErr.ToLinux()))
-}
-
-func (s *sockFile) evehup(e *waiter.Entry) {
-	evnotify(uintptr(s.fd), uintptr(waiter.EventHUp.ToLinux()))
+func (s *sockFile) evcallback(e *waiter.Entry, mask waiter.EventMask) {
+	evnotify(uintptr(s.fd), uintptr(mask.ToLinux()))
 }
 
 func (s *sockFile) Bind(uaddr, uaddrlen uintptr) error {
@@ -192,7 +148,7 @@ func (s *sockFile) Connect(uaddr, uaddrlen uintptr) error {
 		Port: ntohs(saddr.port),
 	}
 	err := s.ep.Connect(addr)
-	if err == tcpip.ErrConnectStarted {
+	if _, ok := err.(*tcpip.ErrConnectStarted); ok {
 		return syscall.EINPROGRESS
 	}
 	if err != nil {
@@ -211,10 +167,10 @@ func (s *sockFile) Accept4(uaddr, uaddrlen, flag uintptr) (int, error) {
 		return 0, syscall.EINVAL
 	}
 	saddr := (*_sockaddr)(unsafe.Pointer(uaddr))
-	newep, wq, err := s.ep.Accept()
-	switch err {
+	newep, wq, err := s.ep.Accept(nil)
+	switch err.(type) {
 	case nil:
-	case tcpip.ErrWouldBlock:
+	case *tcpip.ErrWouldBlock:
 		return 0, syscall.EAGAIN
 	default:
 		return 0, e(err)
@@ -242,22 +198,25 @@ func (s *sockFile) Setsockopt(level, opt, vptr, vlen uintptr) error {
 		return errors.New("setsockopt:bad opt value length")
 	}
 
-	var terr *tcpip.Error
+	var terr tcpip.Error
 	value := *(*int32)(unsafe.Pointer(vptr))
+	sockopt := s.ep.SocketOptions()
 
 	switch opt {
 	case syscall.SO_REUSEADDR:
-		terr = s.ep.SetSockOpt(tcpip.ReuseAddressOption(value))
+		sockopt.SetReuseAddress(value != 0)
 	case syscall.SO_BROADCAST:
-		terr = s.ep.SetSockOpt(tcpip.BroadcastOption(value))
+		sockopt.SetBroadcast(value != 0)
 	case syscall.TCP_NODELAY:
-		terr = s.ep.SetSockOptInt(tcpip.DelayOption, int(value))
+		sockopt.SetDelayOption(value != 0)
 	case syscall.SO_KEEPALIVE:
-		terr = s.ep.SetSockOpt(tcpip.KeepaliveEnabledOption(value))
+		sockopt.SetKeepAlive(value != 0)
 	case syscall.TCP_KEEPINTVL:
-		terr = s.ep.SetSockOpt(tcpip.KeepaliveIntervalOption(time.Duration(value) * time.Second))
+		v := tcpip.KeepaliveIntervalOption(time.Duration(value) * time.Second)
+		terr = s.ep.SetSockOpt(&v)
 	case syscall.TCP_KEEPIDLE:
-		terr = s.ep.SetSockOpt(tcpip.KeepaliveIdleOption(time.Duration(value) * time.Second))
+		v := tcpip.KeepaliveIdleOption(time.Duration(value) * time.Second)
+		terr = s.ep.SetSockOpt(&v)
 	default:
 		return fmt.Errorf("setsockopt:unsupport socket opt:%d", level)
 	}
@@ -279,9 +238,9 @@ func (s *sockFile) Getsockopt(level, opt, vptr, vlenptr uintptr) error {
 
 	switch opt {
 	case syscall.SO_ERROR:
-		terr := s.ep.GetSockOpt(tcpip.ErrorOption{})
-		switch terr {
-		case tcpip.ErrConnectionRefused:
+		terr := s.ep.SocketOptions().GetLastError()
+		switch terr.(type) {
+		case *tcpip.ErrConnectionRefused:
 			return syscall.ECONNREFUSED
 		default:
 			return e(terr)

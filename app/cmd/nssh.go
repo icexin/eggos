@@ -2,13 +2,13 @@ package cmd
 
 import (
 	"fmt"
+	"net"
 
 	"github.com/icexin/eggos/app"
-	"github.com/icexin/eggos/inet"
 )
 
 func nsshmain(ctx *app.Context) error {
-	l, err := inet.Listen("tcp", "0.0.0.0:22")
+	l, err := net.Listen("tcp", "0.0.0.0:22")
 	if err != nil {
 		panic(err)
 	}

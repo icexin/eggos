@@ -13,8 +13,8 @@ import (
 	"github.com/icexin/eggos/pic"
 	"github.com/icexin/eggos/sys"
 
-	"github.com/google/netstack/tcpip"
-	"github.com/google/netstack/tcpip/buffer"
+	"gvisor.dev/gvisor/pkg/tcpip/buffer"
+	"gvisor.dev/gvisor/pkg/tcpip/stack"
 )
 
 var _ pci.Driver = (*driver)(nil)
@@ -220,7 +220,7 @@ func (d *driver) Init(dev *pci.Device) error {
 	return nil
 }
 
-func (d *driver) Transmit(pkt tcpip.PacketBuffer) error {
+func (d *driver) Transmit(pkt *stack.PacketBuffer) error {
 	desc := &d.txdescs[d.txidx]
 	if desc.status == 0 {
 		return errors.New("tx queue full")
@@ -228,15 +228,8 @@ func (d *driver) Transmit(pkt tcpip.PacketBuffer) error {
 
 	txbuf := sys.UnsafeBuffer(uintptr(desc.paddr), mm.PGSIZE)
 
-	views := append([]buffer.View{pkt.Header.View()}, pkt.Data.Views()...)
-	pktlen := 0
-	for _, v := range views {
-		if pktlen+len(v) > len(txbuf) {
-			return errors.New("e1000: tx buffer too large")
-		}
-		copy(txbuf[pktlen:], v)
-		pktlen += len(v)
-	}
+	r := buffer.NewVectorisedView(pkt.Size(), pkt.Views())
+	pktlen, _ := r.Read(txbuf)
 
 	desc.cmd = TX_DESC_IFCS | TX_DESC_EOP | TX_DESC_RS
 	desc.len = uint16(pktlen)

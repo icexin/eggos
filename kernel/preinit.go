@@ -125,6 +125,7 @@ func prepareArgs(sp uintptr) {
 	// no env, len(env) == 0
 	// envput(&buf, 1)
 	envTerm := (*uintptr)(unsafe.Pointer(envput(&buf, 0)))
+	envGoDebug := (*uintptr)(unsafe.Pointer(envput(&buf, 0)))
 	envput(&buf, 0)
 
 	// put auxillary vector
@@ -134,9 +135,10 @@ func prepareArgs(sp uintptr) {
 	envput(&buf, 0)
 
 	// alloc memory for argv[0]
-	*argv0 = envdup(&buf, "gobare\x00")
+	*argv0 = envdup(&buf, "eggos\x00")
 
 	*envTerm = envdup(&buf, "TERM=xterm\x00")
+	*envGoDebug = envdup(&buf, "GODEBUG=asyncpreemptoff=1\x00")
 }
 
 //go:nosplit

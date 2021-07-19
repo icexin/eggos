@@ -164,6 +164,7 @@ func detectToolPrefix() string {
 }
 
 func detectGoVersion() {
+	return
 	if !hasCommand("go") {
 		panic(`go command not found`)
 	}
