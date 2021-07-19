@@ -21,6 +21,7 @@ In general, writing kernel in Go is a very interesting experience. On the one ha
 
 ![js](https://i.imgur.com/Canhd8D.gif)
 ![nes](https://i.imgur.com/WugXcTk.gif)
+![gui](https://i.imgur.com/jILuMMk.png)
 
 
 # Feature list
@@ -33,6 +34,7 @@ In general, writing kernel in Go is a very interesting experience. On the one ha
 - A Javascript interpreter using [otto](https://github.com/robertkrimen/otto)
 - VBE based frame buffer.
 - Some simple network apps(httpd, sshd).
+- GUI support by [nucular](https://github.com/aarzilli/nucular).
 
 
 # Dependencies
@@ -89,7 +91,7 @@ The multiboot.elf generated after executing the make command is a kernel image c
 
 # Documentation
 
-For some design details see [docs/internal.md](docs/internal.md)
+[docs/README.md](docs/README.md)
 
 # Roadmap
 
