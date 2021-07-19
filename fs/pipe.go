@@ -23,21 +23,20 @@ func sysPipe2(call *isyscall.Request) {
 	fds := (*[2]int32)(unsafe.Pointer(call.Args[0]))
 	flags := call.Args[1]
 	_ = flags
-	w := newPipeFile()
-	r := w.Share()
-	wfd, _ := AllocFileNode(w)
-	rfd, _ := AllocFileNode(r)
+	p := newPipeFile()
+	wfd, _ := AllocFileNode(p)
+	rfd, _ := AllocFileNode(p)
 	fds[0] = int32(rfd)
 	fds[1] = int32(wfd)
-	w.fd = wfd
-	r.fd = rfd
+	p.wfd = wfd
+	p.rfd = rfd
 	call.Done()
 }
 
 type pipeFile struct {
-	fd     int
-	closed bool
-	ch     chan byte
+	rfd, wfd int
+	closed   bool
+	ch       chan byte
 }
 
 func newPipeFile() *pipeFile {
@@ -46,30 +45,26 @@ func newPipeFile() *pipeFile {
 	}
 }
 
-func (f *pipeFile) Share() *pipeFile {
-	return &pipeFile{
-		ch: f.ch,
-	}
-}
-
 func (f *pipeFile) Read(p []byte) (n int, err error) {
 	if f.closed {
 		return 0, ErrClosed
 	}
 	var idx int
+
+forLoop:
 	for idx < len(p) {
 		select {
 		case b := <-f.ch:
 			p[idx] = b
 			idx++
 		default:
-			break
+			break forLoop
 		}
 	}
 	if idx == 0 {
 		return 0, syscall.EAGAIN
 	}
-	evnotify(uintptr(f.fd), syscall.EPOLLOUT)
+	evnotify(uintptr(f.wfd), syscall.EPOLLOUT)
 	return idx, nil
 }
 
@@ -78,18 +73,19 @@ func (f *pipeFile) Write(p []byte) (n int, err error) {
 		return 0, ErrClosed
 	}
 	var idx int
+forLoop:
 	for idx < len(p) {
 		select {
 		case f.ch <- p[idx]:
 			idx++
 		default:
-			break
+			break forLoop
 		}
 	}
 	if idx == 0 {
 		return 0, syscall.EAGAIN
 	}
-	evnotify(uintptr(f.fd), syscall.EPOLLIN)
+	evnotify(uintptr(f.rfd), syscall.EPOLLIN)
 	return idx, nil
 }
 
