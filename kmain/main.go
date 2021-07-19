@@ -8,6 +8,7 @@ import (
 	"github.com/icexin/eggos/app/sh"
 	"github.com/icexin/eggos/cga/fbcga"
 	"github.com/icexin/eggos/console"
+	"github.com/icexin/eggos/debug"
 	"github.com/icexin/eggos/fs"
 	"github.com/icexin/eggos/inet"
 	"github.com/icexin/eggos/pci"
@@ -41,6 +42,7 @@ func main() {
 		panic(err)
 	}
 
+	debug.Logf("[runtime] go version:%s", runtime.Version())
 	w := console.Console()
 	io.WriteString(w, "\nwelcome to eggos\n")
 	sh.Bootstrap()
