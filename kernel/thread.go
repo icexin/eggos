@@ -88,6 +88,9 @@ type Thread struct {
 	// 而sysmon没有P，会导致空指针
 	sleepKey uintptr
 	tls      userDesc
+
+	// 用于保存需要转发的系统调用栈帧
+	systf TrapFrame
 }
 
 //go:nosplit

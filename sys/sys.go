@@ -64,3 +64,6 @@ func Mfence()
 
 //go:nosplit
 func Fxsave(addr uintptr)
+
+//go:nosplit
+func SetAX(val uintptr)

@@ -191,19 +191,4 @@ TEXT ·getg(SB), NOSPLIT, $0-4
 	MOVL BX, ret+0(FP)
 	RET
 
-TEXT ·blocksyscall(SB), NOSPLIT, $0
-	// save syscall args
-	PUSHAL
-	CALL runtime·entersyscall(SB)
-	POPAL
-
-	INT $0x80
-
-	// In order not to confuse exitsyscall,
-	// keep sp the same as entersyscall.
-	// Also we need save AX, the return value of syscall
-	PUSHAL
-	CALL runtime·exitsyscall(SB)
-	POPAL
-	RET
 
