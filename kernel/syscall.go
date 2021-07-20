@@ -79,11 +79,9 @@ func getg() uintptr
 func readgstatus(uintptr) uint32
 
 //go:nosplit
-func blocksyscall()
-
-//go:nosplit
 func syscallIntr() {
-	tf := Mythread().tf
+	my := Mythread()
+	tf := my.tf
 	dokernel := !(bootstrapDone && canForward(tf))
 	if dokernel {
 		tf.AX = doBootSyscall(tf.AX, tf.BX, tf.CX, tf.DX, tf.SI, tf.DI, tf.BP)
@@ -95,8 +93,10 @@ func syscallIntr() {
 	if status != _Grunning {
 		tf.AX = doForwardSyscall(tf.AX, tf.BX, tf.CX, tf.DX, tf.SI, tf.DI, tf.BP)
 	} else {
+		// tf.AX = doForwardSyscall(tf.AX, tf.BX, tf.CX, tf.DX, tf.SI, tf.DI, tf.BP)
 		// making all forwarded syscall as blocked syscall, so the syscall task can acquire a P
 		// make the caller call blocksyscall, it will call syscallIntr again with syscall status.
+		my.systf = *tf
 		ChangeReturnPC(tf, sys.FuncPC(blocksyscall))
 		return
 	}
@@ -104,6 +104,17 @@ func syscallIntr() {
 		// Signal(uintptr(syscall.SIGSEGV), 10, 0)
 	}
 	return
+}
+
+//go:nosplit
+func blocksyscall() {
+	tf := *&Mythread().systf
+	ret, _, errno := syscall.Syscall6(tf.AX, tf.BX, tf.CX, tf.DX, tf.SI, tf.DI, tf.BP)
+	if errno != 0 {
+		sys.SetAX(-uintptr(errno))
+	} else {
+		sys.SetAX(ret)
+	}
 }
 
 //go:nosplit

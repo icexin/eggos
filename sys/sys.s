@@ -59,3 +59,7 @@ TEXT ·Fxsave(SB), NOSPLIT, $0-4
 	MOVL addr+0(FP), AX
 	FXSAVE (AX)
 	RET
+
+TEXT ·SetAX(SB), NOSPLIT, $0-4
+	MOVL val+0(FP), AX
+	RET
