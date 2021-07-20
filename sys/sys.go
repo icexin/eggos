@@ -60,9 +60,6 @@ func FuncPC(f interface{}) uintptr {
 }
 
 //go:nosplit
-func Mfence()
-
-//go:nosplit
 func Fxsave(addr uintptr)
 
 //go:nosplit
