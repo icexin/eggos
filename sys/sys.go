@@ -10,7 +10,7 @@ const PageSize = 4 << 10
 func Outb(port uint16, data byte)
 
 //go:nosplit
-func Inb(reg uint16) byte
+func Inb(port uint16) byte
 
 //go:nosplit
 func Outl(port uint16, data uint32)
