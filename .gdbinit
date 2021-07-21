@@ -1,6 +1,6 @@
 #set architecture i386:x86-64:intel
-set architecture i386
-#file kernel.elf
+#set architecture i386
+#file mutiboot.elf
 #set architecture i386:x86-64
 #target remote :1234
 

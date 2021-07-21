@@ -56,12 +56,22 @@ func Kernel() error {
 		"-ldflags", goLdflags, "-gcflags", GOGCFLAGS, "./kmain")
 }
 
+func Boot64() error {
+	compileCfile("boot/boot64.S", "-m64")
+	compileCfile("boot/boot64main.c", "-m64")
+	ldflags := "-Ttext 0x3200000 -m elf_x86_64 -o boot64.elf boot64.o boot64main.o"
+	ldArgs := append([]string{}, LDFLAGS...)
+	ldArgs = append(ldArgs, strings.Fields(ldflags)...)
+	return sh.RunV(LD, ldArgs...)
+}
+
 // Multiboot target build Multiboot specification compatible elf format, generate multiboot.elf
 func Multiboot() error {
+	mg.Deps(Boot64)
 	mg.Deps(Kernel)
-	compileCfile("boot/multiboot.c")
-	compileCfile("boot/multiboot_header.S")
-	ldflags := "-Ttext 0x3200000 -o multiboot.elf multiboot.o multiboot_header.o -b binary kernel.elf"
+	compileCfile("boot/multiboot.c", "-m32")
+	compileCfile("boot/multiboot_header.S", "-m32")
+	ldflags := "-Ttext 0x3300000 -m elf_i386 -o multiboot.elf multiboot.o multiboot_header.o -b binary kernel.elf -b binary boot64.elf"
 	ldArgs := append([]string{}, LDFLAGS...)
 	ldArgs = append(ldArgs, strings.Fields(ldflags)...)
 	return sh.RunV(LD, ldArgs...)
@@ -89,7 +99,7 @@ func QemuDebug() error {
 	detectQemu()
 	args := append([]string{}, QEMU_DEBUG_OPT...)
 	args = append(args, "-kernel", "multiboot.elf")
-	return sh.RunV(QEMU32, args...)
+	return sh.RunV(QEMU64, args...)
 }
 
 // Iso generate eggos.iso, which can be used with qemu -cdrom option.
@@ -132,7 +142,7 @@ func GraphicDebug() error {
 	mg.Deps(Iso)
 	args := append([]string{}, QEMU_DEBUG_OPT...)
 	args = append(args, "-cdrom", "eggos.iso")
-	return sh.RunV(QEMU32, args...)
+	return sh.RunV(QEMU64, args...)
 }
 
 func Clean() {
@@ -225,7 +235,7 @@ func accelArg() []string {
 }
 
 func initCflags() []string {
-	cflags := strings.Fields("-fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -ggdb -m32 -Werror -fno-omit-frame-pointer -I. -nostdinc")
+	cflags := strings.Fields("-fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -ggdb -Werror -fno-omit-frame-pointer -I. -nostdinc")
 	if hasOutput("-fno-stack-protector", CC, "--help") {
 		cflags = append(cflags, "-fno-stack-protector")
 	}
@@ -239,7 +249,7 @@ func initCflags() []string {
 }
 
 func initLdflags() []string {
-	ldflags := strings.Fields("-N -e _start -m elf_i386")
+	ldflags := strings.Fields("-N -e _start")
 	return ldflags
 }
 
@@ -269,14 +279,16 @@ func initQemuDebugOpt() []string {
 	return append(ret, strings.Fields(opts)...)
 }
 
-func compileCfile(file string) {
+func compileCfile(file string, extFlags ...string) {
 	args := append([]string{}, CFLAGS...)
+	args = append(args, extFlags...)
 	args = append(args, "-c", file)
 	err := sh.RunV(CC, args...)
 	if err != nil {
 		panic(err)
 	}
 }
+
 func cmdOutput(cmd string, args ...string) ([]byte, error) {
 	return exec.Command(cmd, args...).CombinedOutput()
 }
