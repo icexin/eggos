@@ -79,14 +79,14 @@ TEXT ·gdt_init(SB), NOSPLIT, $0
 	RET
 
 TEXT ·set_fs(SB), NOSPLIT, $0-4
-	MOVW idx+0(FP), AX
+	MOVL idx+0(FP), AX
 	SHLL $3, AX
 	ADDL $3, AX
 	MOVW AX, FS
 	RET
 
 TEXT ·set_gs(SB), NOSPLIT, $0-4
-	MOVW idx+0(FP), AX
+	MOVL idx+0(FP), AX
 	SHLL $3, AX
 	ADDL $3, AX
 	MOVW AX, GS
@@ -138,23 +138,8 @@ TEXT ·callSigHandler(SB), NOSPLIT, $0-20
 	POPL BP
 	RET
 
-// func call(pc,a0,a1,a2 uintptr)
-TEXT ·call(SB), NOSPLIT, $12-16
-	MOVL pc+0(FP), CX
-
-	MOVL a0+4(FP), AX
-	MOVL AX, 0(SP)
-
-	MOVL a1+8(FP), AX
-	MOVL AX, 4(SP)
-
-	MOVL a2+12(FP), AX
-	MOVL AX, 8(SP)
-	CALL CX
-	RET
-
 TEXT ·set_mythread(SB), NOSPLIT, $4-4
-	MOVL tid+0(FP), AX
+	MOVL t+0(FP), AX
 	MOVL AX, 0(FS)
 	MOVL AX, 0(SP)
 	CALL ·switchThreadContext(SB)
@@ -169,7 +154,7 @@ TEXT ·sys_clone(SB), NOSPLIT, $0-12
 	// In parent, return.
 	CMPL AX, $0
 	JEQ  3(PC)
-	MOVL AX, tid+8(FP)
+	MOVL AX, ret+8(FP)
 	RET
 
 	NOP SP // tell vet SP changed - stop checking offsets

@@ -8,17 +8,17 @@ TEXT ·Outb(SB), NOSPLIT, $0-3
 	RET
 
 // byte Inb(reg uint16)
-TEXT ·Inb(SB), NOSPLIT, $0-3
+TEXT ·Inb(SB), NOSPLIT, $0-5
 	MOVW port+0(FP), DX
 	XORW AX, AX
 	INB
-	MOVW AX, ret+4(FP)
+	MOVB AX, ret+4(FP)
 	RET
 
 // Outl(port uint16, data uint32)
 TEXT ·Outl(SB), NOSPLIT, $0-8
 	MOVW port+0(FP), DX
-	MOVL b+4(FP), AX
+	MOVL data+4(FP), AX
 	OUTL
 	RET
 
