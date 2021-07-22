@@ -49,11 +49,11 @@ func Kernel() error {
 	detectGoVersion()
 	env := map[string]string{
 		"GOOS":   "linux",
-		"GOARCH": "386",
+		"GOARCH": "amd64",
 	}
-	goLdflags := "-E github.com/icexin/eggos/kernel.rt0 -T 0x100000"
+	goLdflags := "-E github.com/icexin/eggos/kernel64.rt0 -T 0x100000"
 	return sh.RunWithV(env, gobin(), "build", "-o", "kernel.elf", "-tags", GOTAGS,
-		"-ldflags", goLdflags, "-gcflags", GOGCFLAGS, "./kmain")
+		"-ldflags", goLdflags, "-gcflags", GOGCFLAGS, "./kmain64")
 }
 
 func Boot64() error {

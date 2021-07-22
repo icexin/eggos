@@ -8,7 +8,7 @@ void puts(int line, char *str);
 void boot64main(uint32 gomain, uint32 magic, uint32 mbinfo)
 {
     void (*gomain_entry)(uint32, uint32);
-    gomain_entry = (void(*)(uint32, uint32))(gomain);
+    gomain_entry = (void(*)(uint32, uint32))((uint64)gomain);
     gomain_entry(magic, mbinfo);
     puts(2, "hello world");
     for (;;)
