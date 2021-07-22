@@ -7,11 +7,10 @@
 //
 // https://www.gnu.org/software/grub/manual/multiboot/multiboot.html#OS-image-format
 
-typedef unsigned int uint;
+typedef unsigned char uint8;
+typedef unsigned short uint16;
 typedef unsigned int uint32;
-typedef unsigned short ushort;
-typedef unsigned char uchar;
-typedef unsigned long uint64;
+typedef unsigned long long uint64;
 
 #include "elf.h"
 #include "multiboot.h"
@@ -26,21 +25,21 @@ uint64 loadelf(char *image);
 void multibootmain(unsigned long magic, multiboot_info_t *mbi)
 {
     uint64 entry_addr = 0;
-    void (*boot64_entry)(uint64, uint64, uint64);
+    void (*boot64_entry)(uint32, uint32, uint32);
 
     entry_addr = loadelf(_binary_boot64_elf_start);
     if (entry_addr == 0)
     {
         return;
     }
-    boot64_entry = (void (*)(uint64, uint64, uint64))((uint32)entry_addr);
+    boot64_entry = (void (*)(uint32, uint32, uint32))((uint32)entry_addr);
 
     entry_addr = loadelf(_binary_kernel_elf_start);
     if (entry_addr == 0)
     {
         return;
     }
-    boot64_entry(entry_addr, magic, (uint64)(uint32)mbi);
+    boot64_entry((uint32)entry_addr, (uint32)magic, (uint32)mbi);
 }
 
 uint64 loadelf(char *image)
@@ -56,7 +55,7 @@ uint64 loadelf(char *image)
         return 0;
 
     // Load each program segment (ignores ph flags).
-    ph = (struct proghdr *)((uchar *)elf + elf->phoff);
+    ph = (struct proghdr *)((uint8 *)elf + elf->phoff);
     eph = ph + elf->phnum;
     for (; ph < eph; ph++)
     {

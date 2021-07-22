@@ -105,16 +105,15 @@ entry64high:
 //   jnz entry64mp
 
 # setup initial stack
-//   mov %rsp, %rbx
 //   mov $0xFFFFFFFF80010000, %rax
-//   push 0(%rbx)
-//   push 8(%rbx)
-//   push 16(%rbx)
 //   mov %rax, %rsp
 
 # enter boot64main()
-//   jmp boot64main
-  call boot64main
+// %rdi, %rsi, %rdx, %rcx, %r8 and %r9 are args
+  movl 4(%rsp), %edi
+  movl 8(%rsp), %esi
+  movl 12(%rsp), %edx
+  jmp boot64main
 
 .global __deadloop
 __deadloop:
