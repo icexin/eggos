@@ -12,10 +12,17 @@ func go_entry()
 func sseInit()
 
 //go:nosplit
+func wrmsr(reg uint32, value uintptr)
+
+//go:nosplit
+func rdmsr(reg uint32) (value uintptr)
+
+//go:nosplit
 func preinit() {
 	sseInit()
 	gdtInit()
 	idtInit()
+	syscallInit()
 	uart.PreInit()
 	uart.WriteString("kernel64\n")
 	go_entry()

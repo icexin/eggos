@@ -48,3 +48,17 @@ TEXT ·reloadCS(SB), NOSPLIT, $0
 
 	// IRET
 	IRETQ
+
+TEXT ·rdmsr(SB),NOSPLIT,$0-16
+	MOVL reg+0(FP), CX
+	RDMSR
+	MOVL	AX, lo+8(FP)
+	MOVL	DX, hi+12(FP)
+	RET
+
+TEXT ·wrmsr(SB),NOSPLIT,$0-12
+	MOVL	reg+0(FP), CX
+	MOVL	lo+4(FP), AX
+	MOVL	hi+8(FP), DX
+	WRMSR
+	RET

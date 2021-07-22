@@ -1,6 +1,9 @@
 package kernel64
 
-import "github.com/icexin/eggos/uart"
+import (
+	"github.com/icexin/eggos/debug"
+	"github.com/icexin/eggos/uart"
+)
 
 type trapFrame struct {
 	AX, BX, CX, DX    uintptr
@@ -19,5 +22,6 @@ func trapret()
 
 //go:nosplit
 func dotrap(tf *trapFrame) {
+	debug.PrintHex(tf.Trapno)
 	uart.WriteString("trap\n")
 }

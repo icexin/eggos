@@ -1,10 +1,8 @@
 package debug
 
 import (
-	"fmt"
 	"time"
 
-	"github.com/icexin/eggos/console"
 	"github.com/icexin/eggos/sys"
 	"github.com/icexin/eggos/uart"
 )
@@ -14,9 +12,9 @@ var (
 	lastTime = time.Now()
 )
 
-func Logf(fmtstr string, args ...interface{}) {
-	fmt.Fprintf(console.Console(), fmtstr+"\n", args...)
-}
+// func Logf(fmtstr string, args ...interface{}) {
+// 	fmt.Fprintf(console.Console(), fmtstr+"\n", args...)
+// }
 
 //go:nosplit
 func PrintStr(s string) {
