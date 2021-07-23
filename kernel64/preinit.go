@@ -1,6 +1,9 @@
 package kernel64
 
-import "github.com/icexin/eggos/uart"
+import (
+	"github.com/icexin/eggos/kernel64/mm"
+	"github.com/icexin/eggos/uart"
+)
 
 //go:nosplit
 func rt0()
@@ -22,6 +25,7 @@ func preinit() {
 	sseInit()
 	gdtInit()
 	idtInit()
+	mm.Init()
 	syscallInit()
 	uart.PreInit()
 	uart.WriteString("kernel64\n")
