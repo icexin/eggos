@@ -56,9 +56,9 @@ TEXT ·rdmsr(SB),NOSPLIT,$0-16
 	MOVL	DX, hi+12(FP)
 	RET
 
-TEXT ·wrmsr(SB),NOSPLIT,$0-12
+TEXT ·wrmsr(SB),NOSPLIT,$0-16
 	MOVL	reg+0(FP), CX
-	MOVL	lo+4(FP), AX
-	MOVL	hi+8(FP), DX
+	MOVL	lo+8(FP), AX
+	MOVL	hi+12(FP), DX
 	WRMSR
 	RET
