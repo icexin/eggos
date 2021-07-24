@@ -4,6 +4,9 @@ import (
 	"unsafe"
 
 	"github.com/icexin/eggos/debug"
+	"github.com/icexin/eggos/kernel/isyscall"
+	"github.com/icexin/eggos/kernel/trap"
+	"github.com/icexin/eggos/pic"
 	"github.com/icexin/eggos/sys"
 	"github.com/icexin/eggos/uart"
 )
@@ -16,8 +19,17 @@ type trapFrame struct {
 
 	Trapno, Err uintptr
 
-	// pushed by hardward
+	// pushed by hardware
 	IP, CS, FLAGS, SP, SS uintptr
+}
+
+func (t *trapFrame) SyscallRequest() isyscall.Request {
+	return isyscall.Request{
+		NO: t.AX,
+		Args: [6]uintptr{
+			t.DI, t.SI, t.DX, t.R10, t.R8, t.R9,
+		},
+	}
 }
 
 //go:nosplit
@@ -54,7 +66,23 @@ func changeReturnPC(tf *trapFrame, pc uintptr) {
 
 //go:nosplit
 func dotrap(tf *trapFrame) {
+	Mythread().tf = tf
 	debug.PrintHex(tf.Trapno)
 	uart.WriteString("trap\n")
-	preparePanic(tf)
+	handler := trap.Handler(int(tf.Trapno))
+	if handler == nil {
+		preparePanic(tf)
+		return
+	}
+	// timer and syscall interrupts are processed synchronously
+	if tf.Trapno > 32 && tf.Trapno != 0x80 {
+		// pci using level trigger irq, cause dead lock on trap handler
+		// FIXME: hard code network irq line
+		if tf.Trapno == 43 {
+			pic.DisableIRQ(43 - pic.IRQ_BASE)
+		}
+		// wakeIRQ(tf.Trapno)
+		return
+	}
+	handler()
 }

@@ -28,8 +28,7 @@ func preinit() {
 	mm.Init()
 	syscallInit()
 	uart.PreInit()
+	threadInit()
 	uart.WriteString("kernel64\n")
-	go_entry()
-	for {
-	}
+	schedule()
 }

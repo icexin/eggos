@@ -15,7 +15,7 @@ mouse: enabled=0
 #display_library: x, options="gui_debug"
 #display_library: nogui
 
-log:bochs.log
+#log:bochs.log
 debug: action=ignore, cpu0=report
 #info: action=report
 magic_break:enabled=1
