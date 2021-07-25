@@ -127,5 +127,5 @@ func htons(n uint16) uint16 {
 }
 
 func init() {
-	isyscall.Register(syscall.SYS_SOCKETCALL, socketcall)
+	// isyscall.Register(syscall.SYS_SOCKETCALL, socketcall)
 }

@@ -2,6 +2,8 @@ package kernel
 
 import (
 	"unsafe"
+
+	"gvisor.dev/gvisor/pkg/abi/linux"
 )
 
 const (
@@ -13,7 +15,7 @@ const (
 )
 
 //go:nosplit
-func futex(addr *uintptr, op, val uintptr, ts *timespec) {
+func futex(addr *uintptr, op, val uintptr, ts *linux.Timespec) {
 	switch op {
 	case _FUTEX_WAIT, _FUTEX_WAIT_PRIVATE:
 		if ts != nil {
@@ -32,14 +34,16 @@ func futex(addr *uintptr, op, val uintptr, ts *timespec) {
 }
 
 //go:nosplit
-func sleeptimeout(addr *uintptr, val uintptr, ts *timespec) {
+func sleeptimeout(addr *uintptr, val uintptr, ts *linux.Timespec) {
 	if ts == nil {
 		panic("sleeptimeout: nil ts")
 	}
-	deadline := nanosecond() + int64(ts.tv_nsec) + int64(ts.tv_sec)*second
+	deadline := nanosecond() + int64(ts.Nsec) + int64(ts.Sec)*second
 	// check on every timer intr
-	for nanosecond() < deadline && *addr == val {
+	now := nanosecond()
+	for now < deadline && *addr == val {
 		sleepon(&sleeplock)
+		now = nanosecond()
 	}
 }
 
@@ -69,7 +73,7 @@ func wakeup(lock *uintptr, n int) {
 type note uintptr
 
 //go:nosplit
-func (n *note) sleep(ts *timespec) {
+func (n *note) sleep(ts *linux.Timespec) {
 	futex((*uintptr)(unsafe.Pointer(n)), _FUTEX_WAIT, 0, ts)
 }
 

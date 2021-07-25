@@ -4,7 +4,7 @@ import (
 	"image"
 	"unsafe"
 
-	"github.com/icexin/eggos/mm"
+	"github.com/icexin/eggos/kernel/mm"
 	"github.com/icexin/eggos/multiboot"
 	"github.com/icexin/eggos/uart"
 )

@@ -110,7 +110,7 @@ func fscall(fn int) isyscall.Handler {
 			c.Ret = uintptr(n)
 		case syscall.SYS_CLOSE:
 			err = sysClose(ni)
-		case syscall.SYS_FSTAT64:
+		case syscall.SYS_FSTAT:
 			err = sysStat(ni, c.Args[1])
 		case syscall.SYS_IOCTL:
 			err = sysIoctl(ni, c.Args[1], c.Args[2])
@@ -179,7 +179,7 @@ func sysStat(ni *Inode, statptr uintptr) error {
 		return err
 	}
 	stat.Mode = uint32(info.Mode())
-	stat.Mtim.Sec = int32(info.ModTime().Unix())
+	stat.Mtim.Sec = int64(info.ModTime().Unix())
 	stat.Size = info.Size()
 
 	return nil
@@ -229,7 +229,7 @@ func sysFstatat64(c *isyscall.Request) {
 		return
 	}
 	stat.Mode = uint32(info.Mode())
-	stat.Mtim.Sec = int32(info.ModTime().Unix())
+	stat.Mtim.Sec = int64(info.ModTime().Unix())
 	stat.Size = info.Size()
 	c.Ret = 0
 	c.Done()
@@ -322,11 +322,11 @@ func sysInit() {
 	isyscall.Register(syscall.SYS_WRITE, fscall(syscall.SYS_WRITE))
 	isyscall.Register(syscall.SYS_READ, fscall(syscall.SYS_READ))
 	isyscall.Register(syscall.SYS_CLOSE, fscall(syscall.SYS_CLOSE))
-	isyscall.Register(syscall.SYS_FSTAT64, fscall(syscall.SYS_FSTAT64))
+	isyscall.Register(syscall.SYS_FSTAT, fscall(syscall.SYS_FSTAT))
 	isyscall.Register(syscall.SYS_IOCTL, fscall(syscall.SYS_IOCTL))
 	isyscall.Register(syscall.SYS_FCNTL, sysFcntl)
-	isyscall.Register(syscall.SYS_FCNTL64, sysFcntl)
-	isyscall.Register(syscall.SYS_FSTATAT64, sysFstatat64)
+	isyscall.Register(syscall.SYS_FCNTL, sysFcntl)
+	isyscall.Register(syscall.SYS_FSTATFS, sysFstatat64)
 	isyscall.Register(syscall.SYS_UNAME, sysUname)
 	isyscall.Register(355, sysRandom)
 }

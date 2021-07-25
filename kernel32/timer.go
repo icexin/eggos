@@ -1,10 +1,9 @@
-package kernel64
+package kernel
 
 import (
 	"github.com/icexin/eggos/kernel/trap"
 	"github.com/icexin/eggos/pic"
 	"github.com/icexin/eggos/sys"
-	"gvisor.dev/gvisor/pkg/abi/linux"
 )
 
 const (
@@ -53,18 +52,18 @@ func nanosecond() int64 {
 }
 
 //go:nosplit
-func clocktime() linux.Timespec {
-	var ts linux.Timespec
+func clocktime() timespec {
+	var ts timespec
 	n := counter - clockBaseCounter
-	ts.Sec = n/_HZ + baseUnixTime
-	ts.Nsec = n % _HZ * (second / _HZ)
-	ts.Nsec += int64(pitCounter()) * (second / _PIT_HZ)
+	ts.tv_sec = int32(n)/_HZ + int32(baseUnixTime)
+	ts.tv_nsec = int32(n) % _HZ * (second / _HZ)
+	ts.tv_nsec += int32(pitCounter()) * (second / _PIT_HZ)
 	return ts
 }
 
 //go:nosplit
-func nanosleep(tc *linux.Timespec) {
-	deadline := nanosecond() + int64(tc.Sec+tc.Nsec*second)
+func nanosleep(tc *timespec) {
+	deadline := nanosecond() + int64(tc.tv_nsec+tc.tv_sec*second)
 	for nanosecond() < deadline {
 		sleepon(&sleeplock)
 	}

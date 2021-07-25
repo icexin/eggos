@@ -21,13 +21,13 @@ func genasm() {
 	for i := 0; i < 256; i++ {
 		fmt.Fprintf(buf, "TEXT ·trap%d(SB), NOSPLIT, $0-0\n", i)
 		if !hasErrCode(i) {
-			buf.WriteString("  PUSHL    $0\n")
+			buf.WriteString("  PUSHQ    $0\n")
 		}
-		fmt.Fprintf(buf, "  PUSHL    $%d\n", i)
+		fmt.Fprintf(buf, "  PUSHQ    $%d\n", i)
 		buf.WriteString("  JMP    alltraps(SB)\n")
-		buf.WriteString("  POPL    AX\n")
+		buf.WriteString("  POPQ    AX\n")
 		if !hasErrCode(i) {
-			buf.WriteString("  POPL    AX\n")
+			buf.WriteString("  POPQ    AX\n")
 		}
 		buf.WriteString("  RET\n\n")
 	}

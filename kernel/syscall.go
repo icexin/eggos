@@ -1,17 +1,30 @@
 package kernel
 
 import (
-	"runtime"
 	"syscall"
 	"unsafe"
 
 	"github.com/icexin/eggos/debug"
 	"github.com/icexin/eggos/kernel/isyscall"
+	"github.com/icexin/eggos/kernel/mm"
 	"github.com/icexin/eggos/kernel/trap"
-	"github.com/icexin/eggos/mm"
 	"github.com/icexin/eggos/sys"
 	"github.com/icexin/eggos/uart"
 	"golang.org/x/sys/unix"
+	"gvisor.dev/gvisor/pkg/abi/linux"
+	"gvisor.dev/gvisor/pkg/abi/linux/errno"
+)
+
+const (
+	_MSR_LSTAR = 0xc0000082
+	_MSR_STAR  = 0xc0000081
+	_MSR_FSTAR = 0xc0000084
+
+	_MSR_IA32_EFER = 0xc0000080
+	_MSR_FS_BASE   = 0xc0000100
+	_MSR_GS_BASE   = 0xc0000101
+
+	_EFER_SCE = 1 << 0 // Enable SYSCALL.
 )
 
 const (
@@ -29,48 +42,34 @@ const (
 var (
 	bootstrapDone = false
 
-	// kernelCalls is the syscalls must be implement in kernel
 	kernelCalls = [...]uintptr{
-		syscall.SYS_EXIT,
-		syscall.SYS_SET_THREAD_AREA,
-		syscall.SYS_SCHED_YIELD,
-		syscall.SYS_NANOSLEEP,
-		syscall.SYS_BRK,
+		syscall.SYS_ARCH_PRCTL,
+		syscall.SYS_MMAP,
 		syscall.SYS_MUNMAP,
-		syscall.SYS_MMAP2,
-		syscall.SYS_MADVISE,
-		syscall.SYS_CLONE,
-		syscall.SYS_GETTID,
-		syscall.SYS_FUTEX,
-		syscall.SYS_RT_SIGACTION,
+		syscall.SYS_CLOCK_GETTIME,
 		syscall.SYS_RT_SIGPROCMASK,
 		syscall.SYS_SIGALTSTACK,
-		syscall.SYS_CLOCK_GETTIME,
-		syscall.SYS_EXIT_GROUP,
+		syscall.SYS_RT_SIGACTION,
+		syscall.SYS_GETTID,
+		syscall.SYS_CLONE,
+		syscall.SYS_FUTEX,
+		syscall.SYS_NANOSLEEP,
+		syscall.SYS_SCHED_YIELD,
+
+		// may removed in the future
 		syscall.SYS_EPOLL_CREATE1,
 		syscall.SYS_EPOLL_CTL,
 		syscall.SYS_EPOLL_WAIT,
+		syscall.SYS_EPOLL_PWAIT,
 
-		SYS_WAIT_IRQ, SYS_WAIT_SYSCALL, SYS_FIXED_MMAP,
+		SYS_WAIT_IRQ,
+		SYS_WAIT_SYSCALL,
+		SYS_FIXED_MMAP,
 	}
-
-	syscalltask threadptr
-
-	// pendingCall is the address of pending forward syscall
-	pendingCall uintptr
 )
 
-type userDesc struct {
-	entryNumber int
-	baseAddr    uintptr
-	limit       int
-	flags       int
-}
-
-type timespec struct {
-	tv_sec  int32
-	tv_nsec int32
-}
+//go:nosplit
+func syscallEntry()
 
 //go:nosplit
 func getg() uintptr
@@ -82,43 +81,35 @@ func readgstatus(uintptr) uint32
 func syscallIntr() {
 	my := Mythread()
 	tf := my.tf
-	dokernel := !(bootstrapDone && canForward(tf))
-	if dokernel {
-		tf.AX = doBootSyscall(tf.AX, tf.BX, tf.CX, tf.DX, tf.SI, tf.DI, tf.BP)
+	my.systf = *tf
+
+	req := tf.SyscallRequest()
+	req.Ret = 0
+	doInKernel := !(bootstrapDone && canForward(tf))
+	if doInKernel {
+		doSyscall(&req)
+		tf.AX = req.Ret
 		return
 	}
 
 	// use tricks to get whether the current g has p
 	status := readgstatus(getg())
 	if status != _Grunning {
-		tf.AX = doForwardSyscall(tf.AX, tf.BX, tf.CX, tf.DX, tf.SI, tf.DI, tf.BP)
+		forwardCall(&req)
 	} else {
 		// tf.AX = doForwardSyscall(tf.AX, tf.BX, tf.CX, tf.DX, tf.SI, tf.DI, tf.BP)
 		// making all forwarded syscall as blocked syscall, so the syscall task can acquire a P
 		// make the caller call blocksyscall, it will call syscallIntr again with syscall status.
 		my.systf = *tf
-		ChangeReturnPC(tf, sys.FuncPC(blocksyscall))
+		changeReturnPC(tf, sys.FuncPC(blocksyscall))
 		return
 	}
-	if tf.AX == ^uintptr(0) {
-		// Signal(uintptr(syscall.SIGSEGV), 10, 0)
-	}
-	return
+
+	tf.AX = req.Ret
 }
 
 //go:nosplit
-func blocksyscall() {
-	tf := *&Mythread().systf
-	ret, _, errno := syscall.Syscall6(tf.AX, tf.BX, tf.CX, tf.DX, tf.SI, tf.DI, tf.BP)
-	if errno != 0 {
-		sys.SetAX(-uintptr(errno))
-	} else {
-		sys.SetAX(ret)
-	}
-}
-
-//go:nosplit
-func canForward(tf *TrapFrame) bool {
+func canForward(tf *trapFrame) bool {
 	no := tf.AX
 	my := Mythread()
 	// syscall thread can't call self
@@ -138,202 +129,235 @@ func canForward(tf *TrapFrame) bool {
 }
 
 //go:nosplit
-func doForwardSyscall(no, a0, a1, a2, a3, a4, a5 uintptr) uintptr {
-	call := isyscall.Request{
-		NO: no,
-		Args: [...]uintptr{
-			a0, a1, a2, a3, a4, a5,
-		},
+func blocksyscall() {
+	tf := *&Mythread().systf
+	ret, _, errno := syscall.Syscall6(tf.AX, tf.BX, tf.CX, tf.DX, tf.SI, tf.DI, tf.BP)
+	if errno != 0 {
+		sys.SetAX(-uintptr(errno))
+	} else {
+		sys.SetAX(ret)
 	}
-	forwardCall(&call)
-	return call.Ret
 }
 
 //go:nosplit
-func doBootSyscall(no, a0, a1, a2, a3, a4, a5 uintptr) uintptr {
-	my := Mythread()
-	// if no != syscall.SYS_WRITE && no != syscall.SYS_SCHED_YIELD && no < 500 {
-	// 	debug.PrintStr(sysnum[no])
+func panicNosys() {
+	req := Mythread().systf.SyscallRequest()
+	debug.PrintStr("syscall not found:")
+	debug.PrintStr(sysnum[req.NO])
+	debug.PrintStr("\n")
+	for {
+	}
+}
+
+//go:nosplit
+func doSyscall(req *isyscall.Request) {
+	// if req.NO != syscall.SYS_SCHED_YIELD {
+	// 	debug.PrintStr("call ")
+	// 	if int(req.NO) < len(sysnum) {
+	// 		debug.PrintStr(sysnum[req.NO])
+	// 	} else {
+	// 		debug.PrintHex(req.NO)
+	// 	}
 	// 	debug.PrintStr("\n")
 	// }
-
-	switch no {
-	case syscall.SYS_EXIT:
-		exit()
-		return 0
-	case syscall.SYS_SET_THREAD_AREA:
-		desc := (*userDesc)(unsafe.Pointer(a0))
-		settls(_GO_TLS_IDX, uint32(desc.baseAddr), uint32(desc.limit))
-		desc.entryNumber = _GO_TLS_IDX
-		my.tls = *desc
-		return 0
+	switch req.NO {
+	case syscall.SYS_ARCH_PRCTL:
+		sysArchPrctl(req)
+	case syscall.SYS_SCHED_GETAFFINITY:
+		req.Ret = 0
+	case syscall.SYS_OPENAT:
+		req.Ret = isyscall.Errno(errno.ENOSYS)
+	case syscall.SYS_MMAP:
+		sysMmap(req)
+	case syscall.SYS_MUNMAP:
+		sysMunmap(req)
 	case syscall.SYS_READ:
-		return a2
+		sysRead(req)
 	case syscall.SYS_WRITE:
-		fd, p, n := a0, a1, a2
-		if fd == 1 || fd == 2 {
-			buf := sys.UnsafeBuffer(p, int(n))
-			uart.Write(buf)
-		}
-		return n
-	case syscall.SYS_OPEN:
-		return errno(-1)
+		sysWrite(req)
 	case syscall.SYS_CLOSE:
-		return 0
-	case syscall.SYS_UNAME:
-		return 0
+	case syscall.SYS_CLOCK_GETTIME:
+		sysClockGetTime(req)
+	case syscall.SYS_RT_SIGPROCMASK:
+	case syscall.SYS_SIGALTSTACK:
+	case syscall.SYS_RT_SIGACTION:
+	case syscall.SYS_GETTID:
+		req.Ret = uintptr(Mythread().id)
+	case syscall.SYS_CLONE:
+		sysClone(req)
+	case syscall.SYS_FUTEX:
+		sysFutex(req)
+	case syscall.SYS_NANOSLEEP:
+		sysNanosleep(req)
 	case syscall.SYS_SCHED_YIELD:
 		Yield()
-		return 0
-	case syscall.SYS_NANOSLEEP:
-		tc := (*timespec)(unsafe.Pointer(a0))
-		nanosleep(tc)
-		return 0
-	case syscall.SYS_BRK:
-		return mm.Sbrk(0)
-	case syscall.SYS_MUNMAP:
-		return 0
-	case syscall.SYS_MMAP2:
-		return mmap(unsafe.Pointer(a0), a1, int32(a2), int32(a3), int32(a4), uint32(a5))
-	case syscall.SYS_MADVISE:
-		return 0
-	case syscall.SYS_CLONE:
-		return uintptr(clone(my.tf.IP, a1))
-	case syscall.SYS_GETTID:
-		return uintptr(my.id)
-	case syscall.SYS_FUTEX:
-		futex((*uintptr)(unsafe.Pointer(a0)), a1, a2, (*timespec)(unsafe.Pointer(a3)))
-		return 0
-	case syscall.SYS_SCHED_GETAFFINITY:
-		return ^uintptr(0)
-	case syscall.SYS_RT_SIGACTION:
-		_new := (*sigactiont)(unsafe.Pointer(a1))
-		old := (*sigactiont)(unsafe.Pointer(a2))
-		return uintptr(rt_sigaction(a0, _new, old, a3))
-	case syscall.SYS_RT_SIGPROCMASK:
-		_new := (*sigset)(unsafe.Pointer(a1))
-		old := (*sigset)(unsafe.Pointer(a2))
-		rtsigprocmask(int32(a0), _new, old, int32(a3))
-		return 0
-	case syscall.SYS_SIGALTSTACK:
-		_new := (*stackt)(unsafe.Pointer(a0))
-		old := (*stackt)(unsafe.Pointer(a1))
-		sigaltstack(_new, old)
-		return 0
-	case syscall.SYS_CLOCK_GETTIME:
-		tspec := (*timespec)(unsafe.Pointer(a1))
-		*tspec = clocktime()
-		// tspec.tv_sec = int32(counter) / _HZ
-		// tspec.tv_nsec = int32(counter) % _HZ * (second / _HZ)
-		return 0
-	case syscall.SYS_EXIT_GROUP:
-		for {
-			sys.Hlt()
-		}
-	case syscall.SYS_FCNTL, syscall.SYS_FCNTL64:
-		return errno(-1)
-	case syscall.SYS_READLINKAT:
-		return errno(-1)
-	case syscall.SYS_EPOLL_CREATE1:
-		return 3
-	case syscall.SYS_EPOLL_CTL:
-		return epollCtl(a0, a1, a2, a3)
-	case syscall.SYS_EPOLL_WAIT:
-		return epollWait(a0, a1, a2, a3)
+
 	case unix.SYS_GETRANDOM:
-		// the lenth arg
-		return a1
-	case syscall.SYS_GETPID:
-		return 0
+		req.Ret = req.Args[1]
+
+	case syscall.SYS_EPOLL_CREATE1:
+		sysEpollCreate(req)
+	case syscall.SYS_EPOLL_CTL:
+		sysEpollCtl(req)
+	case syscall.SYS_EPOLL_WAIT, syscall.SYS_EPOLL_PWAIT:
+		sysEpollWait(req)
+
 	case SYS_WAIT_IRQ:
-		return waitIRQ()
+		sysWaitIRQ(req)
 	case SYS_WAIT_SYSCALL:
-		return fetchPendingCall()
+		sysWaitSyscall(req)
 	case SYS_FIXED_MMAP:
-		return fixedmmap(a0, a1)
+		sysFixedMmap(req)
 
 	default:
-		debug.PrintStr("syscall ")
-		debug.PrintStr(sysnum[no])
-		debug.PrintStr(" not found\n")
-		PreparePanic(my.tf)
-		return 0
+		req.Ret = isyscall.Errno(errno.ENOSYS)
+		if req.NO == syscall.SYS_PIPE2 {
+			changeReturnPC(Mythread().tf, sys.FuncPC(panicNosys))
+		}
 	}
 }
 
 //go:nosplit
-func mmap(addr unsafe.Pointer, n uintptr, prot, flags, fd int32, off uint32) uintptr {
+func sysArchPrctl(req *isyscall.Request) {
+	switch req.Args[0] {
+	case linux.ARCH_SET_FS:
+		wrmsr(_MSR_FS_BASE, req.Args[1])
+		Mythread().fsBase = req.Args[1]
+	default:
+		preparePanic(Mythread().tf)
+		req.Ret = errno.EINVAL
+	}
+}
+
+//go:nosplit
+func sysMmap(req *isyscall.Request) {
+	addr := req.Args[0]
+	n := req.Args[1]
+	prot := req.Args[2]
 	// called on sysReserve
 	if prot == syscall.PROT_NONE {
-		return mm.Sbrk(n)
+		if addr == 0 {
+			req.Ret = mm.Sbrk(n)
+		}
+		return
 	}
 
 	// called on sysMap and sysAlloc
-	return mm.Mmap(uintptr(addr), n)
-}
-
-//go:nopslit
-func fixedmmap(addr uintptr, size uintptr) uintptr {
-	mm.Fixmap(addr, addr, size)
-	return addr
+	req.Ret = mm.Mmap(addr, n)
+	return
 }
 
 //go:nosplit
-func syscal_init() {
-	epollInit()
+func sysMunmap(req *isyscall.Request) {
+	addr := req.Args[0]
+	n := req.Args[1]
+	mm.Munmap(addr, n)
+}
+
+//go:nosplit
+func sysRead(req *isyscall.Request) {
+	req.Ret = isyscall.Errno(errno.EINVAL)
+	return
+}
+
+//go:nosplit
+func sysWrite(req *isyscall.Request) {
+	fd := req.Args[0]
+	buf := req.Args[1]
+	len := req.Args[2]
+	if fd != 2 {
+		req.Ret = isyscall.Errno(errno.EINVAL)
+		return
+	}
+	buffer := sys.UnsafeBuffer(buf, int(len))
+	uart.Write(buffer)
+	req.Ret = len
+	return
+}
+
+//go:nosplit
+func sysClockGetTime(req *isyscall.Request) {
+	ts := (*linux.Timespec)(unsafe.Pointer(req.Args[1]))
+	*ts = clocktime()
+}
+
+//go:nosplit
+func sysClone(req *isyscall.Request) {
+	pc := Mythread().tf.IP
+	stack := req.Args[1]
+	tls := req.Args[4]
+	tid := clone(pc, stack, tls)
+	req.Ret = uintptr(tid)
+}
+
+//go:nosplit
+func sysFutex(req *isyscall.Request) {
+	addr := (*uintptr)(unsafe.Pointer(req.Args[0]))
+	op := req.Args[1]
+	val := req.Args[2]
+	ts := (*linux.Timespec)(unsafe.Pointer(req.Args[3]))
+	futex(addr, op, val, ts)
+}
+
+//go:nosplit
+func sysNanosleep(req *isyscall.Request) {
+	tc := (*linux.Timespec)(unsafe.Pointer(req.Args[0]))
+	nanosleep(tc)
+}
+
+//go:nosplit
+func sysEpollCreate(req *isyscall.Request) {
+	req.Ret = 3
+}
+
+//go:nosplit
+func sysEpollCtl(req *isyscall.Request) {
+	efd := req.Args[0]
+	op := req.Args[1]
+	fd := req.Args[2]
+	desc := req.Args[3]
+	req.Ret = epollCtl(efd, op, fd, desc)
+}
+
+//go:nosplit
+func sysEpollWait(req *isyscall.Request) {
+	efd := req.Args[0]
+	evs := req.Args[1]
+	len := req.Args[2]
+	_ms := req.Args[3]
+	req.Ret = epollWait(efd, evs, len, _ms)
+}
+
+//go:nosplit
+func sysWaitIRQ(req *isyscall.Request) {
+	req.Ret = waitIRQ()
+}
+
+//go:nosplit
+func sysWaitSyscall(req *isyscall.Request) {
+	req.Ret = fetchPendingCall()
+}
+
+//go:nosplit
+func sysFixedMmap(req *isyscall.Request) {
+	addr := req.Args[0]
+	len := req.Args[1]
+	mm.Fixmap(addr, addr, len)
+}
+
+//go:nosplit
+func syscallInit() {
+	// write syscall selector
+	wrmsr(_MSR_STAR, 8<<32)
+	// clear IF when enter syscall
+	wrmsr(_MSR_FSTAR, 0x200)
+	// set syscall entry
+	wrmsr(_MSR_LSTAR, sys.FuncPC(syscallEntry))
+
+	// Enable SYSCALL instruction.
+	efer := rdmsr(_MSR_IA32_EFER)
+	wrmsr(_MSR_IA32_EFER, efer|_EFER_SCE)
+
 	trap.Register(0x80, syscallIntr)
-}
-
-//go:nosplit
-func errno(n int) uintptr {
-	return uintptr(n)
-}
-
-//go:nosplit
-func forwardCall(call *isyscall.Request) {
-	// wait syscall task fetch pendingCall
-	for pendingCall != 0 {
-		sleepon(&pendingCall)
-	}
-	pendingCall = uintptr(unsafe.Pointer(call))
-	// tell syscall task pendingCall is avaiable
-	// we can't only wakeup only one thread here
-	wakeup(&pendingCall, -1)
-
-	// wait on syscall task handle request
-	sleepon(&call.Lock)
-}
-
-//go:nosplit
-func fetchPendingCall() uintptr {
-	// waiting someone call forward syscall
-	for pendingCall == 0 {
-		sleepon(&pendingCall)
-	}
-	ret := pendingCall
-	pendingCall = 0
-	// wakeup one thread, pendingCall is avaiable
-	wakeup(&pendingCall, 1)
-	return ret
-}
-
-// handleForward run in normal go code space
-func handleForward() {
-	runtime.LockOSThread()
-	my := Mythread()
-	syscalltask = (threadptr)(unsafe.Pointer(my))
-	debug.Logf("[syscall] tid:%d", my.id)
-	for {
-		callptr, _, _ := syscall.Syscall(SYS_WAIT_SYSCALL, 0, 0, 0)
-		call := (*isyscall.Request)(unsafe.Pointer(callptr))
-		handler := isyscall.GetHandler(call.NO)
-		if handler == nil {
-			debug.Logf("[syscall] unhandled syscall %s(%d)", sysnum[call.NO], call.NO)
-			call.Ret = isyscall.Errno(syscall.EINVAL)
-			// call.Ret = isyscall.Errno(syscall.EPERM)
-			call.Done()
-			continue
-		}
-		go handler(call)
-	}
+	epollInit()
 }

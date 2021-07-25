@@ -64,3 +64,6 @@ func Fxsave(addr uintptr)
 
 //go:nosplit
 func SetAX(val uintptr)
+
+//go:nosplit
+func CS() uintptr

@@ -1,7 +1,7 @@
 #include "textflag.h"
 
 #define SYS_clone	     56
-#define SYS_sched_yield	 158
+#define SYS_sched_yield	 24
 
 #define tls_my 0
 
@@ -39,20 +39,23 @@ TEXT ·Mythread(SB), NOSPLIT, $0-8
 
 TEXT ·ksysClone(SB), NOSPLIT, $0-24
 	MOVQ $SYS_clone, AX
-	MOVL pc+0(FP), DX
-	MOVL stack+4(FP), CX
-	INT  $0x80
+	MOVQ pc+0(FP), DI
+	MOVQ stack+8(FP), SI
+	// clear tls
+	XORQ R8, R8
+
+	INT $0x80
 
 	// In parent, return.
-	CMPL AX, $0
+	CMPQ AX, $0
 	JEQ  3(PC)
-	MOVL AX, ret+8(FP)
+	MOVQ AX, ret+16(FP)
 	RET
 
 	NOP SP // tell vet SP changed - stop checking offsets
-	JMP DX
+	JMP DI
 
 TEXT ·ksysYield(SB), NOSPLIT, $0
-	MOVL $SYS_sched_yield, AX
-	INT  $0x80
+	MOVQ $SYS_sched_yield, AX
+	INT $0x80
 	RET

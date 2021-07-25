@@ -1,4 +1,4 @@
-package kernel64
+package kernel
 
 import (
 	"unsafe"

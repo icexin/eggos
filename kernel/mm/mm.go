@@ -36,7 +36,7 @@ func pageEnable()
 //go:nosplit
 func lcr3(topPage *entryPage)
 
-//go:linkname throw github.com/icexin/eggos/kernel64.throw
+//go:linkname throw github.com/icexin/eggos/kernel.throw
 func throw(msg string)
 
 //go:nosplit

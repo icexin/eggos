@@ -8,7 +8,7 @@ import (
 
 	"github.com/icexin/eggos/debug"
 	"github.com/icexin/eggos/inet"
-	"github.com/icexin/eggos/mm"
+	"github.com/icexin/eggos/kernel/mm"
 	"github.com/icexin/eggos/pci"
 	"github.com/icexin/eggos/pic"
 	"github.com/icexin/eggos/sys"

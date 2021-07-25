@@ -1,4 +1,4 @@
-package kernel64
+package kernel
 
 import (
 	"unsafe"
@@ -105,10 +105,10 @@ func gdtInit() {
 }
 
 //go:nosplit
-func setIdtDesc(desc *idtSetDesc, addr uintptr) {
+func setIdtDesc(desc *idtSetDesc, addr uintptr, dpl byte) {
 	desc.Addr1 = uint16(addr & 0xffff)
 	desc.Selector = 8
-	desc.Attr = 0x8e00 // P=1 TYPE=e interrupt gate
+	desc.Attr = 0x8e00 | uint16(dpl)<<8 // P=1 TYPE=e interrupt gate
 	desc.Addr2 = uint16(addr >> 16 & 0xffff)
 	desc.Addr3 = uint32(addr>>32) & 0xffffffff
 }
@@ -116,8 +116,9 @@ func setIdtDesc(desc *idtSetDesc, addr uintptr) {
 //go:nosplit
 func idtInit() {
 	for i := 0; i < 256; i++ {
-		setIdtDesc(&idt[i], sys.FuncPC(vectors[i]))
+		setIdtDesc(&idt[i], sys.FuncPC(vectors[i]), segDplKernel)
 	}
+	setIdtDesc(&idt[0x80], sys.FuncPC(vectors[0x80]), segDplUser)
 
 	limit := (*uint16)(unsafe.Pointer(&idtptr[0]))
 	base := (*uint64)(unsafe.Pointer(&idtptr[2]))

@@ -43,6 +43,12 @@ TEXT ·Cr2(SB), NOSPLIT, $0-8
 	MOVQ AX, ret+0(FP)
 	RET
 
+TEXT ·CS(SB), NOSPLIT, $0-8
+	XORQ AX, AX
+	MOVW CS, AX
+	MOVQ AX, ret+0(FP)
+	RET
+
 TEXT ·Fxsave(SB), NOSPLIT, $0-8
 	MOVQ addr+0(FP), AX
 	FXSAVE (AX)

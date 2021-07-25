@@ -1,7 +1,8 @@
-package kernel64
+package kernel
 
 import (
-	"github.com/icexin/eggos/kernel64/mm"
+	"github.com/icexin/eggos/kernel/mm"
+	"github.com/icexin/eggos/pic"
 	"github.com/icexin/eggos/uart"
 )
 
@@ -26,9 +27,12 @@ func preinit() {
 	gdtInit()
 	idtInit()
 	mm.Init()
-	syscallInit()
 	uart.PreInit()
+	syscallInit()
+	trapInit()
 	threadInit()
-	uart.WriteString("kernel64\n")
+	pic.Init()
+	timerInit()
+	uart.WriteString("kernel\n")
 	schedule()
 }

@@ -1,5 +1,9 @@
 #include "textflag.h"
 
+// copy from go_tls.h
+#define get_tls(r)	MOVL TLS, r
+#define g(r)	0(r)(TLS*1)
+
 TEXT ·rt0(SB), NOSPLIT, $0-0
 	// switch to new stack
 	MOVQ $0x80000, SP
@@ -39,3 +43,10 @@ TEXT ·wrmsr(SB),NOSPLIT,$0-16
 	MOVL	hi+12(FP), DX
 	WRMSR
 	RET
+
+TEXT ·getg(SB), NOSPLIT, $0-8
+	get_tls(CX)
+	MOVQ g(CX), BX
+	MOVQ BX, ret+0(FP)
+	RET
+

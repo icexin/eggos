@@ -4,10 +4,7 @@ import (
 	"syscall"
 	"unsafe"
 
-	"github.com/icexin/eggos/kernel/isyscall"
-	"github.com/icexin/eggos/kernel/mm"
-	"gvisor.dev/gvisor/pkg/abi/linux"
-	"gvisor.dev/gvisor/pkg/abi/linux/errno"
+	"github.com/icexin/eggos/mm"
 )
 
 var (
@@ -83,7 +80,7 @@ func epollCtl(epfd, op, fd, desc uintptr) uintptr {
 	case syscall.EPOLL_CTL_MOD:
 		e = findEpollEvent(fd)
 		if e == nil {
-			return isyscall.Errno(errno.EINVAL)
+			return errno(-1)
 		}
 		e.mask = uintptr(euser.events) | syscall.EPOLLHUP
 		e.data = euser.data
@@ -91,21 +88,21 @@ func epollCtl(epfd, op, fd, desc uintptr) uintptr {
 	case syscall.EPOLL_CTL_DEL:
 		e = findEpollEvent(fd)
 		if e == nil {
-			return isyscall.Errno(errno.EINVAL)
+			return errno(-1)
 		}
 		freeEpollEvent(e)
 		return 0
 	default:
-		return isyscall.Errno(errno.EINVAL)
+		return errno(-1)
 	}
 }
 
 //go:nosplit
 func epollWait(epfd, eventptr, len, _ms uintptr) uintptr {
 	if _ms != 0 {
-		ts := linux.Timespec{
-			Sec:  int64(_ms / 1000),
-			Nsec: int64(_ms%1000) * ms,
+		ts := timespec{
+			tv_sec:  int32(_ms / 1000),
+			tv_nsec: int32(_ms%1000) * ms,
 		}
 		// wait fd event
 		epollNote.sleep(&ts)

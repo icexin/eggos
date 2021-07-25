@@ -51,9 +51,9 @@ func Kernel() error {
 		"GOOS":   "linux",
 		"GOARCH": "amd64",
 	}
-	goLdflags := "-E github.com/icexin/eggos/kernel64.rt0 -T 0x100000"
+	goLdflags := "-E github.com/icexin/eggos/kernel.rt0 -T 0x100000"
 	return sh.RunWithV(env, gobin(), "build", "-o", "kernel.elf", "-tags", GOTAGS,
-		"-ldflags", goLdflags, "-gcflags", GOGCFLAGS, "./kmain64")
+		"-ldflags", goLdflags, "-gcflags", GOGCFLAGS, "./kmain")
 }
 
 func Boot64() error {

@@ -1,51 +1,45 @@
 #include "textflag.h"
 
-TEXT ·idt_init(SB), NOSPLIT, $0
-	CALL ·fillidt(SB)
-	LIDT ·idtptr(SB)
-	RET
-
-#define m_stack 0
-#define m_tf 4
-#define m_fpstate 12
-
 TEXT alltraps(SB), NOSPLIT, $0
-	PUSHAL
-	PUSHW DS
-	PUSHW ES
-	PUSHW FS
-	PUSHW GS
-	
+    PUSHQ R15
+    PUSHQ R14
+    PUSHQ R13
+    PUSHQ R12
+    PUSHQ R11
+    PUSHQ R10
+    PUSHQ R9
+    PUSHQ R8
+    PUSHQ DI
+    PUSHQ SI
+    PUSHQ BP
+    PUSHQ DX
+    PUSHQ CX
+    PUSHQ BX
+    PUSHQ AX
 
-	MOVL 0(FS), CX    // CX store mythread
-	MOVL SP, m_tf(CX)
-
-	// save FPU
-	MOVL m_fpstate(CX), DX
-	FXSAVE (DX)
-
-	// call trap(tf)
-	PUSHL SP
-	CALL  ·dotrap(SB)
-	ADDL  $4, SP
+    PUSHQ SP
+    CALL  ·dotrap(SB)
+	ADDQ  $8, SP
 	JMP   ·trapret(SB)
 
 TEXT ·trapret(SB), NOSPLIT, $0
-	MOVL 0(FS), CX    // CX store mythread
-	MOVL $0, m_tf(CX) // clear tf
+    POPQ AX
+    POPQ BX
+    POPQ CX
+    POPQ DX
+    POPQ BP
+    POPQ SI
+    POPQ DI
+    POPQ R8
+    POPQ R9
+    POPQ R10
+    POPQ R11
+    POPQ R12
+    POPQ R13
+    POPQ R14
+    POPQ R15
 
-	// restore FPU
-	MOVL m_fpstate(CX), DX
-	FXRSTOR (DX)
-	
-	POPW GS
-	POPW FS
-	POPW ES
-	POPW DS
-	POPAL
+	ADDQ $16, SP // skip trapno and errcode
 
-	ADDL $8, SP // skip trapno and errcode
-
-	// IRET
-	BYTE $0xCF
+    IRETQ
 
