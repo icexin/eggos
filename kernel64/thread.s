@@ -37,7 +37,7 @@ TEXT ·Mythread(SB), NOSPLIT, $0-8
 	MOVQ AX, ret+0(FP)
 	RET
 
-TEXT ·sysClone(SB), NOSPLIT, $0-24
+TEXT ·ksysClone(SB), NOSPLIT, $0-24
 	MOVQ $SYS_clone, AX
 	MOVL pc+0(FP), DX
 	MOVL stack+4(FP), CX
@@ -52,7 +52,7 @@ TEXT ·sysClone(SB), NOSPLIT, $0-24
 	NOP SP // tell vet SP changed - stop checking offsets
 	JMP DX
 
-TEXT ·sysYield(SB), NOSPLIT, $0
+TEXT ·ksysYield(SB), NOSPLIT, $0
 	MOVL $SYS_sched_yield, AX
 	INT  $0x80
 	RET

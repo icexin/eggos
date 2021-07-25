@@ -39,7 +39,7 @@ TEXT ·trapret(SB), NOSPLIT, $0
     POPQ R14
     POPQ R15
 
-	ADDL $16, SP // skip trapno and errcode
+	ADDQ $16, SP // skip trapno and errcode
 
     IRETQ
 

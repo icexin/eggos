@@ -137,7 +137,7 @@ func (v *vmmt) munmap(va, size uintptr) bool {
 	// println("mumap va=", va, " size=", size)
 	p := pageRoundDown(va)
 	last := pageRoundDown(va + size - 1)
-	for {
+	for ; p != last; p += PGSIZE {
 		pte := v.walkpgdir(p, false)
 		if pte == nil {
 			return false
@@ -146,11 +146,7 @@ func (v *vmmt) munmap(va, size uintptr) bool {
 			return false
 		}
 		kmm.free(pte.addr())
-		*pte = entry(pte.addr())
-		if p == last {
-			break
-		}
-		p += PGSIZE
+		*pte = 0
 	}
 	return true
 }
@@ -195,6 +191,13 @@ func Mmap(va, size uintptr) uintptr {
 	// flush page table cache
 	lcr3(vmm.topPage)
 	return va
+}
+
+//go:nosplit
+func Munmap(va, size uintptr) bool {
+	ok := vmm.munmap(va, size)
+	lcr3(vmm.topPage)
+	return ok
 }
 
 //go:nosplit
@@ -278,6 +281,9 @@ func (v *vmmt) walkpgdir(va uintptr, alloc bool) *entry {
 	var pe *entry
 	for i := 4; i >= 1; i-- {
 		pe = v.walkpglvl(epg, va, i, alloc)
+		if pe == nil {
+			return nil
+		}
 		epg = pe.entryPage()
 	}
 	return pe

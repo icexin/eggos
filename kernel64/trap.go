@@ -3,12 +3,10 @@ package kernel64
 import (
 	"unsafe"
 
-	"github.com/icexin/eggos/debug"
 	"github.com/icexin/eggos/kernel/isyscall"
 	"github.com/icexin/eggos/kernel/trap"
 	"github.com/icexin/eggos/pic"
 	"github.com/icexin/eggos/sys"
-	"github.com/icexin/eggos/uart"
 )
 
 type trapFrame struct {
@@ -67,8 +65,8 @@ func changeReturnPC(tf *trapFrame, pc uintptr) {
 //go:nosplit
 func dotrap(tf *trapFrame) {
 	Mythread().tf = tf
-	debug.PrintHex(tf.Trapno)
-	uart.WriteString("trap\n")
+	// debug.PrintHex(tf.Trapno)
+	// uart.WriteString("trap\n")
 	handler := trap.Handler(int(tf.Trapno))
 	if handler == nil {
 		preparePanic(tf)

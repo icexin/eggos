@@ -174,13 +174,13 @@ func thread0Init() {
 }
 
 //go:nosplit
-func sysClone(pc, stack uintptr) uintptr
+func ksysClone(pc, stack uintptr) uintptr
 
 //go:nosplit
-func sysYield()
+func ksysYield()
 
 //go:nosplit
-func sysHlt()
+func ksysHlt()
 
 // thread0 is the first thread
 //go:nosplit
@@ -194,7 +194,7 @@ func thread0() {
 func idleInit() {
 	// thread0 clone idle thread
 	stack := mm.SysMmap(0, _THREAD_STACK_SIZE) + _THREAD_STACK_SIZE
-	tid := sysClone(sys.FuncPC(idle), stack)
+	tid := ksysClone(sys.FuncPC(idle), stack)
 	idleThread = (threadptr)(unsafe.Pointer(&threads[tid]))
 
 	// make idle thread running at ring0, so that it can call HLT instruction.
@@ -206,12 +206,12 @@ func idleInit() {
 func idle() {
 	for {
 		sys.Hlt()
-		sysYield()
+		ksysYield()
 	}
 }
 
 //go:nosplit
-func clone(pc, usp uintptr) int {
+func clone(pc, usp, tls uintptr) int {
 	my := Mythread()
 	chld := allocThread()
 
@@ -239,6 +239,7 @@ func clone(pc, usp uintptr) int {
 	// *(*uintptr)(unsafe.Pointer(&chld.context)) = sp
 	chld.tf = tf
 	chld.stack = usp
+	chld.fsBase = tls
 	chld.state = RUNNABLE
 	return chld.id
 }

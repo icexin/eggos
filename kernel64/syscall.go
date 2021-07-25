@@ -2,6 +2,7 @@ package kernel64
 
 import (
 	"syscall"
+	"unsafe"
 
 	"github.com/icexin/eggos/debug"
 	"github.com/icexin/eggos/kernel/isyscall"
@@ -58,6 +59,9 @@ func panicNosys() {
 
 //go:nosplit
 func doSyscall(req *isyscall.Request) {
+	debug.PrintStr("call ")
+	debug.PrintStr(sysnum[req.NO])
+	debug.PrintStr("\n")
 	switch req.NO {
 	case syscall.SYS_ARCH_PRCTL:
 		sysArchPrctl(req)
@@ -67,12 +71,28 @@ func doSyscall(req *isyscall.Request) {
 		req.Ret = isyscall.Errno(errno.ENOSYS)
 	case syscall.SYS_MMAP:
 		sysMmap(req)
+	case syscall.SYS_MUNMAP:
+		sysMunmap(req)
 	case syscall.SYS_READ:
 		sysRead(req)
 	case syscall.SYS_CLOSE:
+	case syscall.SYS_CLOCK_GETTIME:
+		sysClockGetTime(req)
+	case syscall.SYS_RT_SIGPROCMASK:
+	case syscall.SYS_SIGALTSTACK:
+	case syscall.SYS_RT_SIGACTION:
+	case syscall.SYS_GETTID:
+		req.Ret = uintptr(Mythread().id)
+	case syscall.SYS_CLONE:
+		sysClone(req)
+	case syscall.SYS_FUTEX:
+		sysFutex(req)
+	case syscall.SYS_NANOSLEEP:
+		sysNanosleep(req)
 
 	default:
-		changeReturnPC(Mythread().tf, sys.FuncPC(panicNosys))
+		req.Ret = isyscall.Errno(errno.ENOSYS)
+		// changeReturnPC(Mythread().tf, sys.FuncPC(panicNosys))
 	}
 }
 
@@ -94,7 +114,9 @@ func sysMmap(req *isyscall.Request) {
 	prot := req.Args[2]
 	// called on sysReserve
 	if prot == syscall.PROT_NONE {
-		req.Ret = mm.Sbrk(n)
+		if addr == 0 {
+			req.Ret = mm.Sbrk(n)
+		}
 		return
 	}
 
@@ -104,9 +126,46 @@ func sysMmap(req *isyscall.Request) {
 }
 
 //go:nosplit
+func sysMunmap(req *isyscall.Request) {
+	addr := req.Args[0]
+	n := req.Args[1]
+	mm.Munmap(addr, n)
+}
+
+//go:nosplit
 func sysRead(req *isyscall.Request) {
 	req.Ret = isyscall.Errno(errno.EINVAL)
 	return
+}
+
+//go:nosplit
+func sysClockGetTime(req *isyscall.Request) {
+	ts := (*linux.Timespec)(unsafe.Pointer(req.Args[1]))
+	*ts = clocktime()
+}
+
+//go:nosplit
+func sysClone(req *isyscall.Request) {
+	pc := Mythread().tf.IP
+	stack := req.Args[1]
+	tls := req.Args[4]
+	tid := clone(pc, stack, tls)
+	req.Ret = uintptr(tid)
+}
+
+//go:nosplit
+func sysFutex(req *isyscall.Request) {
+	addr := (*uintptr)(unsafe.Pointer(req.Args[0]))
+	op := req.Args[1]
+	val := req.Args[2]
+	ts := (*linux.Timespec)(unsafe.Pointer(req.Args[3]))
+	futex(addr, op, val, ts)
+}
+
+//go:nosplit
+func sysNanosleep(req *isyscall.Request) {
+	tc := (*linux.Timespec)(unsafe.Pointer(req.Args[0]))
+	nanosleep(tc)
 }
 
 //go:nosplit
