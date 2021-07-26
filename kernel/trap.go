@@ -64,9 +64,8 @@ func dotrap(tf *trapFrame) {
 	if sys.Flags()&_FLAGS_IF != 0 {
 		throw("IF should clear")
 	}
-	Mythread().tf = tf
-	// debug.PrintHex(tf.Trapno)
-	// uart.WriteString("trap\n")
+	my := Mythread()
+	*(*uintptr)(unsafe.Pointer(&my.tf)) = uintptr(unsafe.Pointer(tf))
 	handler := trap.Handler(int(tf.Trapno))
 	if handler == nil {
 		// throw("kernel panic")

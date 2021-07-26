@@ -2,6 +2,7 @@ package kernel
 
 import (
 	"github.com/icexin/eggos/kernel/mm"
+	"github.com/icexin/eggos/multiboot"
 	"github.com/icexin/eggos/pic"
 	"github.com/icexin/eggos/uart"
 )
@@ -22,10 +23,11 @@ func wrmsr(reg uint32, value uintptr)
 func rdmsr(reg uint32) (value uintptr)
 
 //go:nosplit
-func preinit() {
+func preinit(magic, mbiptr uintptr) {
 	sseInit()
 	gdtInit()
 	idtInit()
+	multiboot.Init(magic, mbiptr)
 	mm.Init()
 	uart.PreInit()
 	syscallInit()

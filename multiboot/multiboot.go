@@ -11,7 +11,7 @@ func Enabled() bool {
 	return enabled
 }
 
-func Init(magic uint32, mbiptr uintptr) {
+func Init(magic uintptr, mbiptr uintptr) {
 	if magic != bootloaderMagic {
 		return
 	}
