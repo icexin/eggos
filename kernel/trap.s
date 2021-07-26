@@ -1,5 +1,7 @@
 #include "textflag.h"
 
+#define m_fpstate 32
+
 TEXT alltraps(SB), NOSPLIT, $0
     PUSHQ R15
     PUSHQ R14
@@ -17,12 +19,23 @@ TEXT alltraps(SB), NOSPLIT, $0
     PUSHQ BX
     PUSHQ AX
 
+    // CX store mythread
+    MOVQ 0(GS), CX
+    MOVQ m_fpstate(CX), DX
+    FXSAVE (DX)
+
     PUSHQ SP
     CALL  ·dotrap(SB)
 	ADDQ  $8, SP
 	JMP   ·trapret(SB)
 
 TEXT ·trapret(SB), NOSPLIT, $0
+    // CX store mythread
+    MOVQ 0(GS), CX
+	// restore FPU
+	MOVQ m_fpstate(CX), DX
+	FXRSTOR (DX)
+
     POPQ AX
     POPQ BX
     POPQ CX
