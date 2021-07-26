@@ -16,11 +16,24 @@ func wakeup(lock *uintptr, n int)
 type Handler func(req *Request)
 
 type Request struct {
-	NO   uintptr
-	Args [6]uintptr
-	Ret  uintptr
+	tf *trapFrame
 
 	Lock uintptr
+}
+
+//go:nosplit
+func (r *Request) NO() uintptr {
+	return r.tf.NO()
+}
+
+//go:nosplit
+func (r *Request) Arg(n int) uintptr {
+	return r.tf.Arg(n)
+}
+
+//go:nosplit
+func (r *Request) SetRet(v uintptr) {
+	r.tf.SetRet(v)
 }
 
 func (r *Request) Done() {

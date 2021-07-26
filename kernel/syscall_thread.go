@@ -56,11 +56,11 @@ func runSyscallThread() {
 			throw("bad SYS_WAIT_SYSCALL return")
 		}
 		call := (*isyscall.Request)(unsafe.Pointer(callptr))
-		handler := isyscall.GetHandler(call.NO)
+		handler := isyscall.GetHandler(call.NO())
 		if handler == nil {
-			debug.Logf("[syscall] unhandled syscall %s(%d)", sysnum[call.NO], call.NO)
-			// call.Ret = isyscall.Errno(syscall.EINVAL)
-			// call.Ret = isyscall.Errno(syscall.EPERM)
+			debug.Logf("[syscall] unhandled syscall %s(%d)", syscallName(int(call.NO())), call.NO())
+			// call.SetRet(isyscall.Errno(syscall.EINVAL))
+			// call.SetRet(isyscall.Errno(syscall.EPERM))
 			call.Done()
 			continue
 		}

@@ -22,12 +22,7 @@ type trapFrame struct {
 }
 
 func (t *trapFrame) SyscallRequest() isyscall.Request {
-	return isyscall.Request{
-		NO: t.AX,
-		Args: [6]uintptr{
-			t.DI, t.SI, t.DX, t.R10, t.R8, t.R9,
-		},
-	}
+	return isyscall.NewRequest(uintptr(unsafe.Pointer(t)))
 }
 
 //go:nosplit
@@ -35,9 +30,7 @@ func trapret()
 
 //go:nosplit
 func trapPanic() {
-	for {
-	}
-	panic("trap panic")
+	throw("trap panic")
 }
 
 //go:nosplit
@@ -76,7 +69,7 @@ func dotrap(tf *trapFrame) {
 	// uart.WriteString("trap\n")
 	handler := trap.Handler(int(tf.Trapno))
 	if handler == nil {
-		throw("kernel panic")
+		// throw("kernel panic")
 		preparePanic(tf)
 		return
 	}

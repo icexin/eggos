@@ -56,6 +56,9 @@ var (
 		syscall.SYS_NANOSLEEP,
 		syscall.SYS_SCHED_YIELD,
 
+		// TODO: real random
+		unix.SYS_GETRANDOM,
+
 		// may removed in the future
 		syscall.SYS_EPOLL_CREATE1,
 		syscall.SYS_EPOLL_CTL,
@@ -84,11 +87,9 @@ func syscallIntr() {
 	my.systf = *tf
 
 	req := tf.SyscallRequest()
-	req.Ret = 0
 	doInKernel := !(bootstrapDone && canForward(tf))
 	if doInKernel {
 		doSyscall(&req)
-		tf.AX = req.Ret
 		return
 	}
 
@@ -104,8 +105,6 @@ func syscallIntr() {
 		changeReturnPC(tf, sys.FuncPC(blocksyscall))
 		return
 	}
-
-	tf.AX = req.Ret
 }
 
 //go:nosplit
@@ -143,7 +142,7 @@ func blocksyscall() {
 func panicNosys() {
 	req := Mythread().systf.SyscallRequest()
 	debug.PrintStr("syscall not found:")
-	debug.PrintStr(sysnum[req.NO])
+	debug.PrintStr(syscallName(int(req.NO())))
 	debug.PrintStr("\n")
 	for {
 	}
@@ -151,22 +150,25 @@ func panicNosys() {
 
 //go:nosplit
 func doSyscall(req *isyscall.Request) {
-	// if req.NO != syscall.SYS_SCHED_YIELD {
+	no := req.NO()
+	req.SetRet(0)
+
+	// if no != syscall.SYS_SCHED_YIELD {
 	// 	debug.PrintStr("call ")
-	// 	if int(req.NO) < len(sysnum) {
-	// 		debug.PrintStr(sysnum[req.NO])
+	// 	if int(no) < len(sysnum) {
+	// 		debug.PrintStr(sysnum[no])
 	// 	} else {
-	// 		debug.PrintHex(req.NO)
+	// 		debug.PrintHex(no)
 	// 	}
 	// 	debug.PrintStr("\n")
 	// }
-	switch req.NO {
+	switch no {
 	case syscall.SYS_ARCH_PRCTL:
 		sysArchPrctl(req)
 	case syscall.SYS_SCHED_GETAFFINITY:
-		req.Ret = 0
+		req.SetRet(0)
 	case syscall.SYS_OPENAT:
-		req.Ret = isyscall.Errno(errno.ENOSYS)
+		req.SetRet(isyscall.Errno(errno.ENOSYS))
 	case syscall.SYS_MMAP:
 		sysMmap(req)
 	case syscall.SYS_MUNMAP:
@@ -182,7 +184,7 @@ func doSyscall(req *isyscall.Request) {
 	case syscall.SYS_SIGALTSTACK:
 	case syscall.SYS_RT_SIGACTION:
 	case syscall.SYS_GETTID:
-		req.Ret = uintptr(Mythread().id)
+		req.SetRet(uintptr(Mythread().id))
 	case syscall.SYS_CLONE:
 		sysClone(req)
 	case syscall.SYS_FUTEX:
@@ -193,7 +195,7 @@ func doSyscall(req *isyscall.Request) {
 		Yield()
 
 	case unix.SYS_GETRANDOM:
-		req.Ret = req.Args[1]
+		req.SetRet(req.Arg(1))
 
 	case syscall.SYS_EPOLL_CREATE1:
 		sysEpollCreate(req)
@@ -210,8 +212,8 @@ func doSyscall(req *isyscall.Request) {
 		sysFixedMmap(req)
 
 	default:
-		req.Ret = isyscall.Errno(errno.ENOSYS)
-		if req.NO == syscall.SYS_PIPE2 {
+		req.SetRet(isyscall.Errno(errno.ENOSYS))
+		if no == syscall.SYS_PIPE2 {
 			changeReturnPC(Mythread().tf, sys.FuncPC(panicNosys))
 		}
 	}
@@ -219,129 +221,129 @@ func doSyscall(req *isyscall.Request) {
 
 //go:nosplit
 func sysArchPrctl(req *isyscall.Request) {
-	switch req.Args[0] {
+	switch req.Arg(0) {
 	case linux.ARCH_SET_FS:
-		wrmsr(_MSR_FS_BASE, req.Args[1])
-		Mythread().fsBase = req.Args[1]
+		wrmsr(_MSR_FS_BASE, req.Arg(1))
+		Mythread().fsBase = req.Arg(1)
 	default:
 		preparePanic(Mythread().tf)
-		req.Ret = errno.EINVAL
+		req.SetRet(errno.EINVAL)
 	}
 }
 
 //go:nosplit
 func sysMmap(req *isyscall.Request) {
-	addr := req.Args[0]
-	n := req.Args[1]
-	prot := req.Args[2]
+	addr := req.Arg(0)
+	n := req.Arg(1)
+	prot := req.Arg(2)
 	// called on sysReserve
 	if prot == syscall.PROT_NONE {
 		if addr == 0 {
-			req.Ret = mm.Sbrk(n)
+			req.SetRet(mm.Sbrk(n))
 		}
 		return
 	}
 
 	// called on sysMap and sysAlloc
-	req.Ret = mm.Mmap(addr, n)
+	req.SetRet(mm.Mmap(addr, n))
 	return
 }
 
 //go:nosplit
 func sysMunmap(req *isyscall.Request) {
-	addr := req.Args[0]
-	n := req.Args[1]
+	addr := req.Arg(0)
+	n := req.Arg(1)
 	mm.Munmap(addr, n)
 }
 
 //go:nosplit
 func sysRead(req *isyscall.Request) {
-	req.Ret = isyscall.Errno(errno.EINVAL)
+	req.SetRet(isyscall.Errno(errno.EINVAL))
 	return
 }
 
 //go:nosplit
 func sysWrite(req *isyscall.Request) {
-	fd := req.Args[0]
-	buf := req.Args[1]
-	len := req.Args[2]
+	fd := req.Arg(0)
+	buf := req.Arg(1)
+	len := req.Arg(2)
 	if fd != 2 {
-		req.Ret = isyscall.Errno(errno.EINVAL)
+		req.SetRet(isyscall.Errno(errno.EINVAL))
 		return
 	}
 	buffer := sys.UnsafeBuffer(buf, int(len))
 	uart.Write(buffer)
-	req.Ret = len
+	req.SetRet(len)
 	return
 }
 
 //go:nosplit
 func sysClockGetTime(req *isyscall.Request) {
-	ts := (*linux.Timespec)(unsafe.Pointer(req.Args[1]))
+	ts := (*linux.Timespec)(unsafe.Pointer(req.Arg(1)))
 	*ts = clocktime()
 }
 
 //go:nosplit
 func sysClone(req *isyscall.Request) {
 	pc := Mythread().tf.IP
-	stack := req.Args[1]
-	tls := req.Args[4]
+	stack := req.Arg(1)
+	tls := req.Arg(4)
 	tid := clone(pc, stack, tls)
-	req.Ret = uintptr(tid)
+	req.SetRet(uintptr(tid))
 }
 
 //go:nosplit
 func sysFutex(req *isyscall.Request) {
-	addr := (*uintptr)(unsafe.Pointer(req.Args[0]))
-	op := req.Args[1]
-	val := req.Args[2]
-	ts := (*linux.Timespec)(unsafe.Pointer(req.Args[3]))
+	addr := (*uintptr)(unsafe.Pointer(req.Arg(0)))
+	op := req.Arg(1)
+	val := req.Arg(2)
+	ts := (*linux.Timespec)(unsafe.Pointer(req.Arg(3)))
 	futex(addr, op, val, ts)
 }
 
 //go:nosplit
 func sysNanosleep(req *isyscall.Request) {
-	tc := (*linux.Timespec)(unsafe.Pointer(req.Args[0]))
+	tc := (*linux.Timespec)(unsafe.Pointer(req.Arg(0)))
 	nanosleep(tc)
 }
 
 //go:nosplit
 func sysEpollCreate(req *isyscall.Request) {
-	req.Ret = 3
+	req.SetRet(3)
 }
 
 //go:nosplit
 func sysEpollCtl(req *isyscall.Request) {
-	efd := req.Args[0]
-	op := req.Args[1]
-	fd := req.Args[2]
-	desc := req.Args[3]
-	req.Ret = epollCtl(efd, op, fd, desc)
+	efd := req.Arg(0)
+	op := req.Arg(1)
+	fd := req.Arg(2)
+	desc := req.Arg(3)
+	req.SetRet(epollCtl(efd, op, fd, desc))
 }
 
 //go:nosplit
 func sysEpollWait(req *isyscall.Request) {
-	efd := req.Args[0]
-	evs := req.Args[1]
-	len := req.Args[2]
-	_ms := req.Args[3]
-	req.Ret = epollWait(efd, evs, len, _ms)
+	efd := req.Arg(0)
+	evs := req.Arg(1)
+	len := req.Arg(2)
+	_ms := req.Arg(3)
+	req.SetRet(epollWait(efd, evs, len, _ms))
 }
 
 //go:nosplit
 func sysWaitIRQ(req *isyscall.Request) {
-	req.Ret = waitIRQ()
+	req.SetRet(waitIRQ())
 }
 
 //go:nosplit
 func sysWaitSyscall(req *isyscall.Request) {
-	req.Ret = fetchPendingCall()
+	req.SetRet(fetchPendingCall())
 }
 
 //go:nosplit
 func sysFixedMmap(req *isyscall.Request) {
-	addr := req.Args[0]
-	len := req.Args[1]
+	addr := req.Arg(0)
+	len := req.Arg(1)
 	mm.Fixmap(addr, addr, len)
 }
 

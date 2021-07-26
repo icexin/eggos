@@ -20,8 +20,8 @@ var (
 func evnotify(fd, events uintptr)
 
 func sysPipe2(call *isyscall.Request) {
-	fds := (*[2]int32)(unsafe.Pointer(call.Args[0]))
-	flags := call.Args[1]
+	fds := (*[2]int32)(unsafe.Pointer(call.Arg(0)))
+	flags := call.Arg(1)
 	_ = flags
 	p := newPipeFile()
 	wfd, _ := AllocFileNode(p)
@@ -30,6 +30,7 @@ func sysPipe2(call *isyscall.Request) {
 	fds[1] = int32(wfd)
 	p.wfd = wfd
 	p.rfd = rfd
+	call.SetRet(0)
 	call.Done()
 }
 

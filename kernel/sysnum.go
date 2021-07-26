@@ -317,3 +317,11 @@ var sysnum = [...]string{
 	312: "kcmp",
 	313: "finit_module",
 }
+
+//go:nosplit
+func syscallName(n int) string {
+	if n >= len(sysnum) {
+		return "unknown"
+	}
+	return sysnum[n]
+}

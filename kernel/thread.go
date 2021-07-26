@@ -35,7 +35,6 @@ const (
 var (
 	threads    [_NTHREDS]Thread
 	scheduler  *context
-	taskstate  [27]uint32
 	idleThread threadptr
 )
 
@@ -92,9 +91,7 @@ func allocThread() *Thread {
 	if t == nil {
 		throw("no thread slot available")
 	}
-	// t.sigstack.ss_flags = _SS_DISABLE
-	// t.sigstack.ss_sp = mm.Alloc()
-	// t.sigstack.ss_size = mm.PGSIZE
+
 	t.state = INITING
 	t.kstack = mm.Mmap(0, _THREAD_STACK_SIZE) + _THREAD_STACK_SIZE
 	t.fpstate = mm.Alloc()
@@ -130,7 +127,9 @@ func setMythread(t *Thread) {
 //go:nosplit
 func switchThreadContext(t *Thread) {
 	// set go tls base address
-	setFS(t.fsBase)
+	if t.fsBase != 0 {
+		setFS(t.fsBase)
+	}
 	// set current thread base address
 	setGS(uintptr(unsafe.Pointer(&t.threadTLS)))
 
@@ -286,12 +285,6 @@ func pickup(pidx *int) *Thread {
 		idx := (curr + i + 1) % _NTHREDS
 		*pidx = idx
 		tt := &threads[idx]
-		// debug.PrintHex(uintptr(tt.state))
-		// debug.PrintStr("\n")
-		// debug.PrintHex(uintptr(unsafe.Pointer(tt)))
-		// debug.PrintStr("\n")
-		// debug.PrintHex(uintptr(idleThread))
-		// debug.PrintStr("\n")
 		if tt.state == RUNNABLE && tt != idleThread.ptr() {
 			t = tt
 			break

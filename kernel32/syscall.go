@@ -329,8 +329,8 @@ func handleForward() {
 		handler := isyscall.GetHandler(call.NO)
 		if handler == nil {
 			debug.Logf("[syscall] unhandled syscall %s(%d)", sysnum[call.NO], call.NO)
-			call.Ret = isyscall.Errno(syscall.EINVAL)
-			// call.Ret = isyscall.Errno(syscall.EPERM)
+			call.SetRet(isyscall.Errno(syscall.EINVAL))
+			// call.SetRet(isyscall.Errno(syscall.EPERM))
 			call.Done()
 			continue
 		}

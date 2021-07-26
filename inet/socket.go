@@ -42,20 +42,20 @@ const (
 func socketcall(c *isyscall.Request) {
 	// Kernel interface gets call sub-number and pointer to a0.
 	// see syscall/asm_linux_386.s rawsocketcall
-	fn := c.Args[0]
-	args := (*[5]uintptr)(unsafe.Pointer(c.Args[1]))
+	fn := c.Arg(0)
+	args := (*[5]uintptr)(unsafe.Pointer(c.Arg(1)))
 
 	if fn == _SOCKET {
-		c.Ret = sysSocket(uintptr(args[0]), uintptr(args[1]), uintptr(args[2]))
+		c.SetRet(sysSocket(uintptr(args[0]), uintptr(args[1]), uintptr(args[2])))
 		c.Done()
 		return
 	}
 
-	c.Ret = 0
+	c.SetRet(0)
 
 	sf, err := findSockFile(args[0])
 	if err != nil {
-		c.Ret = isyscall.Error(err)
+		c.SetRet(isyscall.Error(err))
 		c.Done()
 		return
 	}
@@ -65,7 +65,7 @@ func socketcall(c *isyscall.Request) {
 	case _ACCEPT4:
 		var fd int
 		fd, err = sf.Accept4(args[1], args[2], args[3])
-		c.Ret = uintptr(fd)
+		c.SetRet(uintptr(fd))
 	case _BIND:
 		err = sf.Bind(args[1], args[2])
 	case _CONNECT:
@@ -85,7 +85,7 @@ func socketcall(c *isyscall.Request) {
 	}
 
 	if err != nil {
-		c.Ret = isyscall.Error(err)
+		c.SetRet(isyscall.Error(err))
 	}
 	c.Done()
 }
