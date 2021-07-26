@@ -117,7 +117,7 @@ func fscall(fn int) isyscall.Handler {
 		}
 
 		if err != nil {
-			c.SetRet(isyscall.Error(err))
+			c.SetError(err)
 		}
 		c.Done()
 	}

@@ -46,7 +46,7 @@ func socketcall(c *isyscall.Request) {
 	args := (*[5]uintptr)(unsafe.Pointer(c.Arg(1)))
 
 	if fn == _SOCKET {
-		c.SetRet(sysSocket(uintptr(args[0]), uintptr(args[1]), uintptr(args[2])))
+		// c.SetRet(sysSocket(uintptr(args[0]), uintptr(args[1]), uintptr(args[2])))
 		c.Done()
 		return
 	}
@@ -90,12 +90,19 @@ func socketcall(c *isyscall.Request) {
 	c.Done()
 }
 
-func sysSocket(domain, typ, proto uintptr) uintptr {
+func sysSocket(c *isyscall.Request) {
+	domain := c.Arg(0)
+	typ := c.Arg(1)
+	// proto := c.Arg(2)
 	if domain != syscall.AF_INET {
-		return isyscall.Errno(syscall.EINVAL)
+		c.SetErrorNO(syscall.EINVAL)
+		c.Done()
+		return
 	}
 	if typ&syscall.SOCK_STREAM == 0 && typ&syscall.SOCK_DGRAM == 0 {
-		return isyscall.Errno(syscall.EINVAL)
+		c.SetErrorNO(syscall.EINVAL)
+		c.Done()
+		return
 	}
 
 	var protoNum tcpip.TransportProtocolNumber
@@ -111,11 +118,14 @@ func sysSocket(domain, typ, proto uintptr) uintptr {
 	wq := new(waiter.Queue)
 	ep, err := nstack.NewEndpoint(protoNum, ipv4.ProtocolNumber, wq)
 	if err != nil {
-		return isyscall.Error(e(err))
+		c.SetError(e(err))
+		c.Done()
+		return
 	}
 
 	sfile := allocSockFile(ep, wq)
-	return uintptr(sfile.fd)
+	c.SetRet(uintptr(sfile.fd))
+	c.Done()
 }
 
 func ntohs(n uint16) uint16 {
@@ -127,5 +137,6 @@ func htons(n uint16) uint16 {
 }
 
 func init() {
+	isyscall.Register(syscall.SYS_SOCKET, sysSocket)
 	// isyscall.Register(syscall.SYS_SOCKETCALL, socketcall)
 }

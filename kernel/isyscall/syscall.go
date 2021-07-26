@@ -36,6 +36,21 @@ func (r *Request) SetRet(v uintptr) {
 	r.tf.SetRet(v)
 }
 
+//go:nosplit
+func (r *Request) SetErrorNO(errno syscall.Errno) {
+	r.SetRet(Errno(errno))
+}
+
+//go:nosplit
+func (r *Request) SetError(err error) {
+	if err == nil {
+		r.SetRet(0)
+		return
+	}
+	fmt.Printf("syscall error: %s\n", err)
+	r.SetErrorNO(syscall.EINVAL)
+}
+
 func (r *Request) Done() {
 	wakeup(&r.Lock, 1)
 }
