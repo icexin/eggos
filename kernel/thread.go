@@ -15,7 +15,8 @@ const (
 
 	_RPL_USER = 3
 
-	_THREAD_STACK_SIZE = 32 << 10
+	_THREAD_STACK_SIZE         = 32 << 10
+	_THREAD_STACK_GUARD_OFFSET = 1 << 10
 )
 
 const (
@@ -93,10 +94,17 @@ func allocThread() *Thread {
 	}
 
 	t.state = INITING
-	t.kstack = mm.Mmap(0, _THREAD_STACK_SIZE) + _THREAD_STACK_SIZE
+	t.kstack = allocThreadStack()
 	t.fpstate = mm.Alloc()
 	t.threadTLS[0] = uintptr(unsafe.Pointer(t))
 	return t
+}
+
+//go:nosplit
+func allocThreadStack() uintptr {
+	stack := mm.Mmap(0, _THREAD_STACK_SIZE)
+	stack += _THREAD_STACK_SIZE - _THREAD_STACK_GUARD_OFFSET
+	return stack
 }
 
 type threadptr uintptr
@@ -140,8 +148,7 @@ func switchThreadContext(t *Thread) {
 //go:nosplit
 func thread0Init() {
 	t := allocThread()
-	t.stack = mm.Mmap(0, _THREAD_STACK_SIZE)
-	t.stack += _THREAD_STACK_SIZE
+	t.stack = allocThreadStack()
 
 	sp := t.kstack
 
@@ -188,7 +195,9 @@ func thread0() {
 // run when after main init
 func idleInit() {
 	// thread0 clone idle thread
-	stack := mm.SysMmap(0, _THREAD_STACK_SIZE) + _THREAD_STACK_SIZE
+	stack := mm.SysMmap(0, _THREAD_STACK_SIZE) +
+		_THREAD_STACK_SIZE - _THREAD_STACK_GUARD_OFFSET
+
 	tid := ksysClone(sys.FuncPC(idle), stack)
 	idleThread = (threadptr)(unsafe.Pointer(&threads[tid]))
 
