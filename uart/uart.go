@@ -45,7 +45,7 @@ func Write(s []byte) (int, error) {
 
 //go:nosplit
 func WriteString(s string) (int, error) {
-	for i := range s {
+	for i := 0; i < len(s); i++ {
 		WriteByte(s[i])
 	}
 	return len(s), nil
