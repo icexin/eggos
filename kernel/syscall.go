@@ -55,6 +55,7 @@ var (
 		syscall.SYS_FUTEX,
 		syscall.SYS_NANOSLEEP,
 		syscall.SYS_SCHED_YIELD,
+		syscall.SYS_MADVISE,
 
 		// TODO: real random
 		unix.SYS_GETRANDOM,
@@ -173,6 +174,7 @@ func doSyscall(req *isyscall.Request) {
 		sysMmap(req)
 	case syscall.SYS_MUNMAP:
 		sysMunmap(req)
+	case syscall.SYS_MADVISE:
 	case syscall.SYS_READ:
 		sysRead(req)
 	case syscall.SYS_WRITE:

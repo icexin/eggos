@@ -229,7 +229,7 @@ func accelArg() []string {
 	case "darwin":
 		return []string{"-M", "accel=hvf"}
 	default:
-		fmt.Printf("accel method not found")
+		// fmt.Printf("accel method not found")
 		return nil
 	}
 }
@@ -260,7 +260,7 @@ func initQemuOpt() []string {
 	-device e1000,netdev=eth0
 	`
 	out := strings.Fields(opts)
-	if os.Getenv("QEMU_ACCEL") != "" {
+	if os.Getenv("QEMU_ACCEL") != "off" {
 		out = append(out, accelArg()...)
 	}
 	if os.Getenv("QEMU_GRAPHIC") == "" {
