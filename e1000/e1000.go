@@ -139,7 +139,7 @@ func (d *driver) Init(dev *pci.Device) error {
 	if !ismem {
 		panic("not memory bar")
 	}
-	mm.SysFixedMmap(uintptr(baddr), uintptr(blen))
+	mm.SysFixedMmap(uintptr(baddr), uintptr(baddr), uintptr(blen))
 	d.bar = uintptr(baddr)
 	debug.Logf("[e1000] mmap for bar0 0x%x", d.bar)
 

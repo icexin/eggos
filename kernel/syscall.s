@@ -7,6 +7,8 @@
 #define	udata_idx  4
 #define rpl_user   3
 
+#define SYS_clockgettime 228
+
 TEXT ·syscallEntry(SB), NOSPLIT, $0
     // save AX
     MOVQ AX, tls_ax(GS)
@@ -37,4 +39,11 @@ TEXT ·syscallEntry(SB), NOSPLIT, $0
     // jmp INT 0x80
     JMP ·trap128(SB)
     
+TEXT ·vdsoGettimeofday(SB), NOSPLIT, $0
+    MOVQ $SYS_clockgettime, AX
+    // DI store *TimeSpec, but clockgettime need SI
+    MOVQ DI, SI
+    MOVQ $0, DI
+    INT $0x80
+    RET
 

@@ -369,9 +369,22 @@ func sysWaitSyscall(req *isyscall.Request) {
 
 //go:nosplit
 func sysFixedMmap(req *isyscall.Request) {
-	addr := req.Arg(0)
-	len := req.Arg(1)
-	mm.Fixmap(addr, addr, len)
+	vaddr := req.Arg(0)
+	paddr := req.Arg(1)
+	len := req.Arg(2)
+	mm.Fixmap(vaddr, paddr, len)
+}
+
+const vdsoGettimeofdaySym = 0xffffffffff600000
+
+//go:nosplit
+func vdsoGettimeofday()
+
+//go:nosplit
+func vdsoInit() {
+	dst := sys.UnsafeBuffer(mm.Mmap(vdsoGettimeofdaySym, 0x100), 0x100)
+	src := sys.UnsafeBuffer(sys.FuncPC(vdsoGettimeofday), 0x100)
+	copy(dst, src)
 }
 
 //go:nosplit
@@ -389,4 +402,5 @@ func syscallInit() {
 
 	trap.Register(0x80, syscallIntr)
 	epollInit()
+	vdsoInit()
 }

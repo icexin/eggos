@@ -19,8 +19,8 @@ func SysMmap(vaddr, size uintptr) uintptr {
 
 // SysFixedMmap map the same physical address to the virtual address
 // run in user mode
-func SysFixedMmap(addr, size uintptr) {
-	_, _, err := syscall.Syscall(_SYS_FIXED_MMAP, addr, size, 0)
+func SysFixedMmap(vaddr, paddr, size uintptr) {
+	_, _, err := syscall.Syscall(_SYS_FIXED_MMAP, vaddr, paddr, size)
 	if err != 0 {
 		panic(err.Error())
 	}

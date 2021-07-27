@@ -74,7 +74,7 @@ func Init() {
 		Pitch:  bootInfo.FramebufferPitch,
 	}
 
-	mm.SysFixedMmap(uintptr(info.Addr), uintptr(info.Width*info.Height*4))
+	mm.SysFixedMmap(uintptr(info.Addr), uintptr(info.Addr), uintptr(info.Width*info.Height*4))
 	fbbuf = (*[10 << 20]uint8)(unsafe.Pointer(uintptr(info.Addr)))[:info.Width*info.Height*4]
 	buffer = make([]uint8, len(fbbuf))
 	DefaultView = NewView()
