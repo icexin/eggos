@@ -88,7 +88,7 @@ func syscallIntr() {
 	my.systf = *tf
 
 	req := tf.SyscallRequest()
-	doInKernel := !(bootstrapDone && canForward(tf))
+	doInKernel := !(bootstrapDone && canForward(&req))
 	if doInKernel {
 		doSyscall(&req)
 		return
@@ -109,17 +109,31 @@ func syscallIntr() {
 }
 
 //go:nosplit
-func canForward(tf *trapFrame) bool {
-	no := tf.AX
+func canForward(req *isyscall.Request) bool {
+	no := req.NO()
 	my := Mythread()
 	// syscall thread can't call self
 	if syscalltask != 0 && my == syscalltask.ptr() {
 		return false
 	}
-	// handle panic write
-	if no == syscall.SYS_WRITE && tf.BX == 2 {
-		return false
+
+	switch no {
+	case syscall.SYS_WRITE:
+		// handle panic write
+		if req.Arg(0) == 2 {
+			return false
+		}
+		// handle pipe write
+		if req.Arg(0) == pipeWriteFd {
+			return false
+		}
+	case syscall.SYS_READ:
+		// handle pipe read
+		if req.Arg(0) == pipeReadFd {
+			return false
+		}
 	}
+
 	for i := 0; i < len(kernelCalls); i++ {
 		if no == kernelCalls[i] {
 			return false
@@ -205,6 +219,8 @@ func doSyscall(req *isyscall.Request) {
 		sysEpollCtl(req)
 	case syscall.SYS_EPOLL_WAIT, syscall.SYS_EPOLL_PWAIT:
 		sysEpollWait(req)
+	case syscall.SYS_PIPE2:
+		sysPipe2(req)
 
 	case SYS_WAIT_IRQ:
 		sysWaitIRQ(req)
@@ -311,7 +327,7 @@ func sysNanosleep(req *isyscall.Request) {
 
 //go:nosplit
 func sysEpollCreate(req *isyscall.Request) {
-	req.SetRet(3)
+	req.SetRet(epollFd)
 }
 
 //go:nosplit

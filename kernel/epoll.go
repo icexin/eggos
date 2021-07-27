@@ -10,6 +10,10 @@ import (
 	"gvisor.dev/gvisor/pkg/abi/linux/errno"
 )
 
+const (
+	epollFd = 3
+)
+
 var (
 	// to manage epoll event
 	eventpool mm.Pool

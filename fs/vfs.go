@@ -313,6 +313,10 @@ func vfsInit() {
 	AllocFileNode(NewFile(nil, c, nil))
 	// epoll fd
 	AllocFileNode(NewFile(nil, nil, nil))
+	// pipe read fd
+	AllocFileNode(NewFile(nil, nil, nil))
+	// pipe write fd
+	AllocFileNode(NewFile(nil, nil, nil))
 
 	etcInit()
 }
