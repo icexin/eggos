@@ -260,7 +260,7 @@ func initQemuOpt() []string {
 	-device e1000,netdev=eth0
 	`
 	out := strings.Fields(opts)
-	if os.Getenv("QEMU_ACCEL") != "off" {
+	if os.Getenv("QEMU_ACCEL") != "" {
 		out = append(out, accelArg()...)
 	}
 	if os.Getenv("QEMU_GRAPHIC") == "" {

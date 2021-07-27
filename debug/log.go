@@ -23,7 +23,7 @@ func PrintStr(s string) {
 	uart.WriteString(s)
 }
 
-const hextab = "0123456789ABCDEF"
+const hextab = "0123456789abcdef"
 
 //go:nosplit
 func PrintHex(n uintptr) {

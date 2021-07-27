@@ -160,8 +160,7 @@ func panicNosys() {
 	debug.PrintStr("syscall not found:")
 	debug.PrintStr(syscallName(int(req.NO())))
 	debug.PrintStr("\n")
-	for {
-	}
+	throw("")
 }
 
 //go:nosplit

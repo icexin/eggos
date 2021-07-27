@@ -3,10 +3,38 @@ package kernel
 import (
 	"unsafe"
 
+	"github.com/icexin/eggos/debug"
 	"github.com/icexin/eggos/kernel/isyscall"
 	"github.com/icexin/eggos/kernel/trap"
 	"github.com/icexin/eggos/pic"
 	"github.com/icexin/eggos/sys"
+)
+
+var (
+	trapnum = [...]string{
+		"#DE(0) Divide by zero",
+		"#DB(1) Debug exception",
+		"#NMI(2) Non maskable interrupt exception",
+		"#BP(3) Breakpoint exception",
+		"#OF(4) Overflow exception",
+		"#BR(5) Bound range exception",
+		"#UD(6) Invalid opcode exception",
+		"#NM(7) Device not avaiable exception",
+		"#DF(8) Double fault exception",
+		"(9)Coprocessor segment overrun exception",
+		"#TS(10) Invalid TSS exception",
+		"#NP(11) Segment not present exception",
+		"#SS(12) Stack exception",
+		"#GP(13) General protection exception",
+		"#PF(14) Page fault exception",
+		"#MF(15) x87 floating point exception",
+		"#AC(16) Alignment check exception",
+		"#MC(17) Machine check exception",
+		"#XF(18) SIMD floating point exception",
+		"#HV(19) Hypervisor injection exception",
+		"#VC(20) VMM communication exception",
+		"#SX(21) Security Exception",
+	}
 )
 
 type trapFrame struct {
@@ -30,7 +58,19 @@ func trapret()
 
 //go:nosplit
 func trapPanic() {
-	throw("trap panic")
+	tf := &Mythread().systf
+	debug.PrintStr("trap panic: ")
+	if tf.Trapno < uintptr(len(trapnum)) {
+		debug.PrintStr(trapnum[tf.Trapno])
+	}
+	debug.PrintStr("\n")
+	throwtf(tf, "stack trace:")
+	panic("trap panic")
+}
+
+//go:nosplit
+func pageFaultPanic() {
+	panic("nil pointer or invalid memory access")
 }
 
 //go:nosplit
@@ -38,8 +78,46 @@ func ignoreHandler() {
 }
 
 //go:nosplit
-func pageFaultPanic() {
-	panic("nil pointer or invalid memory access")
+func pageFaultHandler() {
+	t := Mythread()
+	checkKernelPanic(t)
+	changeReturnPC(t.tf, sys.FuncPC(pageFaultPanic))
+}
+
+//go:nosplit
+func faultHandler() {
+	t := Mythread()
+	checkKernelPanic(t)
+	t.systf = *t.tf
+	changeReturnPC(t.tf, sys.FuncPC(trapPanic))
+}
+
+//go:nosplit
+func printReg(name string, reg uintptr) {
+	debug.PrintStr(name)
+	debug.PrintStr("=")
+	debug.PrintHex(reg)
+	debug.PrintStr("\n")
+}
+
+//go:nosplit
+func checkKernelPanic(t *Thread) {
+	tf := t.tf
+	if tf.CS != _KCODE_IDX<<3 {
+		return
+	}
+	printReg("tid", uintptr(t.id))
+	printReg("no", tf.Trapno)
+	printReg("err", tf.Err)
+	printReg("cr2", sys.Cr2())
+	printReg("ip", tf.IP)
+	printReg("sp", tf.SP)
+	printReg("ax", tf.AX)
+	printReg("bx", tf.BX)
+	printReg("cx", tf.CX)
+	printReg("dx", tf.CX)
+	printReg("cs", tf.CS)
+	throw("trap fault in kernel\n")
 }
 
 //go:nosplit
@@ -65,11 +143,13 @@ func dotrap(tf *trapFrame) {
 		throw("IF should clear")
 	}
 	my := Mythread()
+	// ugly as it is, avoid writeBarrier
+	// my.tf = tf
 	*(*uintptr)(unsafe.Pointer(&my.tf)) = uintptr(unsafe.Pointer(tf))
+
 	handler := trap.Handler(int(tf.Trapno))
 	if handler == nil {
-		// throw("kernel panic")
-		preparePanic(tf)
+		faultHandler()
 		return
 	}
 	// timer and syscall interrupts are processed synchronously
