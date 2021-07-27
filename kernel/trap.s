@@ -24,6 +24,8 @@ TEXT alltraps(SB), NOSPLIT, $0
     MOVQ m_fpstate(CX), DX
     FXSAVE (DX)
 
+    // make top stack frame
+    XORQ BP, BP
     PUSHQ SP
     CALL  ·dotrap(SB)
 	ADDQ  $8, SP

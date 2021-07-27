@@ -58,14 +58,13 @@ func trapret()
 
 //go:nosplit
 func trapPanic() {
-	tf := &Mythread().systf
+	tf := Mythread().tf
 	debug.PrintStr("trap panic: ")
 	if tf.Trapno < uintptr(len(trapnum)) {
 		debug.PrintStr(trapnum[tf.Trapno])
 	}
 	debug.PrintStr("\n")
 	throwtf(tf, "stack trace:")
-	panic("trap panic")
 }
 
 //go:nosplit
@@ -86,10 +85,7 @@ func pageFaultHandler() {
 
 //go:nosplit
 func faultHandler() {
-	t := Mythread()
-	checkKernelPanic(t)
-	t.systf = *t.tf
-	changeReturnPC(t.tf, sys.FuncPC(trapPanic))
+	trapPanic()
 }
 
 //go:nosplit
@@ -167,6 +163,7 @@ func dotrap(tf *trapFrame) {
 
 //go:nosplit
 func trapInit() {
+	trap.Register(14, pageFaultHandler)
 	trap.Register(39, ignoreHandler)
 	trap.Register(47, ignoreHandler)
 }
