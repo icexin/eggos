@@ -65,6 +65,7 @@ var (
 		syscall.SYS_EPOLL_CTL,
 		syscall.SYS_EPOLL_WAIT,
 		syscall.SYS_EPOLL_PWAIT,
+		syscall.SYS_PIPE2,
 
 		SYS_WAIT_IRQ,
 		SYS_WAIT_SYSCALL,
@@ -276,6 +277,11 @@ func sysMunmap(req *isyscall.Request) {
 
 //go:nosplit
 func sysRead(req *isyscall.Request) {
+	fd := req.Arg(0)
+	if fd == pipeReadFd {
+		sysPipeRead(req)
+		return
+	}
 	req.SetRet(isyscall.Errno(errno.EINVAL))
 	return
 }
@@ -285,14 +291,18 @@ func sysWrite(req *isyscall.Request) {
 	fd := req.Arg(0)
 	buf := req.Arg(1)
 	len := req.Arg(2)
-	if fd != 2 {
-		req.SetRet(isyscall.Errno(errno.EINVAL))
+	switch fd {
+	case 2:
+		buffer := sys.UnsafeBuffer(buf, int(len))
+		uart.Write(buffer)
+		req.SetRet(len)
 		return
+	case pipeWriteFd:
+		sysPipeWrite(req)
+		return
+	default:
+		req.SetErrorNO(syscall.EINVAL)
 	}
-	buffer := sys.UnsafeBuffer(buf, int(len))
-	uart.Write(buffer)
-	req.SetRet(len)
-	return
 }
 
 //go:nosplit

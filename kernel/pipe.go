@@ -17,8 +17,11 @@ const (
 )
 
 var (
+	// FIXME:
+	// avoid dup create pipe
 	epollPipeCreated bool
-	pipeBufferBytes  int
+	// the bytes number in pipe
+	pipeBufferBytes int
 )
 
 //go:nosplit
@@ -27,6 +30,7 @@ func sysPipe2(req *isyscall.Request) {
 		req.SetErrorNO(syscall.EINVAL)
 		return
 	}
+	epollPipeCreated = true
 	fds := (*[2]int32)(unsafe.Pointer(req.Arg(0)))
 	fds[0] = pipeReadFd
 	fds[1] = pipeWriteFd
