@@ -56,6 +56,7 @@ var (
 		syscall.SYS_NANOSLEEP,
 		syscall.SYS_SCHED_YIELD,
 		syscall.SYS_MADVISE,
+		syscall.SYS_EXIT_GROUP,
 
 		// TODO: real random
 		unix.SYS_GETRANDOM,
@@ -209,6 +210,8 @@ func doSyscall(req *isyscall.Request) {
 		sysNanosleep(req)
 	case syscall.SYS_SCHED_YIELD:
 		Yield()
+	case syscall.SYS_EXIT_GROUP:
+		sysExitGroup(req)
 
 	case unix.SYS_GETRANDOM:
 		req.SetRet(req.Arg(1))
@@ -373,6 +376,11 @@ func sysFixedMmap(req *isyscall.Request) {
 	paddr := req.Arg(1)
 	len := req.Arg(2)
 	mm.Fixmap(vaddr, paddr, len)
+}
+
+//go:nosplit
+func sysExitGroup(req *isyscall.Request) {
+	debug.QemuExit(int(req.Arg(0)))
 }
 
 const vdsoGettimeofdaySym = 0xffffffffff600000

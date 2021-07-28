@@ -258,6 +258,7 @@ func initQemuOpt() []string {
 	-m 256M -no-reboot -serial mon:stdio
 	-netdev user,id=eth0,hostfwd=tcp::8080-:80,hostfwd=tcp::8081-:22
 	-device e1000,netdev=eth0
+	-device isa-debug-exit
 	`
 	out := strings.Fields(opts)
 	if os.Getenv("QEMU_ACCEL") != "" {
