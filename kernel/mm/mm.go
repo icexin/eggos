@@ -9,8 +9,8 @@ import (
 
 const (
 	PGSIZE = 4 << 10
-	// 1-20 Mb memory reverse for kernel image
-	MEMSTART = 20 << 20
+	// 1-100 Mb memory reverse for kernel image
+	MEMSTART = 100 << 20
 	// 默认可以使用的物理内存终止地址，如果能从grub那里获取就用grub的
 	DEFAULT_MEMTOP = 256 << 20
 	// 虚拟内存起始地址

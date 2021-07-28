@@ -267,6 +267,7 @@ func initQemuOpt() []string {
 	if os.Getenv("QEMU_GRAPHIC") == "" {
 		out = append(out, "-nographic")
 	}
+	out = append(out, "-append", os.Getenv("EGGOS_ARGS"))
 	return out
 }
 

@@ -1,6 +1,8 @@
 package multiboot
 
-import "unsafe"
+import (
+	"unsafe"
+)
 
 const (
 	bootloaderMagic = 0x2BADB002
