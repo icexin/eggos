@@ -86,7 +86,7 @@ func fscall(fn int) isyscall.Handler {
 			} else {
 				c.SetRet(uintptr(fd))
 			}
-			c.Done()
+
 			return
 		}
 
@@ -95,7 +95,7 @@ func fscall(fn int) isyscall.Handler {
 		ni, err = GetInode(int(c.Arg(0)))
 		if err != nil {
 			c.SetRet(isyscall.Error(err))
-			c.Done()
+
 			return
 		}
 
@@ -119,7 +119,7 @@ func fscall(fn int) isyscall.Handler {
 		if err != nil {
 			c.SetError(err)
 		}
-		c.Done()
+
 	}
 }
 
@@ -195,7 +195,6 @@ func sysIoctl(ni *Inode, op, arg uintptr) error {
 
 func sysFcntl(call *isyscall.Request) {
 	call.SetRet(0)
-	call.Done()
 }
 
 // func Uname(buf *Utsname)
@@ -211,7 +210,7 @@ func sysUname(c *isyscall.Request) {
 	copy(unsafebuf(&buf.Sysname), "eggos")
 	copy(unsafebuf(&buf.Version), "0")
 	c.SetRet(0)
-	c.Done()
+
 }
 
 // func fstatat(dirfd int, path string, stat *Stat_t, flags int)
@@ -225,14 +224,14 @@ func sysFstatat64(c *isyscall.Request) {
 		} else {
 			c.SetRet(isyscall.Error(err))
 		}
-		c.Done()
+
 		return
 	}
 	stat.Mode = uint32(info.Mode())
 	stat.Mtim.Sec = int64(info.ModTime().Unix())
 	stat.Size = info.Size()
 	c.SetRet(0)
-	c.Done()
+
 }
 
 func sysRandom(call *isyscall.Request) {
@@ -240,7 +239,6 @@ func sysRandom(call *isyscall.Request) {
 	buf := sys.UnsafeBuffer(p, int(n))
 	rand.Read(buf)
 	call.SetRet(n)
-	call.Done()
 }
 
 func cstring(ptr uintptr) string {

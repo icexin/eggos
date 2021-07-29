@@ -50,3 +50,8 @@ func (t *trapFrame) Arg(n int) uintptr {
 func (t *trapFrame) SetRet(v uintptr) {
 	t.AX = v
 }
+
+//go:nosplit
+func (t *trapFrame) Ret() uintptr {
+	return t.AX
+}

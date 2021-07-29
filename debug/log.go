@@ -1,21 +1,18 @@
 package debug
 
 import (
+	"bytes"
 	"fmt"
-	"time"
 
 	"github.com/icexin/eggos/console"
 	"github.com/icexin/eggos/drivers/uart"
 	"github.com/icexin/eggos/sys"
 )
 
-var (
-	bootTime = time.Now()
-	lastTime = time.Now()
-)
-
 func Logf(fmtstr string, args ...interface{}) {
-	fmt.Fprintf(console.Console(), fmtstr+"\n", args...)
+	buf := bytes.Buffer{}
+	fmt.Fprintf(&buf, fmtstr+"\n", args...)
+	buf.WriteTo(console.Console())
 }
 
 //go:nosplit

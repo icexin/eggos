@@ -3,6 +3,7 @@ package inet
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/icexin/eggos/debug"
@@ -10,6 +11,7 @@ import (
 
 	"gvisor.dev/gvisor/pkg/tcpip"
 	"gvisor.dev/gvisor/pkg/tcpip/header"
+	"gvisor.dev/gvisor/pkg/tcpip/link/loopback"
 	"gvisor.dev/gvisor/pkg/tcpip/network/arp"
 	"gvisor.dev/gvisor/pkg/tcpip/network/ipv4"
 	"gvisor.dev/gvisor/pkg/tcpip/stack"
@@ -18,7 +20,8 @@ import (
 )
 
 const (
-	defaultNIC = 1
+	defaultNIC  = 1
+	loopbackNIC = 2
 )
 
 var (
@@ -32,7 +35,7 @@ func e(err tcpip.Error) error {
 	return errors.New(err.String())
 }
 
-func Init() error {
+func Init() {
 	nstack = stack.New(stack.Options{
 		NetworkProtocols:   []stack.NetworkProtocolFactory{arp.NewProtocol, ipv4.NewProtocol},
 		TransportProtocols: []stack.TransportProtocolFactory{tcp.NewProtocol, udp.NewProtocol},
@@ -40,18 +43,24 @@ func Init() error {
 	endpoint := New(&Options{})
 	err := nstack.CreateNIC(defaultNIC, endpoint)
 	if err != nil {
-		return e(err)
+		panic(err)
 	}
-	// err = nstack.AddAddress(defaultNIC, arp.ProtocolNumber, arp.ProtocolAddress)
-	// if err != nil {
-	// 	return e(err)
-	// }
+
+	err = nstack.CreateNIC(loopbackNIC, loopback.New())
+	if err != nil {
+		panic(err)
+	}
+	err = nstack.AddAddress(loopbackNIC, ipv4.ProtocolNumber, tcpip.Address([]byte{127, 0, 0, 1}))
+	if err != nil {
+		panic(err)
+	}
 
 	err1 := dodhcp(endpoint.LinkAddress())
 	if err1 != nil {
-		return err1
+		panic(err)
 	}
-	return nil
+	fmt.Printf("%v\n", nstack.GetRouteTable())
+	return
 
 	nstack.AddAddress(defaultNIC, ipv4.ProtocolNumber, tcpip.Address([]byte{10, 0, 2, 15}))
 	// nstack.AddAddress(defaultNIC, ipv4.ProtocolNumber, tcpip.Address([]byte{10, 0, 0, 7}))
@@ -61,7 +70,6 @@ func Init() error {
 		// Gateway: tcpip.Address([]byte{10, 0, 0, 1}),
 	})
 
-	return nil
 }
 
 func dodhcp(linkaddr tcpip.LinkAddress) error {
@@ -90,6 +98,7 @@ func setroute(nstack *stack.Stack, cfg dhcp.Config) {
 			Destination: header.IPv4EmptySubnet,
 			Gateway:     cfg.Gateway,
 			NIC:         defaultNIC,
-		}},
+		},
+	},
 	)
 }

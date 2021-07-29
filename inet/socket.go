@@ -1,11 +1,8 @@
 package inet
 
 import (
-	"fmt"
 	"syscall"
-	"unsafe"
 
-	"github.com/icexin/eggos/debug"
 	"github.com/icexin/eggos/kernel/isyscall"
 
 	"gvisor.dev/gvisor/pkg/tcpip"
@@ -15,93 +12,16 @@ import (
 	"gvisor.dev/gvisor/pkg/waiter"
 )
 
-const (
-	// see linux/net.h
-	_SOCKET      = 1
-	_BIND        = 2
-	_CONNECT     = 3
-	_LISTEN      = 4
-	_ACCEPT      = 5
-	_GETSOCKNAME = 6
-	_GETPEERNAME = 7
-	_SOCKETPAIR  = 8
-	_SEND        = 9
-	_RECV        = 10
-	_SENDTO      = 11
-	_RECVFROM    = 12
-	_SHUTDOWN    = 13
-	_SETSOCKOPT  = 14
-	_GETSOCKOPT  = 15
-	_SENDMSG     = 16
-	_RECVMSG     = 17
-	_ACCEPT4     = 18
-	_RECVMMSG    = 19
-	_SENDMMSG    = 20
-)
-
-func socketcall(c *isyscall.Request) {
-	// Kernel interface gets call sub-number and pointer to a0.
-	// see syscall/asm_linux_386.s rawsocketcall
-	fn := c.Arg(0)
-	args := (*[5]uintptr)(unsafe.Pointer(c.Arg(1)))
-
-	if fn == _SOCKET {
-		// c.SetRet(sysSocket(uintptr(args[0]), uintptr(args[1]), uintptr(args[2])))
-		c.Done()
-		return
-	}
-
-	c.SetRet(0)
-
-	sf, err := findSockFile(args[0])
-	if err != nil {
-		c.SetRet(isyscall.Error(err))
-		c.Done()
-		return
-	}
-	switch fn {
-	case _LISTEN:
-		err = sf.Listen(args[1])
-	case _ACCEPT4:
-		var fd int
-		fd, err = sf.Accept4(args[1], args[2], args[3])
-		c.SetRet(uintptr(fd))
-	case _BIND:
-		err = sf.Bind(args[1], args[2])
-	case _CONNECT:
-		err = sf.Connect(args[1], args[2])
-	case _SETSOCKOPT:
-		err = sf.Setsockopt(args[1], args[2], args[3], args[4])
-	case _GETSOCKOPT:
-		err = sf.Getsockopt(args[1], args[2], args[3], args[4])
-	case _GETPEERNAME:
-		err = sf.Getpeername(args[1], args[2])
-	case _GETSOCKNAME:
-		err = sf.Getsockname(args[1], args[2])
-
-	default:
-		debug.Logf("[socket] usupport fn:%d", fn)
-		err = fmt.Errorf("unsupported socket fn:%d", fn)
-	}
-
-	if err != nil {
-		c.SetRet(isyscall.Error(err))
-	}
-	c.Done()
-}
-
 func sysSocket(c *isyscall.Request) {
 	domain := c.Arg(0)
 	typ := c.Arg(1)
 	// proto := c.Arg(2)
 	if domain != syscall.AF_INET {
 		c.SetErrorNO(syscall.EINVAL)
-		c.Done()
 		return
 	}
 	if typ&syscall.SOCK_STREAM == 0 && typ&syscall.SOCK_DGRAM == 0 {
 		c.SetErrorNO(syscall.EINVAL)
-		c.Done()
 		return
 	}
 
@@ -119,13 +39,12 @@ func sysSocket(c *isyscall.Request) {
 	ep, err := nstack.NewEndpoint(protoNum, ipv4.ProtocolNumber, wq)
 	if err != nil {
 		c.SetError(e(err))
-		c.Done()
 		return
 	}
 
 	sfile := allocSockFile(ep, wq)
 	c.SetRet(uintptr(sfile.fd))
-	c.Done()
+
 }
 
 func sysListen(c *isyscall.Request) {
@@ -137,11 +56,103 @@ func sysListen(c *isyscall.Request) {
 	err = sf.Listen(c.Arg(1))
 	if err != nil {
 		c.SetError(err)
+		return
 	}
 	c.SetRet(0)
 }
 
-func sysAccept(c *isyscall.Request) {
+func sysBind(c *isyscall.Request) {
+	sf, err := findSockFile(c.Arg(0))
+	if err != nil {
+		c.SetError(err)
+		return
+	}
+	err = sf.Bind(c.Arg(1), c.Arg(2))
+	if err != nil {
+		c.SetError(err)
+		return
+	}
+	c.SetRet(0)
+
+}
+
+func sysAccept4(c *isyscall.Request) {
+	sf, err := findSockFile(c.Arg(0))
+	if err != nil {
+		c.SetError(err)
+		return
+	}
+	fd, err := sf.Accept4(c.Arg(1), c.Arg(2), c.Arg(3))
+	if err != nil {
+		c.SetError(err)
+		return
+	}
+	c.SetRet(uintptr(fd))
+
+}
+
+func sysConnect(c *isyscall.Request) {
+	sf, err := findSockFile(c.Arg(0))
+	if err != nil {
+		c.SetError(err)
+		return
+	}
+	uaddr := c.Arg(1)
+	uaddrlen := c.Arg(2)
+	err = sf.Connect(uaddr, uaddrlen)
+	c.SetError(err)
+}
+
+func sysSetsockopt(c *isyscall.Request) {
+	sf, err := findSockFile(c.Arg(0))
+	if err != nil {
+		c.SetError(err)
+		return
+	}
+	err = sf.Setsockopt(c.Arg(1), c.Arg(2), c.Arg(3), c.Arg(4))
+	// if err != nil {
+	// 	err = isyscall.EPANIC
+	// }
+	c.SetError(err)
+}
+
+func sysGetsockopt(c *isyscall.Request) {
+	sf, err := findSockFile(c.Arg(0))
+	if err != nil {
+		c.SetError(err)
+		return
+	}
+	v, err := sf.Getsockopt(c.Arg(1), c.Arg(2), c.Arg(3), c.Arg(4))
+	if err != nil {
+		c.SetError(err)
+	}
+	c.SetRet(v)
+}
+
+func sysGetsockname(c *isyscall.Request) {
+	sf, err := findSockFile(c.Arg(0))
+	if err != nil {
+		c.SetError(err)
+		return
+	}
+	err = sf.Getsockname(c.Arg(1), c.Arg(2))
+	// if err != nil {
+	// 	err = isyscall.EPANIC
+	// }
+	c.SetError(err)
+}
+
+func sysGetpeername(c *isyscall.Request) {
+	sf, err := findSockFile(c.Arg(0))
+	if err != nil {
+		c.SetError(err)
+		return
+	}
+	err = sf.Getpeername(c.Arg(1), c.Arg(2))
+	// if err != nil {
+	// 	err = isyscall.EPANIC
+	// }
+	c.SetError(err)
 }
 
 func ntohs(n uint16) uint16 {
@@ -154,5 +165,12 @@ func htons(n uint16) uint16 {
 
 func init() {
 	isyscall.Register(syscall.SYS_SOCKET, sysSocket)
-	// isyscall.Register(syscall.SYS_SOCKETCALL, socketcall)
+	isyscall.Register(syscall.SYS_BIND, sysBind)
+	isyscall.Register(syscall.SYS_LISTEN, sysListen)
+	isyscall.Register(syscall.SYS_ACCEPT4, sysAccept4)
+	isyscall.Register(syscall.SYS_CONNECT, sysConnect)
+	isyscall.Register(syscall.SYS_SETSOCKOPT, sysSetsockopt)
+	isyscall.Register(syscall.SYS_GETSOCKOPT, sysGetsockopt)
+	isyscall.Register(syscall.SYS_GETSOCKNAME, sysGetsockname)
+	isyscall.Register(syscall.SYS_GETPEERNAME, sysGetpeername)
 }

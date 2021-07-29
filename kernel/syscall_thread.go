@@ -7,6 +7,7 @@ import (
 
 	"github.com/icexin/eggos/debug"
 	"github.com/icexin/eggos/kernel/isyscall"
+	"github.com/icexin/eggos/sys"
 )
 
 var (
@@ -29,6 +30,11 @@ func forwardCall(call *isyscall.Request) {
 
 	// wait on syscall task handle request
 	sleepon(&call.Lock)
+
+	// for debug purpose
+	if -call.Ret() == uintptr(isyscall.EPANIC) {
+		preparePanic(Mythread().tf)
+	}
 }
 
 //go:nosplit
@@ -56,14 +62,34 @@ func runSyscallThread() {
 			throw("bad SYS_WAIT_SYSCALL return")
 		}
 		call := (*isyscall.Request)(unsafe.Pointer(callptr))
-		handler := isyscall.GetHandler(call.NO())
+
+		no := call.NO()
+		handler := isyscall.GetHandler(no)
 		if handler == nil {
-			debug.Logf("[syscall] unhandled syscall %s(%d)", syscallName(int(call.NO())), call.NO())
-			// call.SetRet(isyscall.Errno(syscall.EINVAL))
-			// call.SetRet(isyscall.Errno(syscall.EPERM))
+			debug.Logf("[syscall] unhandled syscall %s(%d)", syscallName(int(no)), no)
+			call.SetErrorNO(syscall.ENOSYS)
 			call.Done()
 			continue
 		}
-		go handler(call)
+		go func() {
+			handler(call)
+			var iret interface{}
+			ret := call.Ret()
+			if hasErrno(ret) {
+				iret = syscall.Errno(-ret)
+			} else {
+				iret = ret
+			}
+			debug.Logf("[syscall] %s(%d)(0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x) = %v",
+				syscallName(int(no)), no,
+				call.Arg(0), call.Arg(1), call.Arg(2), call.Arg(3),
+				call.Arg(4), call.Arg(5), iret,
+			)
+			call.Done()
+		}()
 	}
+}
+
+func hasErrno(n uintptr) bool {
+	return 1<<(sys.PtrSize*8-1)&n != 0
 }

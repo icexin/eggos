@@ -6,6 +6,10 @@ import (
 	_ "unsafe"
 )
 
+const (
+	EPANIC syscall.Errno = 0xfffff
+)
+
 var (
 	handlers [512]Handler
 )
@@ -37,6 +41,11 @@ func (r *Request) SetRet(v uintptr) {
 }
 
 //go:nosplit
+func (r *Request) Ret() uintptr {
+	return r.tf.Ret()
+}
+
+//go:nosplit
 func (r *Request) SetErrorNO(errno syscall.Errno) {
 	r.SetRet(Errno(errno))
 }
@@ -47,8 +56,7 @@ func (r *Request) SetError(err error) {
 		r.SetRet(0)
 		return
 	}
-	fmt.Printf("syscall error: %s\n", err)
-	r.SetErrorNO(syscall.EINVAL)
+	r.SetRet(Error(err))
 }
 
 func (r *Request) Done() {
@@ -75,5 +83,6 @@ func Error(err error) uintptr {
 		return Errno(code)
 	}
 	fmt.Printf("syscall error: %s\n", err)
-	return ^uintptr(0)
+	ret := uintptr(syscall.EINVAL)
+	return -ret
 }

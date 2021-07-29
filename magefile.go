@@ -103,6 +103,16 @@ func Test() error {
 	return nil
 }
 
+func TestDebug() error {
+	kernelTarget = KernelTest
+	err := QemuDebug()
+	status := mg.ExitStatus(err)
+	if status != 0 && status != 1 {
+		return err
+	}
+	return nil
+}
+
 // Qemu run multiboot.elf on qemu.
 // If env QEMU_ACCEL is set，QEMU acceleration will be enabled.
 // If env QEMU_GRAPHIC is set QEMU will run in graphic mode.
@@ -113,6 +123,7 @@ func Qemu() error {
 	detectQemu()
 	args := append([]string{}, QEMU_OPT...)
 	args = append(args, "-kernel", "multiboot.elf")
+	args = append(args, "-append", os.Getenv("EGGOS_ARGS"))
 	return sh.RunV(QEMU64, args...)
 }
 
@@ -125,6 +136,7 @@ func QemuDebug() error {
 	detectQemu()
 	args := append([]string{}, QEMU_DEBUG_OPT...)
 	args = append(args, "-kernel", "multiboot.elf")
+	args = append(args, "-append", os.Getenv("EGGOS_ARGS"))
 	return sh.RunV(QEMU64, args...)
 }
 
@@ -293,7 +305,6 @@ func initQemuOpt() []string {
 	if os.Getenv("QEMU_GRAPHIC") == "" {
 		out = append(out, "-nographic")
 	}
-	out = append(out, "-append", os.Getenv("EGGOS_ARGS"))
 	return out
 }
 

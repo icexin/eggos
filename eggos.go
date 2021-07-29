@@ -31,11 +31,7 @@ func kernelInit() {
 	vbe.Init()
 	fbcga.Init()
 	pci.Init()
-
-	err := inet.Init()
-	if err != nil {
-		panic(err)
-	}
+	inet.Init()
 }
 
 func init() {

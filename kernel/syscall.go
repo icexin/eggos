@@ -147,7 +147,9 @@ func canForward(req *isyscall.Request) bool {
 //go:nosplit
 func blocksyscall() {
 	tf := *&Mythread().systf
-	ret, _, errno := syscall.Syscall6(tf.AX, tf.BX, tf.CX, tf.DX, tf.SI, tf.DI, tf.BP)
+	c := tf.SyscallRequest()
+	ret, _, errno := syscall.Syscall6(c.NO(), c.Arg(0), c.Arg(1), c.Arg(2),
+		c.Arg(3), c.Arg(4), c.Arg(5))
 	if errno != 0 {
 		sys.SetAX(-uintptr(errno))
 	} else {

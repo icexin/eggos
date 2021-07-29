@@ -14,7 +14,7 @@ func TestNetworking(t *testing.T) {
 	wg.Add(1)
 
 	server := http.Server{
-		Addr: ":8000",
+		Addr: ":80",
 	}
 
 	go func() {
@@ -22,15 +22,18 @@ func TestNetworking(t *testing.T) {
 
 		err := server.ListenAndServe()
 		if err != nil {
-			t.Fatal(err)
+			t.Error(err)
 		}
 	}()
+	defer func() {
+		server.Shutdown(context.Background())
+		wg.Wait()
+	}()
 
-	resp, err := http.Get("http://127.0.0.1:8000/")
+	resp, err := http.Get("http://127.0.0.1/")
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
+		return
 	}
 	resp.Body.Close()
-	server.Shutdown(context.Background())
-	wg.Wait()
 }

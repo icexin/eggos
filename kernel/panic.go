@@ -35,6 +35,7 @@ func throwtf(tf *trapFrame, msg string) {
 		debug.PrintStr("\n")
 	}
 
+	debug.QemuExit(0xff)
 	for {
 	}
 }
