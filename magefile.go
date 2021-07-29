@@ -39,6 +39,10 @@ var (
 	QEMU_DEBUG_OPT = initQemuDebugOpt()
 )
 
+var (
+	kernelTarget = Kernel
+)
+
 const (
 	goMajorVersionSupported    = 1
 	maxGoMinorVersionSupported = 16
@@ -56,6 +60,18 @@ func Kernel() error {
 		"-ldflags", goLdflags, "-gcflags", GOGCFLAGS, "./kmain")
 }
 
+func KernelTest() error {
+	detectGoVersion()
+	env := map[string]string{
+		"GOOS":   "linux",
+		"GOARCH": "amd64",
+	}
+	goLdflags := "-E github.com/icexin/eggos/kernel.rt0 -T 0x100000"
+	return sh.RunWithV(env, gobin(), "test", "-c", "-o", "kernel.elf",
+		"-ldflags", goLdflags, "-gcflags", GOGCFLAGS, "./tests")
+
+}
+
 func Boot64() error {
 	compileCfile("boot/boot64.S", "-m64")
 	compileCfile("boot/boot64main.c", "-m64")
@@ -68,13 +84,23 @@ func Boot64() error {
 // Multiboot target build Multiboot specification compatible elf format, generate multiboot.elf
 func Multiboot() error {
 	mg.Deps(Boot64)
-	mg.Deps(Kernel)
+	mg.Deps(kernelTarget)
 	compileCfile("boot/multiboot.c", "-m32")
 	compileCfile("boot/multiboot_header.S", "-m32")
 	ldflags := "-Ttext 0x3300000 -m elf_i386 -o multiboot.elf multiboot.o multiboot_header.o -b binary kernel.elf -b binary boot64.elf"
 	ldArgs := append([]string{}, LDFLAGS...)
 	ldArgs = append(ldArgs, strings.Fields(ldflags)...)
 	return sh.RunV(LD, ldArgs...)
+}
+
+func Test() error {
+	kernelTarget = KernelTest
+	err := Qemu()
+	status := mg.ExitStatus(err)
+	if status != 0 && status != 1 {
+		return err
+	}
+	return nil
 }
 
 // Qemu run multiboot.elf on qemu.
