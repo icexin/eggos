@@ -10,6 +10,7 @@ import (
 )
 
 func TestNetworking(t *testing.T) {
+	t.Skip()
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 

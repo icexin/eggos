@@ -181,6 +181,9 @@ func Console() io.ReadWriter {
 }
 
 func Init() {
+	cononce.Do(func() {
+		con = newConsole()
+	})
 	uart.OnInput(con.intr)
 	kbd.OnInput(con.intr)
 }
