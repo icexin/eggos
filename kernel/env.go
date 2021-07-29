@@ -11,9 +11,19 @@ import (
 //go:nosplit
 func envput(pbuf *[]byte, v uintptr) uintptr {
 	buf := *pbuf
-	*(*uintptr)(unsafe.Pointer(&buf[0])) = v
+	p := unsafe.Pointer(&buf[0])
+	// *p = v
+	*(*uintptr)(p) = v
+	// advance buffer
 	*pbuf = buf[unsafe.Sizeof(v):]
+	// return p
 	return uintptr(unsafe.Pointer(&buf[0]))
+}
+
+// envptr used to alloc an *uintptr
+//go:nosplit
+func envptr(pbuf *[]byte) *uintptr {
+	return (*uintptr)(unsafe.Pointer(envput(pbuf, 0)))
 }
 
 //go:nosplit
@@ -28,19 +38,16 @@ func envdup(pbuf *[]byte, s string) uintptr {
 func prepareArgs(sp uintptr) {
 	buf := sys.UnsafeBuffer(sp, 256)
 
-	var argc uintptr
-	// put args
-	argcbuf := buf
-	// reserve argc slot
+	var argc uintptr = 1
+	// put argc slot
 	envput(&buf, argc)
-
-	argc = putKernelArgs(&buf)
-	envput(&argcbuf, argc)
+	arg0 := envptr(&buf)
 	// end of args
 	envput(&buf, 0)
 
-	envTerm := (*uintptr)(unsafe.Pointer(envput(&buf, 0)))
-	envGoDebug := (*uintptr)(unsafe.Pointer(envput(&buf, 0)))
+	envTerm := envptr(&buf)
+	envGoDebug := envptr(&buf)
+	putKernelArgs(&buf)
 	// end of env
 	envput(&buf, 0)
 
@@ -50,6 +57,7 @@ func prepareArgs(sp uintptr) {
 	envput(&buf, linux.AT_NULL)
 	envput(&buf, 0)
 
+	*arg0 = envdup(&buf, "eggos\x00")
 	*envTerm = envdup(&buf, "TERM=xterm\x00")
 	*envGoDebug = envdup(&buf, "GODEBUG=asyncpreemptoff=1\x00")
 }

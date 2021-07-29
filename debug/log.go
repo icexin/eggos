@@ -3,6 +3,7 @@ package debug
 import (
 	"bytes"
 	"fmt"
+	"os"
 
 	"github.com/icexin/eggos/console"
 	"github.com/icexin/eggos/drivers/uart"
@@ -10,6 +11,9 @@ import (
 )
 
 func Logf(fmtstr string, args ...interface{}) {
+	if os.Getenv("EGGOS_DEBUG") == "" {
+		return
+	}
 	buf := bytes.Buffer{}
 	fmt.Fprintf(&buf, fmtstr+"\n", args...)
 	buf.WriteTo(console.Console())

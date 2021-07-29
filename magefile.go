@@ -123,7 +123,7 @@ func Qemu() error {
 	detectQemu()
 	args := append([]string{}, QEMU_OPT...)
 	args = append(args, "-kernel", "multiboot.elf")
-	args = append(args, "-append", os.Getenv("EGGOS_ARGS"))
+	args = append(args, "-append", os.Getenv("EGGOS_ENV"))
 	return sh.RunV(QEMU64, args...)
 }
 
@@ -136,7 +136,7 @@ func QemuDebug() error {
 	detectQemu()
 	args := append([]string{}, QEMU_DEBUG_OPT...)
 	args = append(args, "-kernel", "multiboot.elf")
-	args = append(args, "-append", os.Getenv("EGGOS_ARGS"))
+	args = append(args, "-append", os.Getenv("EGGOS_ENV"))
 	return sh.RunV(QEMU64, args...)
 }
 

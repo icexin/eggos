@@ -3,7 +3,6 @@ package inet
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/icexin/eggos/debug"
@@ -59,7 +58,6 @@ func Init() {
 	if err1 != nil {
 		panic(err)
 	}
-	fmt.Printf("%v\n", nstack.GetRouteTable())
 	return
 
 	nstack.AddAddress(defaultNIC, ipv4.ProtocolNumber, tcpip.Address([]byte{10, 0, 2, 15}))
