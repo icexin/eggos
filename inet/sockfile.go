@@ -65,6 +65,7 @@ func (s *sockFile) Read(p []byte) (int, error) {
 	case *tcpip.ErrClosedForReceive:
 		return 0, nil
 	default:
+		debug.Logf("[socket] read error:%s", terr)
 		return 0, e(terr)
 	}
 	if result.Count < result.Total {
@@ -86,6 +87,7 @@ func (s *sockFile) Write(p []byte) (int, error) {
 	case *tcpip.ErrClosedForSend:
 		return 0, syscall.EPIPE
 	default:
+		debug.Logf("[socket] write error:%s", terr)
 		return 0, e(terr)
 	}
 }
@@ -129,6 +131,7 @@ func (s *sockFile) Bind(uaddr, uaddrlen uintptr) error {
 	}
 	err := s.ep.Bind(addr)
 	if err != nil {
+		debug.Logf("[socket] bind error:%s", err)
 		return e(err)
 	}
 	return nil
@@ -149,6 +152,7 @@ func (s *sockFile) Connect(uaddr, uaddrlen uintptr) error {
 		return syscall.EINPROGRESS
 	}
 	if err != nil {
+		debug.Logf("[socket] connect error:%s", err)
 		return e(err)
 	}
 	return nil
@@ -156,6 +160,9 @@ func (s *sockFile) Connect(uaddr, uaddrlen uintptr) error {
 
 func (s *sockFile) Listen(n uintptr) error {
 	err := s.ep.Listen(int(n))
+	if err != nil {
+		debug.Logf("[socket] listen error:%s", err)
+	}
 	return e(err)
 }
 
@@ -171,11 +178,13 @@ func (s *sockFile) Accept4(uaddr, uaddrlen, flag uintptr) (int, error) {
 	case *tcpip.ErrWouldBlock:
 		return 0, syscall.EAGAIN
 	default:
+		debug.Logf("[socket] accept error:%s", err)
 		return 0, e(err)
 	}
 
 	newaddr, err := newep.GetRemoteAddress()
 	if err != nil {
+		debug.Logf("[socket] accept getRemoteAddress error:%s", err)
 		return 0, e(err)
 	}
 	saddr.Family = syscall.AF_INET
@@ -259,6 +268,7 @@ func (s *sockFile) Getpeername(uaddr, uaddrlen uintptr) error {
 	saddr := (*linux.SockAddrInet)(unsafe.Pointer(uaddr))
 	addr, err := s.ep.GetRemoteAddress()
 	if err != nil {
+		debug.Logf("[socket] getpeername error:%s", err)
 		return e(err)
 	}
 	saddr.Family = syscall.AF_INET
@@ -270,6 +280,7 @@ func (s *sockFile) Getsockname(uaddr, uaddrlen uintptr) error {
 	saddr := (*linux.SockAddrInet)(unsafe.Pointer(uaddr))
 	addr, err := s.ep.GetLocalAddress()
 	if err != nil {
+		debug.Logf("[socket] getsockname error:%s", err)
 		return e(err)
 	}
 	saddr.Family = syscall.AF_INET

@@ -1,7 +1,6 @@
 package isyscall
 
 import (
-	"fmt"
 	"syscall"
 	_ "unsafe"
 )
@@ -82,7 +81,6 @@ func Error(err error) uintptr {
 	if code, ok := err.(syscall.Errno); ok {
 		return Errno(code)
 	}
-	fmt.Printf("syscall error: %s\n", err)
 	ret := uintptr(syscall.EINVAL)
 	return -ret
 }
