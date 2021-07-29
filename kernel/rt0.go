@@ -1,10 +1,10 @@
 package kernel
 
 import (
+	"github.com/icexin/eggos/drivers/multiboot"
+	"github.com/icexin/eggos/drivers/pic"
+	"github.com/icexin/eggos/drivers/uart"
 	"github.com/icexin/eggos/kernel/mm"
-	"github.com/icexin/eggos/multiboot"
-	"github.com/icexin/eggos/pic"
-	"github.com/icexin/eggos/uart"
 )
 
 //go:nosplit

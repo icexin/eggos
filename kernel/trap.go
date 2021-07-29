@@ -4,9 +4,9 @@ import (
 	"unsafe"
 
 	"github.com/icexin/eggos/debug"
+	"github.com/icexin/eggos/drivers/pic"
 	"github.com/icexin/eggos/kernel/isyscall"
 	"github.com/icexin/eggos/kernel/trap"
-	"github.com/icexin/eggos/pic"
 	"github.com/icexin/eggos/sys"
 )
 

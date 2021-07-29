@@ -5,7 +5,7 @@ import (
 	"image/color"
 	"image/draw"
 
-	"github.com/icexin/eggos/vbe"
+	"github.com/icexin/eggos/drivers/vbe"
 
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/basicfont"

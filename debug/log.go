@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/icexin/eggos/console"
+	"github.com/icexin/eggos/drivers/uart"
 	"github.com/icexin/eggos/sys"
-	"github.com/icexin/eggos/uart"
 )
 
 var (

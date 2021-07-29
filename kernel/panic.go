@@ -4,8 +4,8 @@ import (
 	"unsafe"
 
 	"github.com/icexin/eggos/debug"
+	"github.com/icexin/eggos/drivers/uart"
 	"github.com/icexin/eggos/sys"
-	"github.com/icexin/eggos/uart"
 )
 
 var (

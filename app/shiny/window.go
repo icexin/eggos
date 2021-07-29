@@ -7,9 +7,9 @@ import (
 	"image/png"
 
 	"github.com/icexin/eggos/assets"
-	imouse "github.com/icexin/eggos/ps2/mouse"
-	"github.com/icexin/eggos/uart"
-	"github.com/icexin/eggos/vbe"
+	imouse "github.com/icexin/eggos/drivers/ps2/mouse"
+	"github.com/icexin/eggos/drivers/uart"
+	"github.com/icexin/eggos/drivers/vbe"
 	"golang.org/x/exp/shiny/screen"
 	"golang.org/x/image/math/f64"
 )

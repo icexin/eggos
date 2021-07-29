@@ -3,7 +3,7 @@ package mm
 import (
 	"unsafe"
 
-	"github.com/icexin/eggos/multiboot"
+	"github.com/icexin/eggos/drivers/multiboot"
 	"github.com/icexin/eggos/sys"
 )
 

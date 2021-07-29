@@ -4,9 +4,9 @@ import (
 	"image"
 	"unsafe"
 
+	"github.com/icexin/eggos/drivers/multiboot"
+	"github.com/icexin/eggos/drivers/uart"
 	"github.com/icexin/eggos/kernel/mm"
-	"github.com/icexin/eggos/multiboot"
-	"github.com/icexin/eggos/uart"
 )
 
 const bootloaderMagic = 0x2BADB002

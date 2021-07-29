@@ -1,6 +1,6 @@
 package kernel
 
-import "github.com/icexin/eggos/clock"
+import "github.com/icexin/eggos/drivers/clock"
 
 // called when go runtime init done
 func Init() {

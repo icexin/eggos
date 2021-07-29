@@ -7,10 +7,10 @@ import (
 	"unsafe"
 
 	"github.com/icexin/eggos/debug"
+	"github.com/icexin/eggos/drivers/pci"
+	"github.com/icexin/eggos/drivers/pic"
 	"github.com/icexin/eggos/inet"
 	"github.com/icexin/eggos/kernel/mm"
-	"github.com/icexin/eggos/pci"
-	"github.com/icexin/eggos/pic"
 	"github.com/icexin/eggos/sys"
 
 	"gvisor.dev/gvisor/pkg/tcpip/buffer"

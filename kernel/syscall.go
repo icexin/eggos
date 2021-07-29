@@ -5,11 +5,11 @@ import (
 	"unsafe"
 
 	"github.com/icexin/eggos/debug"
+	"github.com/icexin/eggos/drivers/uart"
 	"github.com/icexin/eggos/kernel/isyscall"
 	"github.com/icexin/eggos/kernel/mm"
 	"github.com/icexin/eggos/kernel/trap"
 	"github.com/icexin/eggos/sys"
-	"github.com/icexin/eggos/uart"
 	"golang.org/x/sys/unix"
 	"gvisor.dev/gvisor/pkg/abi/linux"
 	"gvisor.dev/gvisor/pkg/abi/linux/errno"

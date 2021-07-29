@@ -128,6 +128,22 @@ func sysSocket(c *isyscall.Request) {
 	c.Done()
 }
 
+func sysListen(c *isyscall.Request) {
+	sf, err := findSockFile(c.Arg(0))
+	if err != nil {
+		c.SetError(err)
+		return
+	}
+	err = sf.Listen(c.Arg(1))
+	if err != nil {
+		c.SetError(err)
+	}
+	c.SetRet(0)
+}
+
+func sysAccept(c *isyscall.Request) {
+}
+
 func ntohs(n uint16) uint16 {
 	return (n >> 8 & 0xff) | (n&0xff)<<8
 }

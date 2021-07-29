@@ -12,8 +12,8 @@ import (
 
 	"github.com/icexin/eggos/app"
 	"github.com/icexin/eggos/debug"
-	"github.com/icexin/eggos/kbd"
-	"github.com/icexin/eggos/vbe"
+	"github.com/icexin/eggos/drivers/kbd"
+	"github.com/icexin/eggos/drivers/vbe"
 
 	"github.com/fogleman/nes/nes"
 	"golang.org/x/image/draw"
