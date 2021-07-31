@@ -37,10 +37,11 @@ TEXT ·Mythread(SB), NOSPLIT, $0-8
 	MOVQ AX, ret+0(FP)
 	RET
 
-TEXT ·ksysClone(SB), NOSPLIT, $0-24
+TEXT ·ksysClone(SB), NOSPLIT, $0-32
 	MOVQ $SYS_clone, AX
-	MOVQ pc+0(FP), DI
+	MOVQ pc+0(FP), R12
 	MOVQ stack+8(FP), SI
+	MOVQ flags+16(FP), DI
 	// clear tls
 	XORQ R8, R8
 
@@ -49,11 +50,11 @@ TEXT ·ksysClone(SB), NOSPLIT, $0-24
 	// In parent, return.
 	CMPQ AX, $0
 	JEQ  3(PC)
-	MOVQ AX, ret+16(FP)
+	MOVQ AX, ret+24(FP)
 	RET
 
 	NOP SP // tell vet SP changed - stop checking offsets
-	JMP DI
+	JMP R12
 
 TEXT ·ksysYield(SB), NOSPLIT, $0
 	MOVQ $SYS_sched_yield, AX

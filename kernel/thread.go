@@ -17,6 +17,8 @@ const (
 
 	_THREAD_STACK_SIZE         = 32 << 10
 	_THREAD_STACK_GUARD_OFFSET = 1 << 10
+
+	_CLONE_IDLE = 0x8000000000000000
 )
 
 const (
@@ -179,7 +181,7 @@ func thread0Init() {
 }
 
 //go:nosplit
-func ksysClone(pc, stack uintptr) uintptr
+func ksysClone(pc, stack, flags uintptr) uintptr
 
 //go:nosplit
 func ksysYield()
@@ -198,20 +200,15 @@ func idleInit() {
 	stack := mm.SysMmap(0, _THREAD_STACK_SIZE) +
 		_THREAD_STACK_SIZE - _THREAD_STACK_GUARD_OFFSET
 
-	tid := ksysClone(sys.FuncPC(idle), stack)
+	tid := ksysClone(sys.FuncPC(idle), stack, _CLONE_IDLE)
 	idleThread = (threadptr)(unsafe.Pointer(&threads[tid]))
-
-	// make idle thread running at ring0, so that it can call HLT instruction.
-	tf := idleThread.ptr().tf
-	tf.CS = _KCODE_IDX << 3
-	tf.SS = _KDATA_IDX << 3
 }
 
 //go:nosplit
 func idle() {
 	for {
 		if sys.CS() != 8 {
-			throw("bad cs")
+			throw("bad cs in idle thread")
 		}
 		sys.Hlt()
 		ksysYield()
@@ -219,7 +216,7 @@ func idle() {
 }
 
 //go:nosplit
-func clone(pc, usp, tls uintptr) int {
+func clone(pc, usp, flags, tls uintptr) int {
 	my := Mythread()
 	chld := allocThread()
 
@@ -237,6 +234,11 @@ func clone(pc, usp, tls uintptr) int {
 	tf.SP = usp
 	tf.IP = pc
 	tf.AX = 0
+	// idle thread running on ring0 which rely on HLT ins
+	if flags&_CLONE_IDLE != 0 {
+		tf.CS = _KCODE_IDX << 3
+		tf.SS = _KDATA_IDX << 3
+	}
 
 	// for context
 	sp -= unsafe.Sizeof(context{})

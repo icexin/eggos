@@ -322,9 +322,10 @@ func sysClockGetTime(req *isyscall.Request) {
 //go:nosplit
 func sysClone(req *isyscall.Request) {
 	pc := Mythread().tf.IP
+	flags := req.Arg(0)
 	stack := req.Arg(1)
 	tls := req.Arg(4)
-	tid := clone(pc, stack, tls)
+	tid := clone(pc, stack, flags, tls)
 	req.SetRet(uintptr(tid))
 }
 
