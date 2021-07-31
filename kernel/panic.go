@@ -4,6 +4,7 @@ import (
 	"unsafe"
 
 	"github.com/icexin/eggos/debug"
+	"github.com/icexin/eggos/drivers/qemu"
 	"github.com/icexin/eggos/drivers/uart"
 	"github.com/icexin/eggos/kernel/sys"
 )
@@ -35,7 +36,7 @@ func throwtf(tf *trapFrame, msg string) {
 		debug.PrintStr("\n")
 	}
 
-	debug.QemuExit(0xff)
+	qemu.Exit(0xff)
 	for {
 	}
 }

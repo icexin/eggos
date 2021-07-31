@@ -5,6 +5,7 @@ import (
 	"unsafe"
 
 	"github.com/icexin/eggos/debug"
+	"github.com/icexin/eggos/drivers/qemu"
 	"github.com/icexin/eggos/drivers/uart"
 	"github.com/icexin/eggos/kernel/isyscall"
 	"github.com/icexin/eggos/kernel/mm"
@@ -387,7 +388,7 @@ func sysFixedMmap(req *isyscall.Request) {
 
 //go:nosplit
 func sysExitGroup(req *isyscall.Request) {
-	debug.QemuExit(int(req.Arg(0)))
+	qemu.Exit(int(req.Arg(0)))
 }
 
 //go:nosplit

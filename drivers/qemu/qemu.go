@@ -1,4 +1,4 @@
-package debug
+package qemu
 
 import "github.com/icexin/eggos/kernel/sys"
 
@@ -6,6 +6,6 @@ const (
 	qemuExitPort = 0x501
 )
 
-func QemuExit(code int) {
+func Exit(code int) {
 	sys.Outb(qemuExitPort, byte(code))
 }
