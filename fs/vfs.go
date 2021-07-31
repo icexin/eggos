@@ -4,19 +4,21 @@ import (
 	"io"
 	"math/rand"
 	"os"
+	"sync"
 	"syscall"
 	"unsafe"
 
 	"github.com/icexin/eggos/console"
 	"github.com/icexin/eggos/fs/mount"
 	"github.com/icexin/eggos/kernel/isyscall"
-	"github.com/icexin/eggos/sys"
+	"github.com/icexin/eggos/kernel/sys"
 
 	"github.com/spf13/afero"
 )
 
 var (
-	inodes []*Inode
+	inodeLock sync.Mutex
+	inodes    []*Inode
 
 	Root = mount.NewMountableFs(afero.NewMemMapFs())
 )
@@ -32,12 +34,18 @@ type Inode struct {
 }
 
 func (i *Inode) Release() {
+	inodeLock.Lock()
+	defer inodeLock.Unlock()
+
 	i.inuse = false
 	i.File = nil
 	i.Fd = -1
 }
 
 func AllocInode() (int, *Inode) {
+	inodeLock.Lock()
+	defer inodeLock.Unlock()
+
 	var fd int
 	var ni *Inode
 	for i := range inodes {
@@ -65,6 +73,9 @@ func AllocFileNode(r io.ReadWriteCloser) (int, *Inode) {
 }
 
 func GetInode(fd int) (*Inode, error) {
+	inodeLock.Lock()
+	defer inodeLock.Unlock()
+
 	if int(fd) >= len(inodes) {
 		return nil, syscall.EBADF
 	}
@@ -80,52 +91,51 @@ func fscall(fn int) isyscall.Handler {
 		var err error
 		if fn == syscall.SYS_OPENAT {
 			var fd int
-			fd, err = sysOpen(c.Args[0], c.Args[1], c.Args[2], c.Args[3])
+			fd, err = sysOpen(c.Arg(0), c.Arg(1), c.Arg(2), c.Arg(3))
 			if err != nil {
-				c.Ret = isyscall.Error(err)
+				c.SetRet(isyscall.Error(err))
 			} else {
-				c.Ret = uintptr(fd)
+				c.SetRet(uintptr(fd))
 			}
-			c.Done()
+
 			return
 		}
 
 		var ni *Inode
 
-		ni, err = GetInode(int(c.Args[0]))
+		ni, err = GetInode(int(c.Arg(0)))
 		if err != nil {
-			c.Ret = isyscall.Error(err)
-			c.Done()
+			c.SetRet(isyscall.Error(err))
+
 			return
 		}
 
 		switch fn {
 		case syscall.SYS_READ:
 			var n int
-			n, err = sysRead(ni, c.Args[1], c.Args[2])
-			c.Ret = uintptr(n)
+			n, err = sysRead(ni, c.Arg(1), c.Arg(2))
+			c.SetRet(uintptr(n))
 		case syscall.SYS_WRITE:
 			var n int
-			n, err = sysWrite(ni, c.Args[1], c.Args[2])
-			c.Ret = uintptr(n)
+			n, err = sysWrite(ni, c.Arg(1), c.Arg(2))
+			c.SetRet(uintptr(n))
 		case syscall.SYS_CLOSE:
 			err = sysClose(ni)
-		case syscall.SYS_FSTAT64:
-			err = sysStat(ni, c.Args[1])
+		case syscall.SYS_FSTAT:
+			err = sysStat(ni, c.Arg(1))
 		case syscall.SYS_IOCTL:
-			err = sysIoctl(ni, c.Args[1], c.Args[2])
+			err = sysIoctl(ni, c.Arg(1), c.Arg(2))
 		}
 
 		if err != nil {
-			c.Ret = isyscall.Error(err)
+			c.SetError(err)
 		}
-		c.Done()
+
 	}
 }
 
 func sysOpen(dirfd, name, flags, perm uintptr) (int, error) {
 	path := cstring(name)
-	fd, ni := AllocInode()
 	f, err := Root.OpenFile(path, int(flags), os.FileMode(perm))
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -133,6 +143,7 @@ func sysOpen(dirfd, name, flags, perm uintptr) (int, error) {
 		}
 		return 0, err
 	}
+	fd, ni := AllocInode()
 	ni.File = f
 	return fd, nil
 }
@@ -179,7 +190,7 @@ func sysStat(ni *Inode, statptr uintptr) error {
 		return err
 	}
 	stat.Mode = uint32(info.Mode())
-	stat.Mtim.Sec = int32(info.ModTime().Unix())
+	stat.Mtim.Sec = int64(info.ModTime().Unix())
 	stat.Size = info.Size()
 
 	return nil
@@ -194,8 +205,7 @@ func sysIoctl(ni *Inode, op, arg uintptr) error {
 }
 
 func sysFcntl(call *isyscall.Request) {
-	call.Ret = 0
-	call.Done()
+	call.SetRet(0)
 }
 
 // func Uname(buf *Utsname)
@@ -203,44 +213,43 @@ func sysUname(c *isyscall.Request) {
 	unsafebuf := func(b *[65]int8) []byte {
 		return (*[65]byte)(unsafe.Pointer(b))[:]
 	}
-	buf := (*syscall.Utsname)(unsafe.Pointer(c.Args[0]))
+	buf := (*syscall.Utsname)(unsafe.Pointer(c.Arg(0)))
 	copy(unsafebuf(&buf.Machine), "x86_32")
 	copy(unsafebuf(&buf.Domainname), "icexin.com")
 	copy(unsafebuf(&buf.Nodename), "icexin.local")
 	copy(unsafebuf(&buf.Release), "0")
 	copy(unsafebuf(&buf.Sysname), "eggos")
 	copy(unsafebuf(&buf.Version), "0")
-	c.Ret = 0
-	c.Done()
+	c.SetRet(0)
+
 }
 
 // func fstatat(dirfd int, path string, stat *Stat_t, flags int)
 func sysFstatat64(c *isyscall.Request) {
-	name := cstring(c.Args[1])
-	stat := (*syscall.Stat_t)(unsafe.Pointer(c.Args[2]))
+	name := cstring(c.Arg(1))
+	stat := (*syscall.Stat_t)(unsafe.Pointer(c.Arg(2)))
 	info, err := Root.Stat(name)
 	if err != nil {
 		if os.IsNotExist(err) {
-			c.Ret = isyscall.Errno(syscall.ENOENT)
+			c.SetRet(isyscall.Errno(syscall.ENOENT))
 		} else {
-			c.Ret = isyscall.Error(err)
+			c.SetRet(isyscall.Error(err))
 		}
-		c.Done()
+
 		return
 	}
 	stat.Mode = uint32(info.Mode())
-	stat.Mtim.Sec = int32(info.ModTime().Unix())
+	stat.Mtim.Sec = int64(info.ModTime().Unix())
 	stat.Size = info.Size()
-	c.Ret = 0
-	c.Done()
+	c.SetRet(0)
+
 }
 
 func sysRandom(call *isyscall.Request) {
-	p, n := call.Args[0], call.Args[1]
+	p, n := call.Arg(0), call.Arg(1)
 	buf := sys.UnsafeBuffer(p, int(n))
 	rand.Read(buf)
-	call.Ret = n
-	call.Done()
+	call.SetRet(n)
 }
 
 func cstring(ptr uintptr) string {
@@ -313,6 +322,10 @@ func vfsInit() {
 	AllocFileNode(NewFile(nil, c, nil))
 	// epoll fd
 	AllocFileNode(NewFile(nil, nil, nil))
+	// pipe read fd
+	AllocFileNode(NewFile(nil, nil, nil))
+	// pipe write fd
+	AllocFileNode(NewFile(nil, nil, nil))
 
 	etcInit()
 }
@@ -322,11 +335,11 @@ func sysInit() {
 	isyscall.Register(syscall.SYS_WRITE, fscall(syscall.SYS_WRITE))
 	isyscall.Register(syscall.SYS_READ, fscall(syscall.SYS_READ))
 	isyscall.Register(syscall.SYS_CLOSE, fscall(syscall.SYS_CLOSE))
-	isyscall.Register(syscall.SYS_FSTAT64, fscall(syscall.SYS_FSTAT64))
+	isyscall.Register(syscall.SYS_FSTAT, fscall(syscall.SYS_FSTAT))
 	isyscall.Register(syscall.SYS_IOCTL, fscall(syscall.SYS_IOCTL))
 	isyscall.Register(syscall.SYS_FCNTL, sysFcntl)
-	isyscall.Register(syscall.SYS_FCNTL64, sysFcntl)
-	isyscall.Register(syscall.SYS_FSTATAT64, sysFstatat64)
+	isyscall.Register(syscall.SYS_FCNTL, sysFcntl)
+	isyscall.Register(syscall.SYS_FSTATFS, sysFstatat64)
 	isyscall.Register(syscall.SYS_UNAME, sysUname)
 	isyscall.Register(355, sysRandom)
 }

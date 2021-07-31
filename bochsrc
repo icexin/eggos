@@ -16,6 +16,8 @@ mouse: enabled=0
 #display_library: nogui
 
 #log:bochs.log
+debug: action=ignore, cpu0=report
+#info: action=report
 magic_break:enabled=1
 #gdb调试
 #gdbstub: enabled=1, port=1234, text_base=0,data_base=0,bss_base=0

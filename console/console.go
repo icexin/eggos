@@ -6,9 +6,9 @@ import (
 	"syscall"
 	"unsafe"
 
-	"github.com/icexin/eggos/cga"
-	"github.com/icexin/eggos/kbd"
-	"github.com/icexin/eggos/uart"
+	"github.com/icexin/eggos/drivers/cga"
+	"github.com/icexin/eggos/drivers/kbd"
+	"github.com/icexin/eggos/drivers/uart"
 )
 
 const (
@@ -25,6 +25,8 @@ type console struct {
 
 	mutex  sync.Mutex
 	notify *sync.Cond
+
+	wmutex sync.Mutex
 }
 
 var (
@@ -135,6 +137,8 @@ func (c *console) Read(p []byte) (int, error) {
 }
 
 func (c *console) Write(p []byte) (int, error) {
+	c.wmutex.Lock()
+	defer c.wmutex.Unlock()
 	for _, ch := range p {
 		c.putc(ch)
 	}
@@ -167,12 +171,19 @@ type winSize struct {
 	xpixel, ypixel uint16
 }
 
+var cononce sync.Once
+
 func Console() io.ReadWriter {
+	cononce.Do(func() {
+		con = newConsole()
+	})
 	return con
 }
 
 func Init() {
-	con = newConsole()
+	cononce.Do(func() {
+		con = newConsole()
+	})
 	uart.OnInput(con.intr)
 	kbd.OnInput(con.intr)
 }

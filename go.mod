@@ -18,6 +18,7 @@ require (
 	github.com/magefile/mage v1.11.0
 	github.com/mattn/go-shellwords v1.0.10
 	github.com/peterh/liner v1.2.0
+	github.com/prometheus/client_golang v1.7.1
 	github.com/rakyll/statik v0.1.7
 	github.com/robertkrimen/otto v0.0.0-20191219234010-c382bd3c16ff
 	github.com/spf13/afero v1.4.0

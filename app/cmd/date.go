@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/icexin/eggos/app"
-	"github.com/icexin/eggos/clock"
+	"github.com/icexin/eggos/drivers/clock"
 )
 
 func datemain(ctx *app.Context) error {

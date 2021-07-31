@@ -1,9 +1,12 @@
 package isyscall
 
 import (
-	"fmt"
 	"syscall"
 	_ "unsafe"
+)
+
+const (
+	EPANIC syscall.Errno = 0xfffff
 )
 
 var (
@@ -16,11 +19,43 @@ func wakeup(lock *uintptr, n int)
 type Handler func(req *Request)
 
 type Request struct {
-	NO   uintptr
-	Args [6]uintptr
-	Ret  uintptr
+	tf *trapFrame
 
 	Lock uintptr
+}
+
+//go:nosplit
+func (r *Request) NO() uintptr {
+	return r.tf.NO()
+}
+
+//go:nosplit
+func (r *Request) Arg(n int) uintptr {
+	return r.tf.Arg(n)
+}
+
+//go:nosplit
+func (r *Request) SetRet(v uintptr) {
+	r.tf.SetRet(v)
+}
+
+//go:nosplit
+func (r *Request) Ret() uintptr {
+	return r.tf.Ret()
+}
+
+//go:nosplit
+func (r *Request) SetErrorNO(errno syscall.Errno) {
+	r.SetRet(Errno(errno))
+}
+
+//go:nosplit
+func (r *Request) SetError(err error) {
+	if err == nil {
+		r.SetRet(0)
+		return
+	}
+	r.SetRet(Error(err))
 }
 
 func (r *Request) Done() {
@@ -46,6 +81,6 @@ func Error(err error) uintptr {
 	if code, ok := err.(syscall.Errno); ok {
 		return Errno(code)
 	}
-	fmt.Printf("syscall error: %s\n", err)
-	return ^uintptr(0)
+	ret := uintptr(syscall.EINVAL)
+	return -ret
 }
