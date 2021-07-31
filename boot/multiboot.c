@@ -21,18 +21,19 @@ extern char _binary_boot64_elf_start[];
 void memcpy(char *dst, char *src, int count);
 void memset(char *addr, char data, int cnt);
 uint64 loadelf(char *image);
+typedef void (*boot64_entry_t)(uint32, uint32, uint32);
 
 void multibootmain(unsigned long magic, multiboot_info_t *mbi)
 {
     uint64 entry_addr = 0;
-    void (*boot64_entry)(uint32, uint32, uint32);
+    boot64_entry_t boot64_entry;
 
     entry_addr = loadelf(_binary_boot64_elf_start);
     if (entry_addr == 0)
     {
         return;
     }
-    boot64_entry = (void (*)(uint32, uint32, uint32))((uint32)entry_addr);
+    boot64_entry = (boot64_entry_t)((uint32)entry_addr);
 
     entry_addr = loadelf(_binary_kernel_elf_start);
     if (entry_addr == 0)
