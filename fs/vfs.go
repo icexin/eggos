@@ -4,6 +4,7 @@ import (
 	"io"
 	"math/rand"
 	"os"
+	"sync"
 	"syscall"
 	"unsafe"
 
@@ -16,7 +17,8 @@ import (
 )
 
 var (
-	inodes []*Inode
+	inodeLock sync.Mutex
+	inodes    []*Inode
 
 	Root = mount.NewMountableFs(afero.NewMemMapFs())
 )
@@ -32,12 +34,18 @@ type Inode struct {
 }
 
 func (i *Inode) Release() {
+	inodeLock.Lock()
+	defer inodeLock.Unlock()
+
 	i.inuse = false
 	i.File = nil
 	i.Fd = -1
 }
 
 func AllocInode() (int, *Inode) {
+	inodeLock.Lock()
+	defer inodeLock.Unlock()
+
 	var fd int
 	var ni *Inode
 	for i := range inodes {
@@ -65,6 +73,9 @@ func AllocFileNode(r io.ReadWriteCloser) (int, *Inode) {
 }
 
 func GetInode(fd int) (*Inode, error) {
+	inodeLock.Lock()
+	defer inodeLock.Unlock()
+
 	if int(fd) >= len(inodes) {
 		return nil, syscall.EBADF
 	}
@@ -125,7 +136,6 @@ func fscall(fn int) isyscall.Handler {
 
 func sysOpen(dirfd, name, flags, perm uintptr) (int, error) {
 	path := cstring(name)
-	fd, ni := AllocInode()
 	f, err := Root.OpenFile(path, int(flags), os.FileMode(perm))
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -133,6 +143,7 @@ func sysOpen(dirfd, name, flags, perm uintptr) (int, error) {
 		}
 		return 0, err
 	}
+	fd, ni := AllocInode()
 	ni.File = f
 	return fd, nil
 }
