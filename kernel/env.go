@@ -4,7 +4,7 @@ import (
 	"unsafe"
 
 	"github.com/icexin/eggos/drivers/multiboot"
-	"github.com/icexin/eggos/sys"
+	"github.com/icexin/eggos/kernel/sys"
 	"gvisor.dev/gvisor/pkg/abi/linux"
 )
 

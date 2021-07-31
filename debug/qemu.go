@@ -1,6 +1,6 @@
 package debug
 
-import "github.com/icexin/eggos/sys"
+import "github.com/icexin/eggos/kernel/sys"
 
 const (
 	qemuExitPort = 0x501

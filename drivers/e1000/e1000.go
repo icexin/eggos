@@ -11,7 +11,7 @@ import (
 	"github.com/icexin/eggos/drivers/pic"
 	"github.com/icexin/eggos/inet"
 	"github.com/icexin/eggos/kernel/mm"
-	"github.com/icexin/eggos/sys"
+	"github.com/icexin/eggos/kernel/sys"
 
 	"gvisor.dev/gvisor/pkg/tcpip/buffer"
 	"gvisor.dev/gvisor/pkg/tcpip/stack"

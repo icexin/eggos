@@ -11,7 +11,7 @@ import (
 	"github.com/icexin/eggos/console"
 	"github.com/icexin/eggos/fs/mount"
 	"github.com/icexin/eggos/kernel/isyscall"
-	"github.com/icexin/eggos/sys"
+	"github.com/icexin/eggos/kernel/sys"
 
 	"github.com/spf13/afero"
 )

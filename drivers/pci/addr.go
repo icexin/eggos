@@ -1,6 +1,6 @@
 package pci
 
-import "github.com/icexin/eggos/sys"
+import "github.com/icexin/eggos/kernel/sys"
 
 const (
 	configAddrPort = 0xcf8

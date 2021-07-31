@@ -7,7 +7,7 @@ import (
 
 	"github.com/icexin/eggos/debug"
 	"github.com/icexin/eggos/kernel/isyscall"
-	"github.com/icexin/eggos/sys"
+	"github.com/icexin/eggos/kernel/sys"
 )
 
 var (

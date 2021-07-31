@@ -3,7 +3,7 @@ package mm
 import (
 	"unsafe"
 
-	"github.com/icexin/eggos/sys"
+	"github.com/icexin/eggos/kernel/sys"
 )
 
 //go:notinheap

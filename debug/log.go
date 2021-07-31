@@ -7,7 +7,7 @@ import (
 
 	"github.com/icexin/eggos/console"
 	"github.com/icexin/eggos/drivers/uart"
-	"github.com/icexin/eggos/sys"
+	"github.com/icexin/eggos/kernel/sys"
 )
 
 func Logf(fmtstr string, args ...interface{}) {

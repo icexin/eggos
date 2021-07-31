@@ -5,7 +5,7 @@ import (
 
 	"github.com/icexin/eggos/drivers/cga/fbcga"
 	"github.com/icexin/eggos/drivers/vbe"
-	"github.com/icexin/eggos/sys"
+	"github.com/icexin/eggos/kernel/sys"
 )
 
 type Backend interface {

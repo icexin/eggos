@@ -4,7 +4,7 @@ import (
 	"unsafe"
 
 	"github.com/icexin/eggos/kernel/mm"
-	"github.com/icexin/eggos/sys"
+	"github.com/icexin/eggos/kernel/sys"
 )
 
 const (
