@@ -5,9 +5,9 @@ import (
 	"syscall"
 	"unsafe"
 
-	"github.com/icexin/eggos/debug"
 	"github.com/icexin/eggos/kernel/isyscall"
 	"github.com/icexin/eggos/kernel/sys"
+	"github.com/icexin/eggos/log"
 )
 
 var (
@@ -55,7 +55,7 @@ func runSyscallThread() {
 	runtime.LockOSThread()
 	my := Mythread()
 	syscalltask = (threadptr)(unsafe.Pointer(my))
-	debug.Logf("[syscall] tid:%d", my.id)
+	log.Infof("[syscall] tid:%d", my.id)
 	for {
 		callptr, _, err := syscall.Syscall(SYS_WAIT_SYSCALL, 0, 0, 0)
 		if err != 0 {
@@ -66,7 +66,7 @@ func runSyscallThread() {
 		no := call.NO()
 		handler := isyscall.GetHandler(no)
 		if handler == nil {
-			debug.Logf("[syscall] unhandled syscall %s(%d)", syscallName(int(no)), no)
+			log.Infof("[syscall] unhandled syscall %s(%d)", syscallName(int(no)), no)
 			call.SetErrorNO(syscall.ENOSYS)
 			call.Done()
 			continue
@@ -80,7 +80,7 @@ func runSyscallThread() {
 			} else {
 				iret = ret
 			}
-			debug.Logf("[syscall] %s(%d)(0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x) = %v",
+			log.Debugf("[syscall] %s(%d)(0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x) = %v",
 				syscallName(int(no)), no,
 				call.Arg(0), call.Arg(1), call.Arg(2), call.Arg(3),
 				call.Arg(4), call.Arg(5), iret,

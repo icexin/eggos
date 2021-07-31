@@ -4,13 +4,13 @@ import (
 	"syscall"
 	"unsafe"
 
-	"github.com/icexin/eggos/debug"
 	"github.com/icexin/eggos/drivers/qemu"
 	"github.com/icexin/eggos/drivers/uart"
 	"github.com/icexin/eggos/kernel/isyscall"
 	"github.com/icexin/eggos/kernel/mm"
 	"github.com/icexin/eggos/kernel/sys"
 	"github.com/icexin/eggos/kernel/trap"
+	"github.com/icexin/eggos/log"
 	"golang.org/x/sys/unix"
 	"gvisor.dev/gvisor/pkg/abi/linux"
 	"gvisor.dev/gvisor/pkg/abi/linux/errno"
@@ -163,9 +163,9 @@ func blocksyscall() {
 //go:nosplit
 func panicNosys() {
 	req := Mythread().systf.SyscallRequest()
-	debug.PrintStr("syscall not found:")
-	debug.PrintStr(syscallName(int(req.NO())))
-	debug.PrintStr("\n")
+	log.PrintStr("syscall not found:")
+	log.PrintStr(syscallName(int(req.NO())))
+	log.PrintStr("\n")
 	throw("")
 }
 
@@ -175,13 +175,13 @@ func doSyscall(req *isyscall.Request) {
 	req.SetRet(0)
 
 	// if no != syscall.SYS_SCHED_YIELD {
-	// 	debug.PrintStr("call ")
+	// 	log.PrintStr("call ")
 	// 	if int(no) < len(sysnum) {
-	// 		debug.PrintStr(sysnum[no])
+	// 		log.PrintStr(sysnum[no])
 	// 	} else {
-	// 		debug.PrintHex(no)
+	// 		log.PrintHex(no)
 	// 	}
-	// 	debug.PrintStr("\n")
+	// 	log.PrintStr("\n")
 	// }
 	switch no {
 	case syscall.SYS_ARCH_PRCTL:

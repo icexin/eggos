@@ -6,9 +6,9 @@ import (
 	"syscall"
 	"unsafe"
 
-	"github.com/icexin/eggos/debug"
 	"github.com/icexin/eggos/drivers/pic"
 	"github.com/icexin/eggos/kernel/trap"
+	"github.com/icexin/eggos/log"
 )
 
 var (
@@ -27,7 +27,7 @@ func runTrapThread() {
 
 	my := Mythread()
 	traptask = (threadptr)(unsafe.Pointer(my))
-	debug.Logf("[trap] tid:%d", my.id)
+	log.Infof("[trap] tid:%d", my.id)
 
 	for {
 		trapset, _, err = syscall.Syscall(SYS_WAIT_IRQ, 0, 0, 0)

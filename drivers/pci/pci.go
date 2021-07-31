@@ -1,9 +1,9 @@
 package pci
 
 import (
-	"github.com/icexin/eggos/debug"
 	"github.com/icexin/eggos/drivers/pic"
 	"github.com/icexin/eggos/kernel/trap"
+	"github.com/icexin/eggos/log"
 )
 
 type Identity struct {
@@ -74,10 +74,10 @@ func Init() {
 	for _, driver := range drivers {
 		dev := findDev(driver.Idents())
 		if dev == nil {
-			debug.Logf("[pci] no pci device found for %v\n", driver.Name())
+			log.Infof("[pci] no pci device found for %v\n", driver.Name())
 			continue
 		}
-		debug.Logf("[pci] found %x:%x for %s, irq:%d\n", dev.Ident.Vendor, dev.Ident.Device, driver.Name(), dev.IRQNO)
+		log.Infof("[pci] found %x:%x for %s, irq:%d\n", dev.Ident.Vendor, dev.Ident.Device, driver.Name(), dev.IRQNO)
 		driver.Init(dev)
 		pic.EnableIRQ(uint16(dev.IRQLine))
 		trap.Register(int(dev.IRQNO), driver.Intr)

@@ -3,11 +3,11 @@ package kernel
 import (
 	"unsafe"
 
-	"github.com/icexin/eggos/debug"
 	"github.com/icexin/eggos/drivers/pic"
 	"github.com/icexin/eggos/kernel/isyscall"
 	"github.com/icexin/eggos/kernel/sys"
 	"github.com/icexin/eggos/kernel/trap"
+	"github.com/icexin/eggos/log"
 )
 
 var (
@@ -59,11 +59,11 @@ func trapret()
 //go:nosplit
 func trapPanic() {
 	tf := Mythread().tf
-	debug.PrintStr("trap panic: ")
+	log.PrintStr("trap panic: ")
 	if tf.Trapno < uintptr(len(trapnum)) {
-		debug.PrintStr(trapnum[tf.Trapno])
+		log.PrintStr(trapnum[tf.Trapno])
 	}
-	debug.PrintStr("\n")
+	log.PrintStr("\n")
 	throwtf(tf, "stack trace:")
 }
 
@@ -90,10 +90,10 @@ func faultHandler() {
 
 //go:nosplit
 func printReg(name string, reg uintptr) {
-	debug.PrintStr(name)
-	debug.PrintStr("=")
-	debug.PrintHex(reg)
-	debug.PrintStr("\n")
+	log.PrintStr(name)
+	log.PrintStr("=")
+	log.PrintHex(reg)
+	log.PrintStr("\n")
 }
 
 //go:nosplit

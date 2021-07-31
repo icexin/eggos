@@ -8,8 +8,8 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/icexin/eggos/debug"
 	"github.com/icexin/eggos/fs"
+	"github.com/icexin/eggos/log"
 
 	"gvisor.dev/gvisor/pkg/abi/linux"
 	"gvisor.dev/gvisor/pkg/tcpip"
@@ -65,7 +65,7 @@ func (s *sockFile) Read(p []byte) (int, error) {
 	case *tcpip.ErrClosedForReceive:
 		return 0, nil
 	default:
-		debug.Logf("[socket] read error:%s", terr)
+		log.Infof("[socket] read error:%s", terr)
 		return 0, e(terr)
 	}
 	if result.Count < result.Total {
@@ -87,7 +87,7 @@ func (s *sockFile) Write(p []byte) (int, error) {
 	case *tcpip.ErrClosedForSend:
 		return 0, syscall.EPIPE
 	default:
-		debug.Logf("[socket] write error:%s", terr)
+		log.Infof("[socket] write error:%s", terr)
 		return 0, e(terr)
 	}
 }
@@ -114,7 +114,7 @@ func (s *sockFile) stopEvent() {
 }
 
 func (s *sockFile) evcallback(e *waiter.Entry, mask waiter.EventMask) {
-	// debug.Logf("ev:%x fd:%d", mask, s.fd)
+	// log.Infof("ev:%x fd:%d", mask, s.fd)
 	// syscall.Syscall(kernel.SYS_EPOLL_NOTIFY, uintptr(s.fd), uintptr(mask.ToLinux()), 0)
 	evnotify(uintptr(s.fd), uintptr(mask.ToLinux()))
 }
@@ -133,7 +133,7 @@ func (s *sockFile) Bind(uaddr, uaddrlen uintptr) error {
 	}
 	err := s.ep.Bind(addr)
 	if err != nil {
-		debug.Logf("[socket] bind error:%s", err)
+		log.Infof("[socket] bind error:%s", err)
 		return e(err)
 	}
 	return nil
@@ -154,7 +154,7 @@ func (s *sockFile) Connect(uaddr, uaddrlen uintptr) error {
 		return syscall.EINPROGRESS
 	}
 	if err != nil {
-		debug.Logf("[socket] connect error:%s", err)
+		log.Infof("[socket] connect error:%s", err)
 		return e(err)
 	}
 	return nil
@@ -163,7 +163,7 @@ func (s *sockFile) Connect(uaddr, uaddrlen uintptr) error {
 func (s *sockFile) Listen(n uintptr) error {
 	err := s.ep.Listen(int(n))
 	if err != nil {
-		debug.Logf("[socket] listen error:%s", err)
+		log.Infof("[socket] listen error:%s", err)
 	}
 	return e(err)
 }
@@ -180,13 +180,13 @@ func (s *sockFile) Accept4(uaddr, uaddrlen, flag uintptr) (int, error) {
 	case *tcpip.ErrWouldBlock:
 		return 0, syscall.EAGAIN
 	default:
-		debug.Logf("[socket] accept error:%s", err)
+		log.Infof("[socket] accept error:%s", err)
 		return 0, e(err)
 	}
 
 	newaddr, err := newep.GetRemoteAddress()
 	if err != nil {
-		debug.Logf("[socket] accept getRemoteAddress error:%s", err)
+		log.Infof("[socket] accept getRemoteAddress error:%s", err)
 		return 0, e(err)
 	}
 	saddr.Family = syscall.AF_INET
@@ -200,12 +200,12 @@ func (s *sockFile) Setsockopt(level, opt, vptr, vlen uintptr) error {
 	switch level {
 	case syscall.SOL_SOCKET, syscall.IPPROTO_TCP:
 	default:
-		debug.Logf("[socket] setsockopt:unsupport socket opt level:%d", level)
+		log.Infof("[socket] setsockopt:unsupport socket opt level:%d", level)
 		return syscall.EINVAL
 	}
 
 	if vlen != 4 {
-		debug.Logf("[socket] setsockopt:bad opt value length:%d", vlen)
+		log.Infof("[socket] setsockopt:bad opt value length:%d", vlen)
 		return syscall.EINVAL
 	}
 
@@ -229,7 +229,7 @@ func (s *sockFile) Setsockopt(level, opt, vptr, vlen uintptr) error {
 		v := tcpip.KeepaliveIdleOption(time.Duration(value) * time.Second)
 		terr = s.ep.SetSockOpt(&v)
 	default:
-		debug.Logf("[socket] setsockopt:unknow socket option:%d", opt)
+		log.Infof("[socket] setsockopt:unknow socket option:%d", opt)
 		return syscall.EINVAL
 	}
 
@@ -241,12 +241,12 @@ func (s *sockFile) Setsockopt(level, opt, vptr, vlen uintptr) error {
 
 func (s *sockFile) Getsockopt(level, opt, vptr, vlenptr uintptr) error {
 	if level != syscall.SOL_SOCKET {
-		debug.Logf("[socket] getsockopt:unsupport socket opt level:%d", level)
+		log.Infof("[socket] getsockopt:unsupport socket opt level:%d", level)
 		return syscall.EINVAL
 	}
 	vlen := (*int)(unsafe.Pointer(vlenptr))
 	if *vlen != 4 {
-		debug.Logf("[socket] getsockopt:bad opt value length:%d", vlen)
+		log.Infof("[socket] getsockopt:bad opt value length:%d", vlen)
 		return syscall.EINVAL
 	}
 	value := (*uint32)(unsafe.Pointer(vptr))
@@ -261,11 +261,11 @@ func (s *sockFile) Getsockopt(level, opt, vptr, vlenptr uintptr) error {
 		case *tcpip.ErrNoRoute:
 			*value = uint32(syscall.EHOSTUNREACH)
 		default:
-			debug.Logf("[socket] getsockopt:unknow socket error:%s", terr)
+			log.Infof("[socket] getsockopt:unknow socket error:%s", terr)
 			return e(terr)
 		}
 	default:
-		debug.Logf("[socket] getsockopt:unknow socket option:%d", opt)
+		log.Infof("[socket] getsockopt:unknow socket option:%d", opt)
 		return syscall.EINVAL
 	}
 	return nil
@@ -275,7 +275,7 @@ func (s *sockFile) Getpeername(uaddr, uaddrlen uintptr) error {
 	saddr := (*linux.SockAddrInet)(unsafe.Pointer(uaddr))
 	addr, err := s.ep.GetRemoteAddress()
 	if err != nil {
-		debug.Logf("[socket] getpeername error:%s", err)
+		log.Infof("[socket] getpeername error:%s", err)
 		return e(err)
 	}
 	saddr.Family = syscall.AF_INET
@@ -288,7 +288,7 @@ func (s *sockFile) Getsockname(uaddr, uaddrlen uintptr) error {
 	saddr := (*linux.SockAddrInet)(unsafe.Pointer(uaddr))
 	addr, err := s.ep.GetLocalAddress()
 	if err != nil {
-		debug.Logf("[socket] getsockname error:%s", err)
+		log.Infof("[socket] getsockname error:%s", err)
 		return e(err)
 	}
 	saddr.Family = syscall.AF_INET

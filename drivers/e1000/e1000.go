@@ -6,12 +6,12 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/icexin/eggos/debug"
 	"github.com/icexin/eggos/drivers/pci"
 	"github.com/icexin/eggos/drivers/pic"
 	"github.com/icexin/eggos/inet"
 	"github.com/icexin/eggos/kernel/mm"
 	"github.com/icexin/eggos/kernel/sys"
+	"github.com/icexin/eggos/log"
 
 	"gvisor.dev/gvisor/pkg/tcpip/buffer"
 	"gvisor.dev/gvisor/pkg/tcpip/stack"
@@ -131,7 +131,7 @@ func (d *driver) Init(dev *pci.Device) error {
 
 	d.dev = dev
 
-	debug.Logf("[e1000] enable bus master")
+	log.Infof("[e1000] enable bus master")
 	dev.Addr.EnableBusMaster()
 
 	// mmap bar address
@@ -141,7 +141,7 @@ func (d *driver) Init(dev *pci.Device) error {
 	}
 	mm.SysFixedMmap(uintptr(baddr), uintptr(baddr), uintptr(blen))
 	d.bar = uintptr(baddr)
-	debug.Logf("[e1000] mmap for bar0 0x%x", d.bar)
+	log.Infof("[e1000] mmap for bar0 0x%x", d.bar)
 
 	// alloc desc
 	descptr := mm.Alloc()
@@ -152,7 +152,7 @@ func (d *driver) Init(dev *pci.Device) error {
 	// disable all intrs
 	d.writecmd(REG_IMC, 0xffffffff)
 
-	debug.Logf("[e1000] begin reset")
+	log.Infof("[e1000] begin reset")
 	// Reset the device.
 	d.writecmd(REG_CTRL, d.readcmd(REG_CTRL)|CTRL_RST)
 
@@ -160,13 +160,13 @@ func (d *driver) Init(dev *pci.Device) error {
 	// for (d.readcmd(REG_CTRL) & CTRL_RST) != 0 {
 	// }
 	time.Sleep(time.Microsecond)
-	debug.Logf("[e1000] reset done")
+	log.Infof("[e1000] reset done")
 	// again disable all intrs after reset
 	d.writecmd(REG_IMC, 0xffffffff)
 
 	// Link up!
 	d.writecmd(REG_CTRL, d.readcmd(REG_CTRL)|CTRL_SLU|CTRL_ASDE)
-	debug.Logf("[e1000] link up")
+	log.Infof("[e1000] link up")
 
 	// Fill Multicast Table Array with zeros.
 	for i := uint16(0); i < 0x80; i++ {
@@ -213,9 +213,9 @@ func (d *driver) Init(dev *pci.Device) error {
 	d.readcmd(REG_ICR)
 	d.writecmd(REG_ICR, ^uint32(0))
 
-	debug.Logf("[e1000] begin read mac")
+	log.Infof("[e1000] begin read mac")
 	d.readmac()
-	debug.Logf("[e1000] mac:%x", d.mac)
+	log.Infof("[e1000] mac:%x", d.mac)
 	// go d.recvloop()
 	return nil
 }
@@ -244,7 +244,7 @@ func (d *driver) Transmit(pkt *stack.PacketBuffer) error {
 
 	// for atomic.LoadInt32((*int32)(unsafe.Pointer(&desc.status))) == 0 {
 	// }
-	// debug.Logf("[e1000] send %d bytes", pktlen)
+	// log.Infof("[e1000] send %d bytes", pktlen)
 	return nil
 }
 
@@ -252,7 +252,7 @@ func (d *driver) Intr() {
 	defer pic.EnableIRQ(uint16(d.dev.IRQLine))
 	defer pic.EOI(uintptr(d.dev.IRQNO))
 	cause := d.readcmd(REG_ICR)
-	// debug.Logf("[e1000] cause %x", cause)
+	// log.Infof("[e1000] cause %x", cause)
 	// clear ICR register
 	// e1000e may not clear upon read
 	d.writecmd(REG_ICR, ^uint32(0))
@@ -278,9 +278,9 @@ func (d *driver) recvloop() {
 func (d *driver) readpkt() bool {
 	d.rxidx = d.readcmd(REG_RDT)
 	d.rxidx = (d.rxidx + 1) % NUM_RX_DESCS
-	// debug.Logf("[e1000] head:%d", d.readcmd(0x02810))
-	// debug.Logf("[e1000] tail:%d", d.readcmd(0x02818))
-	// debug.Logf("[e1000] rxidx:%d", d.rxidx)
+	// log.Infof("[e1000] head:%d", d.readcmd(0x02810))
+	// log.Infof("[e1000] tail:%d", d.readcmd(0x02818))
+	// log.Infof("[e1000] rxidx:%d", d.rxidx)
 	desc := &d.rxdescs[d.rxidx]
 
 	// fmt.Printf("status:%x\n", atomic.LoadUint32((*uint32)(unsafe.Pointer(&desc.status))))
@@ -291,7 +291,7 @@ func (d *driver) readpkt() bool {
 	}
 
 	buf := sys.UnsafeBuffer(uintptr(desc.paddr), int(desc.len))
-	// debug.Logf("[e1000] read %d bytes", desc.len)
+	// log.Infof("[e1000] read %d bytes", desc.len)
 	if d.rxfunc != nil {
 		d.rxfunc(buf)
 	}

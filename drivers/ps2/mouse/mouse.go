@@ -41,12 +41,12 @@ func intr() {
 	pic.EOI(_IRQ_MOUSE)
 	for {
 		st := ps2.ReadCmd()
-		// debug.Logf("status:%08b", st)
+		// log.Infof("status:%08b", st)
 		if st&0x01 == 0 {
 			break
 		}
 		x := ps2.ReadDataNoWait()
-		// debug.Logf("data:%08b", x)
+		// log.Infof("data:%08b", x)
 		handlePacket(x)
 	}
 }
@@ -84,7 +84,7 @@ func handlePacket(v byte) {
 		default:
 		}
 	}
-	// debug.Logf("x:%d y:%d packet:%v status:%8b", xpos, ypos, packet, status)
+	// log.Infof("x:%d y:%d packet:%v status:%8b", xpos, ypos, packet, status)
 }
 
 func xrel(status byte, value int) int {

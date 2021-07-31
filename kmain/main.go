@@ -9,12 +9,12 @@ import (
 	_ "github.com/icexin/eggos"
 	"github.com/icexin/eggos/app/sh"
 	"github.com/icexin/eggos/console"
-	"github.com/icexin/eggos/debug"
+	"github.com/icexin/eggos/log"
 )
 
 func main() {
-	debug.Logf("[runtime] go version:%s", runtime.Version())
-	debug.Logf("[runtime] args:%v", os.Args)
+	log.Infof("[runtime] go version:%s", runtime.Version())
+	log.Infof("[runtime] args:%v", os.Args)
 	w := console.Console()
 	io.WriteString(w, "\nwelcome to eggos\n")
 	sh.Bootstrap()

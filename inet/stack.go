@@ -5,8 +5,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/icexin/eggos/debug"
 	"github.com/icexin/eggos/inet/dhcp"
+	"github.com/icexin/eggos/log"
 
 	"gvisor.dev/gvisor/pkg/tcpip"
 	"gvisor.dev/gvisor/pkg/tcpip/header"
@@ -83,18 +83,18 @@ func addInterfaceAddr(s *stack.Stack, nic tcpip.NICID, addr tcpip.Address) {
 func dodhcp(linkaddr tcpip.LinkAddress) error {
 	dhcpclient := dhcp.NewClient(nstack, defaultNIC, linkaddr)
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	debug.Logf("[inet] begin dhcp")
+	log.Infof("[inet] begin dhcp")
 	err1 := dhcpclient.Request(ctx, "")
 	cancel()
 	if err1 != nil {
 		return err1
 	}
-	debug.Logf("[inet] dhcp done")
+	log.Infof("[inet] dhcp done")
 	cfg := dhcpclient.Config()
-	debug.Logf("[inet] addr:%v", dhcpclient.Address())
-	debug.Logf("[inet] gateway:%v", cfg.Gateway)
-	debug.Logf("[inet] mask:%v", cfg.SubnetMask)
-	debug.Logf("[inet] dns:%v", cfg.DomainNameServer)
+	log.Infof("[inet] addr:%v", dhcpclient.Address())
+	log.Infof("[inet] gateway:%v", cfg.Gateway)
+	log.Infof("[inet] mask:%v", cfg.SubnetMask)
+	log.Infof("[inet] dns:%v", cfg.DomainNameServer)
 
 	addInterfaceAddr(nstack, defaultNIC, dhcpclient.Address())
 	nstack.AddRoute(tcpip.Route{

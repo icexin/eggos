@@ -3,10 +3,10 @@ package kernel
 import (
 	"unsafe"
 
-	"github.com/icexin/eggos/debug"
 	"github.com/icexin/eggos/drivers/qemu"
 	"github.com/icexin/eggos/drivers/uart"
 	"github.com/icexin/eggos/kernel/sys"
+	"github.com/icexin/eggos/log"
 )
 
 var (
@@ -27,13 +27,13 @@ func throwtf(tf *trapFrame, msg string) {
 	uart.WriteString(msg)
 	uart.WriteByte('\n')
 
-	debug.PrintStr("0x")
-	debug.PrintHex(tf.IP)
-	debug.PrintStr("\n")
+	log.PrintStr("0x")
+	log.PrintHex(tf.IP)
+	log.PrintStr("\n")
 	for i := 0; i < n; i++ {
-		debug.PrintStr("0x")
-		debug.PrintHex(panicPcs[i])
-		debug.PrintStr("\n")
+		log.PrintStr("0x")
+		log.PrintHex(panicPcs[i])
+		log.PrintStr("\n")
 	}
 
 	qemu.Exit(0xff)

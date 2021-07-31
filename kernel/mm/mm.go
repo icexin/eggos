@@ -266,12 +266,12 @@ func (v *vmmt) walkpglvl(pg *entryPage, va uintptr, lvl int, alloc bool) *entry 
 	sys.Memclr(addr, PGSIZE)
 	// map new page to entry
 	*pe = entry(addr | PTE_P | PTE_W | PTE_U)
-	// debug.PrintHex(uintptr(unsafe.Pointer(pg)))
-	// debug.PrintStr("@")
-	// debug.PrintHex(idx)
-	// debug.PrintStr("=")
-	// debug.PrintHex(addr)
-	// debug.PrintStr("\n")
+	// log.PrintHex(uintptr(unsafe.Pointer(pg)))
+	// log.PrintStr("@")
+	// log.PrintHex(idx)
+	// log.PrintStr("=")
+	// log.PrintHex(addr)
+	// log.PrintStr("\n")
 	return pe
 }
 
