@@ -1,37 +1,25 @@
 package tests
 
 import (
-	"context"
+	"net"
 	"net/http"
-	"sync"
 	"testing"
 
 	_ "github.com/icexin/eggos"
 )
 
-func TestNetworking(t *testing.T) {
-	t.Skip()
-	wg := sync.WaitGroup{}
-	wg.Add(1)
+func TestHTTP(t *testing.T) {
+	server := http.Server{}
 
-	server := http.Server{
-		Addr: ":80",
+	listener, err := net.Listen("tcp", ":80")
+	if err != nil {
+		t.Fatal(err)
 	}
+	defer listener.Close()
 
-	go func() {
-		defer wg.Done()
+	go server.Serve(listener)
 
-		err := server.ListenAndServe()
-		if err != nil {
-			t.Error(err)
-		}
-	}()
-	defer func() {
-		server.Shutdown(context.Background())
-		wg.Wait()
-	}()
-
-	resp, err := http.Get("http://127.0.0.1/")
+	resp, err := http.Get("http://10.0.2.15")
 	if err != nil {
 		t.Error(err)
 		return
