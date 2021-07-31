@@ -122,11 +122,12 @@ func sysGetsockopt(c *isyscall.Request) {
 		c.SetError(err)
 		return
 	}
-	v, err := sf.Getsockopt(c.Arg(1), c.Arg(2), c.Arg(3), c.Arg(4))
+	err = sf.Getsockopt(c.Arg(1), c.Arg(2), c.Arg(3), c.Arg(4))
 	if err != nil {
 		c.SetError(err)
+		return
 	}
-	c.SetRet(v)
+	c.SetRet(0)
 }
 
 func sysGetsockname(c *isyscall.Request) {

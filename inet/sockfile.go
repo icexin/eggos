@@ -114,6 +114,8 @@ func (s *sockFile) stopEvent() {
 }
 
 func (s *sockFile) evcallback(e *waiter.Entry, mask waiter.EventMask) {
+	// debug.Logf("ev:%x fd:%d", mask, s.fd)
+	// syscall.Syscall(kernel.SYS_EPOLL_NOTIFY, uintptr(s.fd), uintptr(mask.ToLinux()), 0)
 	evnotify(uintptr(s.fd), uintptr(mask.ToLinux()))
 }
 
@@ -125,7 +127,7 @@ func (s *sockFile) Bind(uaddr, uaddrlen uintptr) error {
 	saddr = (*linux.SockAddrInet)(unsafe.Pointer(uaddr))
 	ip := net.IPv4(saddr.Addr[0], saddr.Addr[1], saddr.Addr[2], saddr.Addr[3])
 	addr := tcpip.FullAddress{
-		NIC:  defaultNIC,
+		// NIC:  defaultNIC,
 		Addr: tcpip.Address(ip),
 		Port: ntohs(saddr.Port),
 	}
@@ -237,31 +239,36 @@ func (s *sockFile) Setsockopt(level, opt, vptr, vlen uintptr) error {
 	return nil
 }
 
-func (s *sockFile) Getsockopt(level, opt, vptr, vlenptr uintptr) (uintptr, error) {
+func (s *sockFile) Getsockopt(level, opt, vptr, vlenptr uintptr) error {
 	if level != syscall.SOL_SOCKET {
 		debug.Logf("[socket] getsockopt:unsupport socket opt level:%d", level)
-		return 0, syscall.EINVAL
+		return syscall.EINVAL
 	}
 	vlen := (*int)(unsafe.Pointer(vlenptr))
 	if *vlen != 4 {
 		debug.Logf("[socket] getsockopt:bad opt value length:%d", vlen)
-		return 0, syscall.EINVAL
+		return syscall.EINVAL
 	}
+	value := (*uint32)(unsafe.Pointer(vptr))
 
 	switch opt {
 	case syscall.SO_ERROR:
 		terr := s.ep.SocketOptions().GetLastError()
 		switch terr.(type) {
+		case nil:
 		case *tcpip.ErrConnectionRefused:
-			return uintptr(syscall.ECONNREFUSED), nil
+			*value = uint32(syscall.ECONNREFUSED)
+		case *tcpip.ErrNoRoute:
+			*value = uint32(syscall.EHOSTUNREACH)
 		default:
-			return 0, e(terr)
+			debug.Logf("[socket] getsockopt:unknow socket error:%s", terr)
+			return e(terr)
 		}
 	default:
 		debug.Logf("[socket] getsockopt:unknow socket option:%d", opt)
-		return 0, syscall.EINVAL
+		return syscall.EINVAL
 	}
-	return 0, nil
+	return nil
 }
 
 func (s *sockFile) Getpeername(uaddr, uaddrlen uintptr) error {
@@ -273,6 +280,7 @@ func (s *sockFile) Getpeername(uaddr, uaddrlen uintptr) error {
 	}
 	saddr.Family = syscall.AF_INET
 	copy(saddr.Addr[:], addr.Addr)
+	saddr.Port = ntohs(addr.Port)
 	return nil
 }
 
@@ -285,5 +293,6 @@ func (s *sockFile) Getsockname(uaddr, uaddrlen uintptr) error {
 	}
 	saddr.Family = syscall.AF_INET
 	copy(saddr.Addr[:], addr.Addr)
+	saddr.Port = htons(addr.Port)
 	return nil
 }
