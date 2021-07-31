@@ -31,6 +31,7 @@ const (
 	SYS_WAIT_IRQ     = 500
 	SYS_WAIT_SYSCALL = 501
 	SYS_FIXED_MMAP   = 502
+	SYS_EPOLL_NOTIFY = 503
 )
 
 const (
@@ -71,6 +72,7 @@ var (
 		SYS_WAIT_IRQ,
 		SYS_WAIT_SYSCALL,
 		SYS_FIXED_MMAP,
+		SYS_EPOLL_NOTIFY,
 	}
 )
 
@@ -233,6 +235,8 @@ func doSyscall(req *isyscall.Request) {
 		sysWaitSyscall(req)
 	case SYS_FIXED_MMAP:
 		sysFixedMmap(req)
+	case SYS_EPOLL_NOTIFY:
+		sysEpollNotify(req)
 
 	default:
 		req.SetRet(isyscall.Errno(errno.ENOSYS))
@@ -383,6 +387,11 @@ func sysFixedMmap(req *isyscall.Request) {
 //go:nosplit
 func sysExitGroup(req *isyscall.Request) {
 	debug.QemuExit(int(req.Arg(0)))
+}
+
+//go:nosplit
+func sysEpollNotify(req *isyscall.Request) {
+	epollNotify(req.Arg(0), req.Arg(1))
 }
 
 const vdsoGettimeofdaySym = 0xffffffffff600000

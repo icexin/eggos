@@ -12,9 +12,15 @@ import (
 
 const (
 	epollFd = 3
+
+	maxFds = 1024
 )
 
 var (
+	// source of fd events, set by netstack
+	// cleared by epoll_wait
+	fdevents [maxFds]uint32
+
 	// to manage epoll event
 	eventpool mm.Pool
 
@@ -27,18 +33,10 @@ var (
 
 //go:notinheap
 type epollEvent struct {
-	events uintptr
-	mask   uintptr
-
-	fd   uintptr
-	data [8]byte
+	fd  uintptr
+	sub linux.EpollEvent
 
 	pre, next *epollEvent
-}
-
-type userEpollEvent struct {
-	events uint32
-	data   [8]byte // to match amd64
 }
 
 //go:nosplit
@@ -75,22 +73,25 @@ func findEpollEvent(fd uintptr) *epollEvent {
 
 //go:nosplit
 func epollCtl(epfd, op, fd, desc uintptr) uintptr {
-	euser := (*userEpollEvent)(unsafe.Pointer(desc))
+	euser := (*linux.EpollEvent)(unsafe.Pointer(desc))
 	var e *epollEvent
 	switch op {
 	case syscall.EPOLL_CTL_ADD:
-		e = newEpollEvent()
+		e = findEpollEvent(fd)
+		if e == nil {
+			e = newEpollEvent()
+		}
 		e.fd = fd
-		e.data = euser.data
-		e.mask = uintptr(euser.events) | syscall.EPOLLHUP
+		e.sub = *euser
+		e.sub.Events |= syscall.EPOLLHUP
 		return 0
 	case syscall.EPOLL_CTL_MOD:
 		e = findEpollEvent(fd)
 		if e == nil {
 			return isyscall.Errno(errno.EINVAL)
 		}
-		e.mask = uintptr(euser.events) | syscall.EPOLLHUP
-		e.data = euser.data
+		e.sub = *euser
+		e.sub.Events |= syscall.EPOLLHUP
 		return 0
 	case syscall.EPOLL_CTL_DEL:
 		e = findEpollEvent(fd)
@@ -116,17 +117,19 @@ func epollWait(epfd, eventptr, len, _ms uintptr) uintptr {
 		epollNote.clear()
 	}
 
-	events := (*[256]userEpollEvent)(unsafe.Pointer(eventptr))[:len]
+	events := (*[256]linux.EpollEvent)(unsafe.Pointer(eventptr))[:len]
 	var cnt uintptr = 0
 	for e := epollEvents.next; e != nil && cnt < len; e = e.next {
-		if e.events == 0 {
+		event := fdevents[e.fd]
+		if event == 0 {
 			continue
 		}
 		ue := &events[cnt]
-		ue.data = e.data
-		ue.events = uint32(e.events)
+		ue.Data = e.sub.Data
+		ue.Events = event & e.sub.Events
 		// clear events
-		e.events = 0
+		// FIXME: only clear masked events?
+		fdevents[e.fd] = 0
 		cnt++
 	}
 	return cnt
@@ -134,13 +137,7 @@ func epollWait(epfd, eventptr, len, _ms uintptr) uintptr {
 
 //go:nosplit
 func epollNotify(fd, events uintptr) {
-	e := findEpollEvent(fd)
-	if e == nil {
-		return
-	}
-	if e.mask&events != 0 {
-		e.events |= e.mask & events
-	}
+	fdevents[fd] |= uint32(events)
 	epollNote.wakeup()
 }
 
