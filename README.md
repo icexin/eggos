@@ -17,11 +17,16 @@ However, there are also some challenges. Go piling in many instructions to perfo
 
 In general, writing kernel in Go is a very interesting experience. On the one hand, it gave me a deep understanding of Go's runtime. On the other hand, it also provided an attempt to write the operating system kernel on bare metal in addition to the C language.
 
+# Architecture
+
+<img src="https://i.imgur.com/gnq4m9h.png" width="700" />
+
 # Snapshot
 
 ![js](https://i.imgur.com/Canhd8D.gif)
 ![nes](https://i.imgur.com/WugXcTk.gif)
 ![gui](https://i.imgur.com/jILuMMk.png)
+
 
 
 # Feature list
