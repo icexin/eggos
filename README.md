@@ -101,9 +101,9 @@ The multiboot.elf generated after executing the make command is a kernel image c
 # Roadmap
 
 - [ ] WASM runner
-- [ ] GUI support
-- [ ] 3D graphic
-- [ ] x86_64 support
+- [x] GUI support
+- [x] 3D graphic
+- [x] x86_64 support
 - [ ] SMP support
 
 # Bugs
