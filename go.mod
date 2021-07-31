@@ -8,7 +8,7 @@ require (
 	github.com/fogleman/fauxgl v0.0.0-20200818143847-27cddc103802
 	github.com/fogleman/gg v1.3.0
 	github.com/fogleman/nes v0.0.0-20200820131603-8c4b9cf54c35
-	github.com/gin-gonic/gin v1.6.3
+	github.com/gin-gonic/gin v1.7.2
 	github.com/gliderlabs/ssh v0.3.0
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/hirochachacha/go-smb2 v1.0.3
