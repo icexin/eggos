@@ -33,6 +33,7 @@ var (
 
 var (
 	QEMU64 = "qemu-system-x86_64"
+	QEMU32 = "qemu-system-i386"
 
 	QEMU_OPT       = initQemuOpt()
 	QEMU_DEBUG_OPT = initQemuDebugOpt()
@@ -162,6 +163,10 @@ func Iso() error {
 		filepath.Join(tmpdir, "boot", "multiboot.elf"),
 		"multiboot.elf",
 	)
+	sh.Copy(
+		filepath.Join(tmpdir, "boot", "kernel.elf"),
+		"kernel.elf",
+	)
 	return sh.RunV("grub-mkrescue", "-o", "eggos.iso", tmpdir)
 }
 
@@ -183,7 +188,7 @@ func GraphicDebug() error {
 	mg.Deps(Iso)
 	args := append([]string{}, QEMU_DEBUG_OPT...)
 	args = append(args, "-cdrom", "eggos.iso")
-	return sh.RunV(QEMU64, args...)
+	return sh.RunV(QEMU32, args...)
 }
 
 func Clean() {
