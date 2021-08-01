@@ -33,7 +33,6 @@ var (
 
 var (
 	QEMU64 = "qemu-system-x86_64"
-	QEMU32 = "qemu-system-i386"
 
 	QEMU_OPT       = initQemuOpt()
 	QEMU_DEBUG_OPT = initQemuDebugOpt()
@@ -87,7 +86,7 @@ func Multiboot() error {
 	mg.Deps(kernelTarget)
 	compileCfile("boot/multiboot.c", "-m32")
 	compileCfile("boot/multiboot_header.S", "-m32")
-	ldflags := "-Ttext 0x3300000 -m elf_i386 -o multiboot.elf multiboot.o multiboot_header.o -b binary kernel.elf -b binary boot64.elf"
+	ldflags := "-Ttext 0x3300000 -m elf_i386 -o multiboot.elf multiboot.o multiboot_header.o -b binary boot64.elf"
 	ldArgs := append([]string{}, LDFLAGS...)
 	ldArgs = append(ldArgs, strings.Fields(ldflags)...)
 	return sh.RunV(LD, ldArgs...)
@@ -123,6 +122,7 @@ func Qemu() error {
 	detectQemu()
 	args := append([]string{}, QEMU_OPT...)
 	args = append(args, "-kernel", "multiboot.elf")
+	args = append(args, "-initrd", "kernel.elf")
 	args = append(args, "-append", os.Getenv("EGGOS_ENV"))
 	return sh.RunV(QEMU64, args...)
 }
@@ -136,6 +136,7 @@ func QemuDebug() error {
 	detectQemu()
 	args := append([]string{}, QEMU_DEBUG_OPT...)
 	args = append(args, "-kernel", "multiboot.elf")
+	args = append(args, "-initrd", "kernel.elf")
 	args = append(args, "-append", os.Getenv("EGGOS_ENV"))
 	return sh.RunV(QEMU64, args...)
 }
@@ -273,7 +274,7 @@ func accelArg() []string {
 }
 
 func initCflags() []string {
-	cflags := strings.Fields("-fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -ggdb -Werror -fno-omit-frame-pointer -I. -nostdinc")
+	cflags := strings.Fields("-fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -Werror -fno-omit-frame-pointer -I. -nostdinc")
 	if hasOutput("-fno-stack-protector", CC, "--help") {
 		cflags = append(cflags, "-fno-stack-protector")
 	}
