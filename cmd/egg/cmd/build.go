@@ -16,12 +16,9 @@ limitations under the License.
 package cmd
 
 import (
-	"encoding/json"
-	"io/ioutil"
-	"os"
-	"os/exec"
-	"path/filepath"
+	"log"
 
+	"github.com/icexin/eggos/cmd/build"
 	"github.com/spf13/cobra"
 )
 
@@ -35,64 +32,23 @@ var buildCmd = &cobra.Command{
 	Short:              "build like go build command",
 	DisableFlagParsing: true,
 	Run: func(cmd *cobra.Command, args []string) {
-		buildPkg(false, args)
+		err := runBuild(args)
+		if err != nil {
+			log.Fatal(err)
+		}
 	},
 }
 
-func patchEggosPkg() (string, string) {
-	base, err := ioutil.TempDir("", "eggos-build")
+func runBuild(args []string) error {
+	b := build.NewBuilder(build.Config{
+		EggosVersion: eggosVersion,
+		GoArgs:       args,
+	})
+	err := b.Build()
 	if err != nil {
-		panic(err)
+		return err
 	}
-	initFile := filepath.Join(base, "eggosinit.go")
-	os.WriteFile(initFile, []byte(`package main
-	import _ "github.com/icexin/eggos"
-	`), 0644)
-
-	overlayFile := filepath.Join(base, "overlay.json")
-	overlay := map[string]map[string]string{
-		"Replace": {
-			"eggosinit.go": initFile,
-		},
-	}
-	out, _ := json.Marshal(overlay)
-	os.WriteFile(overlayFile, out, 0644)
-	return base, overlayFile
-}
-
-func buildPkg(testbuild bool, args []string) {
-	var buildArgs []string
-	ldflags := "-E github.com/icexin/eggos/kernel.rt0 -T 0x100000"
-	if !testbuild {
-		buildArgs = append(buildArgs, "build")
-	} else {
-		buildArgs = append(buildArgs, "test", "-c")
-	}
-	buildArgs = append(buildArgs, "-ldflags", ldflags)
-	buildArgs = append(buildArgs, args...)
-
-	tmpdir, overlayFile := patchEggosPkg()
-	defer os.RemoveAll(tmpdir)
-	buildArgs = append(buildArgs, "-overlay", overlayFile)
-
-	env := append([]string{}, os.Environ()...)
-	env = append(env, []string{
-		"GOOS=linux",
-		"GOARCH=amd64",
-		"CGO_ENABLED=0",
-	}...)
-
-	cmd := exec.Command("go", buildArgs...)
-	cmd.Env = env
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	err := cmd.Run()
-	if err == nil {
-		return
-	}
-	exiterr := err.(*exec.ExitError)
-	os.Exit(exiterr.ExitCode())
+	return nil
 }
 
 func init() {

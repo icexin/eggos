@@ -16,8 +16,12 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
+	"io/ioutil"
+	"log"
+	"os"
+	"path/filepath"
 
+	"github.com/icexin/eggos/cmd/build"
 	"github.com/spf13/cobra"
 )
 
@@ -26,8 +30,39 @@ var testCmd = &cobra.Command{
 	Use:   "test",
 	Short: "test likes go test but running in qemu",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("test called")
+		err := runTest()
+		if err != nil {
+			log.Fatal(err)
+		}
 	},
+}
+
+func runTest() error {
+	base, err := ioutil.TempDir("", "eggos-test")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(base)
+
+	outfile := filepath.Join(base, "eggos.test.elf")
+
+	b := build.NewBuilder(build.Config{
+		Basedir:      base,
+		BuildTest:    true,
+		EggosVersion: eggosVersion,
+		GoArgs: []string{
+			"-o", outfile,
+			"-vet=off",
+		},
+	})
+	err = b.Build()
+	if err != nil {
+		return err
+	}
+
+	kernelFile = outfile
+	runKernel()
+	return nil
 }
 
 func init() {

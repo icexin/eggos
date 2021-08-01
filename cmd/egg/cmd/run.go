@@ -30,7 +30,8 @@ const (
 )
 
 var (
-	kernelFile string
+	kernelFile  string
+	showgraphic bool
 )
 
 // runCmd represents the run command
@@ -57,9 +58,11 @@ func runKernel() {
 	runArgs = append(runArgs, "-netdev", "user,id=eth0,hostfwd=tcp::8080-:80,hostfwd=tcp::8081-:22")
 	runArgs = append(runArgs, "-device", "e1000,netdev=eth0")
 	runArgs = append(runArgs, "-device", "isa-debug-exit")
-	// runArgs = append(runArgs, "-nographic")
 	runArgs = append(runArgs, "-kernel", loaderFile)
 	runArgs = append(runArgs, "-initrd", kernelFile)
+	if !showgraphic {
+		runArgs = append(runArgs, "-nographic")
+	}
 
 	cmd := exec.Command(qemu64, runArgs...)
 	cmd.Stdin = os.Stdin
@@ -76,4 +79,5 @@ func runKernel() {
 func init() {
 	rootCmd.AddCommand(runCmd)
 	runCmd.Flags().StringVarP(&kernelFile, "kernel", "k", "kernel.elf", "eggos kernel file")
+	runCmd.Flags().BoolVarP(&showgraphic, "graphic", "g", false, "show qemu graphic window")
 }

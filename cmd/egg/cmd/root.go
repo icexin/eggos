@@ -24,7 +24,10 @@ import (
 	"github.com/spf13/viper"
 )
 
-var cfgFile string
+var (
+	cfgFile      string
+	eggosVersion string
+)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -49,6 +52,7 @@ func init() {
 	// will be global for your application.
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.egg.yaml)")
+	rootCmd.PersistentFlags().StringVar(&eggosVersion, "eggos-version", "", "if eggos is missing in go.mod, the version of eggos expected to require")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.

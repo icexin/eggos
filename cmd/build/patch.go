@@ -1,19 +1,4 @@
-/*
-Copyright © 2021 fanbingxin <fanbingxin.me@gmail.com>
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-package cmd
+package build
 
 import (
 	"bytes"
@@ -21,26 +6,24 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"strings"
 	"text/template"
-
-	"github.com/spf13/cobra"
 )
 
 const (
 	eggosModulePath = "github.com/icexin/eggos"
 	eggosImportFile = "import_eggos.go"
+	overlayFile     = "overlay.json"
 )
 
 var (
 	eggosImportTpl = template.Must(template.New("eggos").Parse(`
 	//+build eggos
+
 	package {{.name}}
 	import _ "github.com/icexin/eggos"
 	`))
-)
-
-var (
-	eggosVersion string
 )
 
 type gomodule struct {
@@ -57,35 +40,49 @@ type gomodule struct {
 	Retract interface{} `json:"Retract"`
 }
 
-// initCmd represents the init command
-var initCmd = &cobra.Command{
-	Use:   "init",
-	Short: "init a go project with eggos support",
-	Run: func(cmd *cobra.Command, args []string) {
-		err := initEggos()
-		if err != nil {
-			log.Fatal(err)
-		}
-	},
+type buildOverlay struct {
+	Replace map[string]string
 }
 
-func initEggos() error {
+func (b *Builder) eggosImportFile() string {
+	return filepath.Join(b.basedir, eggosImportFile)
+}
+
+func (b *Builder) overlayFile() string {
+	return filepath.Join(b.basedir, overlayFile)
+}
+
+func (b *Builder) buildPrepare() error {
 	var err error
-	if !hasImportFile() {
-		log.Printf("%s not found, create one", eggosImportFile)
-		err = addImportEggos()
-		if err != nil {
-			return err
-		}
-	}
+
 	if !modHasEggos() {
 		log.Printf("eggos not found in go.mod")
-		err = editGoMod()
+		err = b.editGoMod()
 		if err != nil {
 			return err
 		}
 	}
+
+	err = writeImportFile(b.eggosImportFile())
+	if err != nil {
+		return err
+	}
+
+	err = writeOverlayFile(b.overlayFile(), eggosImportFile, b.eggosImportFile())
+	if err != nil {
+		return err
+	}
 	return nil
+}
+
+func writeOverlayFile(overlayFile, dest, source string) error {
+	overlay := buildOverlay{
+		Replace: map[string]string{
+			dest: source,
+		},
+	}
+	buf, _ := json.Marshal(overlay)
+	return os.WriteFile(overlayFile, buf, 0644)
 }
 
 func readGomodule() (*gomodule, error) {
@@ -105,6 +102,10 @@ func readGomodule() (*gomodule, error) {
 }
 
 func modHasEggos() bool {
+	if currentModulePath() == eggosModulePath {
+		return true
+	}
+
 	mods, err := readGomodule()
 	if err != nil {
 		panic(err)
@@ -117,10 +118,10 @@ func modHasEggos() bool {
 	return false
 }
 
-func editGoMod() error {
+func (b *Builder) editGoMod() error {
 	getPath := eggosModulePath
-	if eggosVersion != "" {
-		getPath = getPath + "@" + eggosVersion
+	if b.cfg.EggosVersion != "" {
+		getPath = getPath + "@" + b.cfg.EggosVersion
 	}
 	log.Printf("go get %s", getPath)
 	env := []string{
@@ -135,20 +136,24 @@ func editGoMod() error {
 	return cmd.Run()
 }
 
-func hasImportFile() bool {
-	_, err := os.Stat(eggosImportFile)
-	return err == nil
-}
-
 func currentPkgName() string {
 	out, err := exec.Command("go", "list", "-f", `{{.Name}}`).CombinedOutput()
 	if err != nil {
 		panic(err)
 	}
-	return string(out)
+	return strings.TrimSpace(string(out))
 }
 
-func addImportEggos() error {
+func currentModulePath() string {
+	out, err := exec.Command("go", "list", "-f", `{{.Module.Path}}`).CombinedOutput()
+	if err != nil {
+		panic(err)
+	}
+	return strings.TrimSpace(string(out))
+
+}
+
+func writeImportFile(fname string) error {
 	pkgname := currentPkgName()
 	var rawFile bytes.Buffer
 	err := eggosImportTpl.Execute(&rawFile, map[string]interface{}{
@@ -158,19 +163,6 @@ func addImportEggos() error {
 		return err
 	}
 
-	var out bytes.Buffer
-	cmd := exec.Command("gofmt")
-	cmd.Stdin = &rawFile
-	cmd.Stdout = &out
-	err = cmd.Run()
-	if err != nil {
-		return err
-	}
-	err = os.WriteFile(eggosImportFile, out.Bytes(), 0644)
+	err = os.WriteFile(fname, rawFile.Bytes(), 0644)
 	return err
-}
-
-func init() {
-	rootCmd.AddCommand(initCmd)
-	initCmd.Flags().StringVarP(&eggosVersion, "version", "", "", "eggos version, match go get version")
 }
