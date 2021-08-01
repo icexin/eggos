@@ -50,12 +50,14 @@ const (
 // Kernel target build the elf kernel for eggos, generate kernel.elf
 func Kernel() error {
 	detectGoVersion()
+	os.Chdir("app")
+	defer os.Chdir("..")
 	env := map[string]string{
 		"GOOS":   "linux",
 		"GOARCH": "amd64",
 	}
 	goLdflags := "-E github.com/icexin/eggos/kernel.rt0 -T 0x100000"
-	return sh.RunWithV(env, gobin(), "build", "-o", "kernel.elf", "-tags", GOTAGS,
+	return sh.RunWithV(env, gobin(), "build", "-o", "../kernel.elf", "-tags", GOTAGS,
 		"-ldflags", goLdflags, "-gcflags", GOGCFLAGS, "./kmain")
 }
 
