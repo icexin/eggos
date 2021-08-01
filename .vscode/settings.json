@@ -3,4 +3,7 @@
         "GOOS": "linux",
         "GOARCH": "amd64",
     },
+    "files.associations": {
+        "multiboot.h": "c"
+    },
 }

@@ -15,12 +15,12 @@ typedef unsigned long long uint64;
 #include "elf.h"
 #include "multiboot.h"
 
-extern char _binary_kernel_elf_start[];
 extern char _binary_boot64_elf_start[];
 
 void memcpy(char *dst, char *src, int count);
 void memset(char *addr, char data, int cnt);
 uint64 loadelf(char *image);
+uint64 loadKernelElf(multiboot_info_t *info);
 typedef void (*boot64_entry_t)(uint32, uint32, uint32);
 
 void multibootmain(unsigned long magic, multiboot_info_t *mbi)
@@ -35,7 +35,7 @@ void multibootmain(unsigned long magic, multiboot_info_t *mbi)
     }
     boot64_entry = (boot64_entry_t)((uint32)entry_addr);
 
-    entry_addr = loadelf(_binary_kernel_elf_start);
+    entry_addr = loadKernelElf(mbi);
     if (entry_addr == 0)
     {
         return;
@@ -68,6 +68,16 @@ uint64 loadelf(char *image)
         }
     }
     return elf->entry;
+}
+
+uint64 loadKernelElf(multiboot_info_t *info)
+{
+    if (info->mods_count < 1)
+    {
+        return 0;
+    }
+    multiboot_module_t *mod = (multiboot_module_t *)(info->mods_addr);
+    return loadelf((char *)(mod->mod_start));
 }
 
 void memcpy(char *dst, char *src, int count)
