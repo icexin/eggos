@@ -76,7 +76,7 @@ func GetInode(fd int) (*Inode, error) {
 	inodeLock.Lock()
 	defer inodeLock.Unlock()
 
-	if int(fd) >= len(inodes) {
+	if fd >= len(inodes) || fd < 0 {
 		return nil, syscall.EBADF
 	}
 	ni := inodes[fd]

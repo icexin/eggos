@@ -66,7 +66,10 @@ func runSyscallThread() {
 		no := call.NO()
 		handler := isyscall.GetHandler(no)
 		if handler == nil {
-			log.Infof("[syscall] unhandled syscall %s(%d)", syscallName(int(no)), no)
+			log.Errorf("[syscall] unhandled %s(%d)(0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x)",
+				syscallName(int(no)), no,
+				call.Arg(0), call.Arg(1), call.Arg(2), call.Arg(3),
+				call.Arg(4), call.Arg(5))
 			call.SetErrorNO(syscall.ENOSYS)
 			call.Done()
 			continue

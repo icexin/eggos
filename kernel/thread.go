@@ -41,6 +41,7 @@ var (
 	idleThread threadptr
 )
 
+//go:notinheap
 type context struct {
 	r15 uintptr
 	r14 uintptr

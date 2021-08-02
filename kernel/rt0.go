@@ -35,6 +35,5 @@ func preinit(magic, mbiptr uintptr) {
 	threadInit()
 	pic.Init()
 	timerInit()
-	uart.WriteString("kernel\n")
 	schedule()
 }

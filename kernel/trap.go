@@ -37,6 +37,7 @@ var (
 	}
 )
 
+//go:notinheap
 type trapFrame struct {
 	AX, BX, CX, DX    uintptr
 	BP, SI, DI, R8    uintptr

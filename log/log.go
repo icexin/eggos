@@ -24,6 +24,8 @@ const (
 	loglvlWarn
 	loglvlError
 	loglvlNone
+
+	defaultLoglvl = loglvlError
 )
 
 var (
@@ -43,7 +45,7 @@ func setLoglvl() {
 	case loglvlEnvError:
 		loglvl = loglvlError
 	default:
-		loglvl = loglvlNone
+		loglvl = defaultLoglvl
 	}
 }
 
