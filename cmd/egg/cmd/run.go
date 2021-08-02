@@ -18,6 +18,7 @@ package cmd
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -50,21 +51,34 @@ var runCmd = &cobra.Command{
 func runKernel() {
 	base, err := ioutil.TempDir("", "eggos-run")
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	defer os.RemoveAll(base)
-
-	loaderFile := filepath.Join(base, "loader.elf")
-	os.WriteFile(loaderFile, []byte(assets.KernelLoader), 0644)
+	if kernelFile == "" {
+		log.Fatal("missing kernel file")
+	}
 
 	var runArgs []string
+
+	ext := filepath.Ext(kernelFile)
+	switch ext {
+	case ".elf":
+		loaderFile := filepath.Join(base, "loader.elf")
+		mustLoaderFile(loaderFile)
+		runArgs = append(runArgs, "-kernel", loaderFile)
+		runArgs = append(runArgs, "-initrd", kernelFile)
+		runArgs = append(runArgs, "-append", strings.Join(envs, " "))
+	case ".iso":
+		runArgs = append(runArgs, "-cdrom", kernelFile)
+	default:
+		log.Fatalf("unsupported file ext:%s", ext)
+	}
+
 	runArgs = append(runArgs, "-m", "256M", "-no-reboot", "-serial", "mon:stdio")
 	runArgs = append(runArgs, "-netdev", "user,id=eth0"+portMapingArgs())
 	runArgs = append(runArgs, "-device", "e1000,netdev=eth0")
 	runArgs = append(runArgs, "-device", "isa-debug-exit")
-	runArgs = append(runArgs, "-kernel", loaderFile)
-	runArgs = append(runArgs, "-initrd", kernelFile)
-	runArgs = append(runArgs, "-append", strings.Join(envs, " "))
+
 	if !showgraphic {
 		runArgs = append(runArgs, "-nographic")
 	}
@@ -79,6 +93,17 @@ func runKernel() {
 	}
 	exiterr := err.(*exec.ExitError)
 	os.Exit(exiterr.ExitCode())
+}
+
+func mustLoaderFile(fname string) {
+	content, err := assets.Boot.ReadFile("boot/multiboot.elf")
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = os.WriteFile(fname, content, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func portMapingArgs() string {
@@ -96,7 +121,7 @@ func portMapingArgs() string {
 
 func init() {
 	rootCmd.AddCommand(runCmd)
-	runCmd.Flags().StringVarP(&kernelFile, "kernel", "k", "kernel.elf", "eggos kernel file")
+	runCmd.Flags().StringVarP(&kernelFile, "kernel", "k", "", "eggos kernel file, kernel.elf|eggos.iso")
 	runCmd.Flags().BoolVarP(&showgraphic, "graphic", "g", false, "show qemu graphic window")
 	runCmd.Flags().StringSliceVarP(&envs, "env", "e", nil, "env passed to kernel")
 	runCmd.Flags().StringSliceVarP(&ports, "port", "p", nil, "port mapping from host to kernel, format $host_port:$kernel_port")
