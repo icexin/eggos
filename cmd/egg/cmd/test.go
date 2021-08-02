@@ -21,7 +21,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/icexin/eggos/cmd/build"
+	"github.com/icexin/eggos/cmd/egg/build"
 	"github.com/spf13/cobra"
 )
 
