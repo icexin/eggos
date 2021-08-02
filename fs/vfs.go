@@ -245,6 +245,22 @@ func sysFstatat64(c *isyscall.Request) {
 
 }
 
+func sysLseek(c *isyscall.Request) {
+	fd := c.Arg(0)
+	offset := c.Arg(1)
+	whence := c.Arg(2)
+
+	_ = offset
+	_ = whence
+
+	_, err := GetInode(int(fd))
+	if err != nil {
+		c.SetRet(isyscall.Error(err))
+		return
+	}
+	c.SetRet(0)
+}
+
 func sysRandom(call *isyscall.Request) {
 	p, n := call.Arg(0), call.Arg(1)
 	buf := sys.UnsafeBuffer(p, int(n))
@@ -338,8 +354,8 @@ func sysInit() {
 	isyscall.Register(syscall.SYS_FSTAT, fscall(syscall.SYS_FSTAT))
 	isyscall.Register(syscall.SYS_IOCTL, fscall(syscall.SYS_IOCTL))
 	isyscall.Register(syscall.SYS_FCNTL, sysFcntl)
-	isyscall.Register(syscall.SYS_FCNTL, sysFcntl)
-	isyscall.Register(syscall.SYS_FSTATFS, sysFstatat64)
+	isyscall.Register(syscall.SYS_NEWFSTATAT, sysFstatat64)
+	isyscall.Register(syscall.SYS_LSEEK, sysLseek)
 	isyscall.Register(syscall.SYS_UNAME, sysUname)
 	isyscall.Register(355, sysRandom)
 }
