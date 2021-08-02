@@ -62,7 +62,7 @@ func runKernel() {
 
 	ext := filepath.Ext(kernelFile)
 	switch ext {
-	case ".elf":
+	case ".elf", "":
 		loaderFile := filepath.Join(base, "loader.elf")
 		mustLoaderFile(loaderFile)
 		runArgs = append(runArgs, "-kernel", loaderFile)
@@ -70,8 +70,6 @@ func runKernel() {
 		runArgs = append(runArgs, "-append", strings.Join(envs, " "))
 	case ".iso":
 		runArgs = append(runArgs, "-cdrom", kernelFile)
-	default:
-		log.Fatalf("unsupported file ext:%s", ext)
 	}
 
 	runArgs = append(runArgs, "-m", "256M", "-no-reboot", "-serial", "mon:stdio")
