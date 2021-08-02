@@ -16,6 +16,7 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -34,6 +35,7 @@ var (
 	kernelFile  string
 	showgraphic bool
 	envs        []string
+	ports       []string
 )
 
 // runCmd represents the run command
@@ -57,7 +59,7 @@ func runKernel() {
 
 	var runArgs []string
 	runArgs = append(runArgs, "-m", "256M", "-no-reboot", "-serial", "mon:stdio")
-	runArgs = append(runArgs, "-netdev", "user,id=eth0,hostfwd=tcp::8080-:80,hostfwd=tcp::8081-:22")
+	runArgs = append(runArgs, "-netdev", "user,id=eth0"+portMapingArgs())
 	runArgs = append(runArgs, "-device", "e1000,netdev=eth0")
 	runArgs = append(runArgs, "-device", "isa-debug-exit")
 	runArgs = append(runArgs, "-kernel", loaderFile)
@@ -79,9 +81,23 @@ func runKernel() {
 	os.Exit(exiterr.ExitCode())
 }
 
+func portMapingArgs() string {
+	var ret []string
+	for _, mapping := range ports {
+		fs := strings.Split(mapping, ":")
+		if len(fs) < 2 {
+			continue
+		}
+		arg := fmt.Sprintf(",hostfwd=tcp::%s-:%s", fs[0], fs[1])
+		ret = append(ret, arg)
+	}
+	return strings.Join(ret, "")
+}
+
 func init() {
 	rootCmd.AddCommand(runCmd)
 	runCmd.Flags().StringVarP(&kernelFile, "kernel", "k", "kernel.elf", "eggos kernel file")
 	runCmd.Flags().BoolVarP(&showgraphic, "graphic", "g", false, "show qemu graphic window")
 	runCmd.Flags().StringSliceVarP(&envs, "env", "e", nil, "env passed to kernel")
+	runCmd.Flags().StringSliceVarP(&ports, "port", "p", nil, "port mapping from host to kernel, format $host_port:$kernel_port")
 }
