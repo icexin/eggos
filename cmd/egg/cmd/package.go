@@ -38,8 +38,8 @@ var (
 	packageOutFile    string
 	packageKernelFile string
 
-	witchDocker bool
-	keepTmpdir  bool
+	withoutDocker bool
+	keepTmpdir    bool
 )
 
 // packageCmd represents the package command
@@ -104,7 +104,7 @@ func runPackage() error {
 
 func mkiso(outfile, isobase, moutbase string) error {
 	var stderr bytes.Buffer
-	if !witchDocker {
+	if withoutDocker {
 		cmd := exec.Command("grub-mkrescue", "-o", outfile, isobase)
 		cmd.Stderr = &stderr
 		err := cmd.Run()
@@ -190,5 +190,5 @@ func init() {
 	packageCmd.Flags().StringVarP(&packageKernelFile, "kernel", "k", "", "the kernel file, if empty current package will be built as kernel")
 	packageCmd.Flags().StringVarP(&packageOutFile, "output", "o", "eggos.iso", "file name of output")
 	packageCmd.Flags().BoolVar(&keepTmpdir, "keep-tmp", false, "keep temp dir, for debugging")
-	packageCmd.Flags().BoolVarP(&witchDocker, "with-docker", "d", false, "using docker for grub tools")
+	packageCmd.Flags().BoolVarP(&withoutDocker, "without-docker", "d", false, "using docker for grub tools")
 }
