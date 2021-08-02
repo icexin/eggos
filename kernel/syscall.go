@@ -389,6 +389,8 @@ func sysFixedMmap(req *isyscall.Request) {
 //go:nosplit
 func sysExitGroup(req *isyscall.Request) {
 	qemu.Exit(int(req.Arg(0)))
+	for {
+	}
 }
 
 //go:nosplit
