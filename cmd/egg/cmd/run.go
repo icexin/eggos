@@ -20,6 +20,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/icexin/eggos/cmd/egg/assets"
 	"github.com/spf13/cobra"
@@ -32,6 +33,7 @@ const (
 var (
 	kernelFile  string
 	showgraphic bool
+	envs        []string
 )
 
 // runCmd represents the run command
@@ -60,6 +62,7 @@ func runKernel() {
 	runArgs = append(runArgs, "-device", "isa-debug-exit")
 	runArgs = append(runArgs, "-kernel", loaderFile)
 	runArgs = append(runArgs, "-initrd", kernelFile)
+	runArgs = append(runArgs, "-append", strings.Join(envs, " "))
 	if !showgraphic {
 		runArgs = append(runArgs, "-nographic")
 	}
@@ -80,4 +83,5 @@ func init() {
 	rootCmd.AddCommand(runCmd)
 	runCmd.Flags().StringVarP(&kernelFile, "kernel", "k", "kernel.elf", "eggos kernel file")
 	runCmd.Flags().BoolVarP(&showgraphic, "graphic", "g", false, "show qemu graphic window")
+	runCmd.Flags().StringSliceVarP(&envs, "env", "e", nil, "env passed to kernel")
 }
