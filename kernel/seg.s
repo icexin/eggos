@@ -12,12 +12,13 @@ TEXT ·lidt(SB), NOSPLIT, $0-8
 
 TEXT ·ltr(SB), NOSPLIT, $0-8
 	MOVQ sel+0(FP), AX
-	LTR AX
-    RET
+	LTR  AX
+	RET
 
 TEXT ·reloadCS(SB), NOSPLIT, $0
 	// save ip
 	MOVQ 0(SP), AX
+
 	// save sp
 	MOVQ SP, BX
 	ADDQ $8, BX

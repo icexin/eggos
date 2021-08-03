@@ -12,4 +12,3 @@ TEXT ·Hlt(SB), NOSPLIT, $0
 	HLT
 	RET
 
-
