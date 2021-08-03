@@ -139,7 +139,7 @@ func (b *Builder) editGoMod() error {
 func (b *Builder) currentPkgName() string {
 	out, err := exec.Command(b.gobin(), "list", "-f", `{{.Name}}`).CombinedOutput()
 	if err != nil {
-		panic(err)
+		log.Panicf("get current package name:%s", out)
 	}
 	return strings.TrimSpace(string(out))
 }
@@ -147,7 +147,7 @@ func (b *Builder) currentPkgName() string {
 func (b *Builder) currentModulePath() string {
 	out, err := exec.Command(b.gobin(), "list", "-f", `{{.Module.Path}}`).CombinedOutput()
 	if err != nil {
-		panic(err)
+		log.Panicf("get current module path:%s", out)
 	}
 	return strings.TrimSpace(string(out))
 
