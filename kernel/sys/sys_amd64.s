@@ -50,6 +50,6 @@ TEXT ·CS(SB), NOSPLIT, $0-8
 	RET
 
 TEXT ·Fxsave(SB), NOSPLIT, $0-8
-	MOVQ addr+0(FP), AX
+	MOVQ   addr+0(FP), AX
 	FXSAVE (AX)
 	RET

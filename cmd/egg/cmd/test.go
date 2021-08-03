@@ -47,6 +47,7 @@ func runTest() error {
 	outfile := filepath.Join(base, "eggos.test.elf")
 
 	b := build.NewBuilder(build.Config{
+		GoRoot:       goroot,
 		Basedir:      base,
 		BuildTest:    true,
 		EggosVersion: eggosVersion,

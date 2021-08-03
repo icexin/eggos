@@ -42,6 +42,7 @@ TEXT ·ksysClone(SB), NOSPLIT, $0-32
 	MOVQ pc+0(FP), R12
 	MOVQ stack+8(FP), SI
 	MOVQ flags+16(FP), DI
+
 	// clear tls
 	XORQ R8, R8
 
@@ -53,10 +54,10 @@ TEXT ·ksysClone(SB), NOSPLIT, $0-32
 	MOVQ AX, ret+24(FP)
 	RET
 
-	NOP SP // tell vet SP changed - stop checking offsets
+	NOP SP  // tell vet SP changed - stop checking offsets
 	JMP R12
 
 TEXT ·ksysYield(SB), NOSPLIT, $0
 	MOVQ $SYS_sched_yield, AX
-	INT $0x80
+	INT  $0x80
 	RET

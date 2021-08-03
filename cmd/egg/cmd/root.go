@@ -27,6 +27,7 @@ import (
 var (
 	cfgFile      string
 	eggosVersion string
+	goroot       string
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -57,6 +58,10 @@ func init() {
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
+	if os.Getenv("GOROOT") != "" {
+		goroot = os.Getenv("GOROOT")
+	}
 }
 
 // initConfig reads in config file and ENV variables if set.

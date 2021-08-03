@@ -55,7 +55,7 @@ func (b *Builder) overlayFile() string {
 func (b *Builder) buildPrepare() error {
 	var err error
 
-	if !modHasEggos() {
+	if !b.modHasEggos() {
 		log.Printf("eggos not found in go.mod")
 		err = b.editGoMod()
 		if err != nil {
@@ -63,7 +63,7 @@ func (b *Builder) buildPrepare() error {
 		}
 	}
 
-	err = writeImportFile(b.eggosImportFile())
+	err = b.writeImportFile(b.eggosImportFile())
 	if err != nil {
 		return err
 	}
@@ -85,9 +85,9 @@ func writeOverlayFile(overlayFile, dest, source string) error {
 	return os.WriteFile(overlayFile, buf, 0644)
 }
 
-func readGomodule() (*gomodule, error) {
+func (b *Builder) readGomodule() (*gomodule, error) {
 	var buf bytes.Buffer
-	cmd := exec.Command("go", "mod", "edit", "-json")
+	cmd := exec.Command(b.gobin(), "mod", "edit", "-json")
 	cmd.Stdout = &buf
 	err := cmd.Run()
 	if err != nil {
@@ -101,12 +101,12 @@ func readGomodule() (*gomodule, error) {
 	return &mod, nil
 }
 
-func modHasEggos() bool {
-	if currentModulePath() == eggosModulePath {
+func (b *Builder) modHasEggos() bool {
+	if b.currentModulePath() == eggosModulePath {
 		return true
 	}
 
-	mods, err := readGomodule()
+	mods, err := b.readGomodule()
 	if err != nil {
 		panic(err)
 	}
@@ -129,23 +129,23 @@ func (b *Builder) editGoMod() error {
 		"GOARCH=amd64",
 	}
 	env = append(env, os.Environ()...)
-	cmd := exec.Command("go", "get", getPath)
+	cmd := exec.Command(b.gobin(), "get", getPath)
 	cmd.Env = env
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
 }
 
-func currentPkgName() string {
-	out, err := exec.Command("go", "list", "-f", `{{.Name}}`).CombinedOutput()
+func (b *Builder) currentPkgName() string {
+	out, err := exec.Command(b.gobin(), "list", "-f", `{{.Name}}`).CombinedOutput()
 	if err != nil {
 		panic(err)
 	}
 	return strings.TrimSpace(string(out))
 }
 
-func currentModulePath() string {
-	out, err := exec.Command("go", "list", "-f", `{{.Module.Path}}`).CombinedOutput()
+func (b *Builder) currentModulePath() string {
+	out, err := exec.Command(b.gobin(), "list", "-f", `{{.Module.Path}}`).CombinedOutput()
 	if err != nil {
 		panic(err)
 	}
@@ -153,8 +153,8 @@ func currentModulePath() string {
 
 }
 
-func writeImportFile(fname string) error {
-	pkgname := currentPkgName()
+func (b *Builder) writeImportFile(fname string) error {
+	pkgname := b.currentPkgName()
 	var rawFile bytes.Buffer
 	err := eggosImportTpl.Execute(&rawFile, map[string]interface{}{
 		"name": pkgname,

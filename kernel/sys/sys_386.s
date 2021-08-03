@@ -44,6 +44,6 @@ TEXT ·Cr2(SB), NOSPLIT, $0-4
 	RET
 
 TEXT ·Fxsave(SB), NOSPLIT, $0-4
-	MOVL addr+0(FP), AX
+	MOVL   addr+0(FP), AX
 	FXSAVE (AX)
 	RET

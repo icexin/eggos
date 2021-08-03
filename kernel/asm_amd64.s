@@ -23,7 +23,7 @@ TEXT ·go_entry(SB), NOSPLIT, $0
 	PUSHQ SP
 	CALL  ·prepareArgs(SB)
 	ADDQ  $8, SP
-	JMP _rt0_amd64_linux(SB)
+	JMP   _rt0_amd64_linux(SB)
 
 TEXT ·sseInit(SB), NOSPLIT, $0
 	MOVL CR0, AX
@@ -35,17 +35,17 @@ TEXT ·sseInit(SB), NOSPLIT, $0
 	MOVL AX, CR4
 	RET
 
-TEXT ·rdmsr(SB),NOSPLIT,$0-16
+TEXT ·rdmsr(SB), NOSPLIT, $0-16
 	MOVL reg+0(FP), CX
 	RDMSR
-	MOVL	AX, lo+8(FP)
-	MOVL	DX, hi+12(FP)
+	MOVL AX, lo+8(FP)
+	MOVL DX, hi+12(FP)
 	RET
 
-TEXT ·wrmsr(SB),NOSPLIT,$0-16
-	MOVL	reg+0(FP), CX
-	MOVL	lo+8(FP), AX
-	MOVL	hi+12(FP), DX
+TEXT ·wrmsr(SB), NOSPLIT, $0-16
+	MOVL reg+0(FP), CX
+	MOVL lo+8(FP), AX
+	MOVL hi+12(FP), DX
 	WRMSR
 	RET
 

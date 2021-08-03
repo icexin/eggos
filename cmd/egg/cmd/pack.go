@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"bytes"
+	"fmt"
 	"io/fs"
 	"io/ioutil"
 	"log"
@@ -34,18 +35,18 @@ const (
 )
 
 var (
-	packageFormat     string
-	packageOutFile    string
-	packageKernelFile string
+	packFormat     string
+	packOutFile    string
+	packKernelFile string
 
 	withoutDocker bool
 	keepTmpdir    bool
 )
 
-// packageCmd represents the package command
-var packageCmd = &cobra.Command{
-	Use:   "package",
-	Short: "package kernel to release format, eg iso",
+// packCmd represents the pack command
+var packCmd = &cobra.Command{
+	Use:   "pack",
+	Short: "pack kernel to release format, eg iso",
 	Run: func(cmd *cobra.Command, args []string) {
 		err := runPackage()
 		if err != nil {
@@ -96,10 +97,33 @@ func runPackage() error {
 		return err
 	}
 
-	if packageOutFile == "" {
-		packageOutFile = "eggos.iso"
+	if packOutFile == "" {
+		packOutFile = "eggos.iso"
 	}
-	return copyfile(packageOutFile, tmpOutFile)
+	return copyfile(packOutFile, tmpOutFile)
+}
+
+func dockerImageExists(imageName string) error {
+	var stderr bytes.Buffer
+	cmd := exec.Command("docker", "inspect", imageName)
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+	if err != nil {
+		return fmt.Errorf("inspect docker image error:%s", stderr.String())
+	}
+	return nil
+}
+
+func dockerPullImage(imageName string) error {
+	cmd := exec.Command("docker", "pull", imageName)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	if err != nil {
+		return fmt.Errorf("pull docker image error:%s", err)
+	}
+	return nil
 }
 
 func mkiso(outfile, isobase, moutbase string) error {
@@ -113,6 +137,17 @@ func mkiso(outfile, isobase, moutbase string) error {
 		}
 		return err
 	}
+
+	err := dockerImageExists(grubDockerImage)
+	if err != nil {
+		log.Print(err)
+		log.Printf("trying to pull docker image `%s`", grubDockerImage)
+		err = dockerPullImage(grubDockerImage)
+		if err != nil {
+			return err
+		}
+	}
+
 	cmd := exec.Command(
 		"docker", "run", "--rm",
 		"-v", moutbase+":"+moutbase,
@@ -121,7 +156,7 @@ func mkiso(outfile, isobase, moutbase string) error {
 		"grub-mkrescue", "-o", outfile, isobase,
 	)
 	cmd.Stderr = &stderr
-	err := cmd.Run()
+	err = cmd.Run()
 	if err != nil {
 		log.Print(stderr.String())
 	}
@@ -157,11 +192,12 @@ func extractBootDir(base string) error {
 }
 
 func getKernelFile(base string) (string, error) {
-	if packageKernelFile != "" {
-		return packageKernelFile, nil
+	if packKernelFile != "" {
+		return packKernelFile, nil
 	}
 	outputFile := filepath.Join(base, "kernel.elf")
 	b := build.NewBuilder(build.Config{
+		GoRoot:  goroot,
 		Basedir: base,
 		GoArgs: []string{
 			"-o", outputFile,
@@ -184,11 +220,11 @@ func copyfile(dst, src string) error {
 }
 
 func init() {
-	rootCmd.AddCommand(packageCmd)
+	rootCmd.AddCommand(packCmd)
 
-	packageCmd.Flags().StringVarP(&packageFormat, "format", "f", "iso", "package format, values `iso`")
-	packageCmd.Flags().StringVarP(&packageKernelFile, "kernel", "k", "", "the kernel file, if empty current package will be built as kernel")
-	packageCmd.Flags().StringVarP(&packageOutFile, "output", "o", "eggos.iso", "file name of output")
-	packageCmd.Flags().BoolVar(&keepTmpdir, "keep-tmp", false, "keep temp dir, for debugging")
-	packageCmd.Flags().BoolVarP(&withoutDocker, "without-docker", "d", false, "using docker for grub tools")
+	packCmd.Flags().StringVarP(&packFormat, "format", "f", "iso", "package format, values `iso`")
+	packCmd.Flags().StringVarP(&packKernelFile, "kernel", "k", "", "the kernel file, if empty current package will be built as kernel")
+	packCmd.Flags().StringVarP(&packOutFile, "output", "o", "eggos.iso", "file name of output")
+	packCmd.Flags().BoolVar(&keepTmpdir, "keep-tmp", false, "keep temp dir, for debugging")
+	packCmd.Flags().BoolVarP(&withoutDocker, "without-docker", "d", false, "using docker for grub tools")
 }
