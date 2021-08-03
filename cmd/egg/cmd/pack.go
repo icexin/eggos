@@ -34,18 +34,18 @@ const (
 )
 
 var (
-	packageFormat     string
-	packageOutFile    string
-	packageKernelFile string
+	packFormat     string
+	packOutFile    string
+	packKernelFile string
 
 	withoutDocker bool
 	keepTmpdir    bool
 )
 
-// packageCmd represents the package command
-var packageCmd = &cobra.Command{
-	Use:   "package",
-	Short: "package kernel to release format, eg iso",
+// packCmd represents the pack command
+var packCmd = &cobra.Command{
+	Use:   "pack",
+	Short: "pack kernel to release format, eg iso",
 	Run: func(cmd *cobra.Command, args []string) {
 		err := runPackage()
 		if err != nil {
@@ -96,10 +96,10 @@ func runPackage() error {
 		return err
 	}
 
-	if packageOutFile == "" {
-		packageOutFile = "eggos.iso"
+	if packOutFile == "" {
+		packOutFile = "eggos.iso"
 	}
-	return copyfile(packageOutFile, tmpOutFile)
+	return copyfile(packOutFile, tmpOutFile)
 }
 
 func mkiso(outfile, isobase, moutbase string) error {
@@ -157,8 +157,8 @@ func extractBootDir(base string) error {
 }
 
 func getKernelFile(base string) (string, error) {
-	if packageKernelFile != "" {
-		return packageKernelFile, nil
+	if packKernelFile != "" {
+		return packKernelFile, nil
 	}
 	outputFile := filepath.Join(base, "kernel.elf")
 	b := build.NewBuilder(build.Config{
@@ -184,11 +184,11 @@ func copyfile(dst, src string) error {
 }
 
 func init() {
-	rootCmd.AddCommand(packageCmd)
+	rootCmd.AddCommand(packCmd)
 
-	packageCmd.Flags().StringVarP(&packageFormat, "format", "f", "iso", "package format, values `iso`")
-	packageCmd.Flags().StringVarP(&packageKernelFile, "kernel", "k", "", "the kernel file, if empty current package will be built as kernel")
-	packageCmd.Flags().StringVarP(&packageOutFile, "output", "o", "eggos.iso", "file name of output")
-	packageCmd.Flags().BoolVar(&keepTmpdir, "keep-tmp", false, "keep temp dir, for debugging")
-	packageCmd.Flags().BoolVarP(&withoutDocker, "without-docker", "d", false, "using docker for grub tools")
+	packCmd.Flags().StringVarP(&packFormat, "format", "f", "iso", "package format, values `iso`")
+	packCmd.Flags().StringVarP(&packKernelFile, "kernel", "k", "", "the kernel file, if empty current package will be built as kernel")
+	packCmd.Flags().StringVarP(&packOutFile, "output", "o", "eggos.iso", "file name of output")
+	packCmd.Flags().BoolVar(&keepTmpdir, "keep-tmp", false, "keep temp dir, for debugging")
+	packCmd.Flags().BoolVarP(&withoutDocker, "without-docker", "d", false, "using docker for grub tools")
 }
