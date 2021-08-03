@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"bytes"
+	"fmt"
 	"io/fs"
 	"io/ioutil"
 	"log"
@@ -102,6 +103,29 @@ func runPackage() error {
 	return copyfile(packOutFile, tmpOutFile)
 }
 
+func dockerImageExists(imageName string) error {
+	var stderr bytes.Buffer
+	cmd := exec.Command("docker", "inspect", imageName)
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+	if err != nil {
+		return fmt.Errorf("inspect docker image error:%s", stderr.String())
+	}
+	return nil
+}
+
+func dockerPullImage(imageName string) error {
+	cmd := exec.Command("docker", "pull", imageName)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	if err != nil {
+		return fmt.Errorf("pull docker image error:%s", err)
+	}
+	return nil
+}
+
 func mkiso(outfile, isobase, moutbase string) error {
 	var stderr bytes.Buffer
 	if withoutDocker {
@@ -113,6 +137,17 @@ func mkiso(outfile, isobase, moutbase string) error {
 		}
 		return err
 	}
+
+	err := dockerImageExists(grubDockerImage)
+	if err != nil {
+		log.Print(err)
+		log.Printf("trying to pull docker image `%s`", grubDockerImage)
+		err = dockerPullImage(grubDockerImage)
+		if err != nil {
+			return err
+		}
+	}
+
 	cmd := exec.Command(
 		"docker", "run", "--rm",
 		"-v", moutbase+":"+moutbase,
@@ -121,7 +156,7 @@ func mkiso(outfile, isobase, moutbase string) error {
 		"grub-mkrescue", "-o", outfile, isobase,
 	)
 	cmd.Stderr = &stderr
-	err := cmd.Run()
+	err = cmd.Run()
 	if err != nil {
 		log.Print(stderr.String())
 	}
