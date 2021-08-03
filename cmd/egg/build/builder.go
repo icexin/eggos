@@ -52,6 +52,24 @@ func (b *Builder) gobin() string {
 	}
 	return filepath.Join(b.cfg.GoRoot, "bin", "go")
 }
+
+func (b *Builder) fixGoTags() {
+	var idx int
+	args := b.cfg.GoArgs
+	for i, arg := range args {
+		if arg == "-tags" {
+			if i >= len(b.cfg.GoArgs)-1 {
+				return
+			}
+			idx = i + 1
+			break
+		}
+	}
+	tags := args[idx]
+	tags += " eggos"
+	args[idx] = tags
+}
+
 func (b *Builder) buildPkg() error {
 	var buildArgs []string
 	ldflags := "-E github.com/icexin/eggos/kernel.rt0 -T 0x100000"
@@ -60,9 +78,9 @@ func (b *Builder) buildPkg() error {
 	} else {
 		buildArgs = append(buildArgs, "test", "-c")
 	}
-	buildArgs = append(buildArgs, "-ldflags", ldflags)
+	b.fixGoTags()
 	buildArgs = append(buildArgs, b.cfg.GoArgs...)
-	buildArgs = append(buildArgs, "-tags", "eggos")
+	buildArgs = append(buildArgs, "-ldflags", ldflags)
 	buildArgs = append(buildArgs, "-overlay", b.overlayFile())
 
 	env := append([]string{}, os.Environ()...)
