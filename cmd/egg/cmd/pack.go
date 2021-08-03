@@ -197,6 +197,7 @@ func getKernelFile(base string) (string, error) {
 	}
 	outputFile := filepath.Join(base, "kernel.elf")
 	b := build.NewBuilder(build.Config{
+		GoRoot:  goroot,
 		Basedir: base,
 		GoArgs: []string{
 			"-o", outputFile,

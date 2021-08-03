@@ -4,9 +4,11 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
 )
 
 type Config struct {
+	GoRoot       string
 	Basedir      string
 	BuildTest    bool
 	EggosVersion string
@@ -44,6 +46,12 @@ func (b *Builder) Build() error {
 	return b.buildPkg()
 }
 
+func (b *Builder) gobin() string {
+	if b.cfg.GoRoot == "" {
+		return "go"
+	}
+	return filepath.Join(b.cfg.GoRoot, "bin", "go")
+}
 func (b *Builder) buildPkg() error {
 	var buildArgs []string
 	ldflags := "-E github.com/icexin/eggos/kernel.rt0 -T 0x100000"
@@ -64,7 +72,7 @@ func (b *Builder) buildPkg() error {
 		"CGO_ENABLED=0",
 	}...)
 
-	cmd := exec.Command("go", buildArgs...)
+	cmd := exec.Command(b.gobin(), buildArgs...)
 	cmd.Env = env
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
