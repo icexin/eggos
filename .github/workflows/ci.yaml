@@ -20,7 +20,7 @@ jobs:
 
     - name: Install Qemu
       run: |
-        sudo apt install -y qemu-system-x86_64
+        sudo apt install -y qemu
 
     - name: Checkout code
       uses: actions/checkout@v2
