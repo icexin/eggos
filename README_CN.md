@@ -79,7 +79,7 @@ $ mage qemu
 在你的项目目录运行`egg build -o kernel.elf`，接着运行`egg run -k kernel.elf`启动qemu虚拟机。
 
 
-`egg pack -o eggos.iso` 可以将内核打包成一个iso文件，通过 https://github.com/ventoy/Ventoy 即可运行在真实的机器上。
+`egg pack -o eggos.iso -k kernel.elf` 可以将内核打包成一个iso文件，通过 https://github.com/ventoy/Ventoy 即可运行在真实的机器上。
 
 Happy hacking!
 

@@ -30,6 +30,7 @@ archives:
     files:
       - eggos.iso
       - README.md
+      - README_CN.md
       - LICENSE
 
 checksum:
