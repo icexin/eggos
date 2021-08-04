@@ -4,7 +4,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -27,7 +26,7 @@ var (
 )
 
 var (
-	GOTAGS    = "nes phy"
+	GOTAGS    = "nes phy prometheus"
 	GOGCFLAGS = ""
 )
 
@@ -40,7 +39,7 @@ var (
 )
 
 var (
-	kernelTarget = Kernel
+	eggBin string
 )
 
 const (
@@ -50,28 +49,13 @@ const (
 
 // Kernel target build the elf kernel for eggos, generate kernel.elf
 func Kernel() error {
-	detectGoVersion()
-	os.Chdir("app")
-	defer os.Chdir("..")
-	env := map[string]string{
-		"GOOS":   "linux",
-		"GOARCH": "amd64",
-	}
-	goLdflags := "-E github.com/icexin/eggos/kernel.rt0 -T 0x100000"
-	return sh.RunWithV(env, gobin(), "build", "-o", "../kernel.elf", "-tags", GOTAGS,
-		"-ldflags", goLdflags, "-gcflags", GOGCFLAGS, "./kmain")
-}
+	mg.Deps(Egg)
 
-func KernelTest() error {
 	detectGoVersion()
-	env := map[string]string{
-		"GOOS":   "linux",
-		"GOARCH": "amd64",
-	}
-	goLdflags := "-E github.com/icexin/eggos/kernel.rt0 -T 0x100000"
-	return sh.RunWithV(env, gobin(), "test", "-c", "-o", "kernel.elf",
-		"-ldflags", goLdflags, "-gcflags", GOGCFLAGS, "./tests")
-
+	return rundir("app", eggBin, "build", "-o", "../kernel.elf",
+		"-gcflags", GOGCFLAGS,
+		"-tags", GOTAGS,
+		"./kmain")
 }
 
 func Boot64() error {
@@ -86,18 +70,29 @@ func Boot64() error {
 // Multiboot target build Multiboot specification compatible elf format, generate multiboot.elf
 func Multiboot() error {
 	mg.Deps(Boot64)
-	mg.Deps(kernelTarget)
 	compileCfile("boot/multiboot.c", "-m32")
 	compileCfile("boot/multiboot_header.S", "-m32")
 	ldflags := "-Ttext 0x3300000 -m elf_i386 -o multiboot.elf multiboot.o multiboot_header.o -b binary boot64.elf"
 	ldArgs := append([]string{}, LDFLAGS...)
 	ldArgs = append(ldArgs, strings.Fields(ldflags)...)
-	return sh.RunV(LD, ldArgs...)
+	err := sh.RunV(LD, ldArgs...)
+	if err != nil {
+		return err
+	}
+	return sh.Copy(
+		filepath.Join("cmd", "egg", "assets", "boot", "multiboot.elf"),
+		"multiboot.elf",
+	)
 }
 
 func Test() error {
-	kernelTarget = KernelTest
-	err := Qemu()
+	mg.Deps(Egg)
+
+	var args []string
+	args = append(args, "test", "--")
+	args = append(args, QEMU_OPT...)
+
+	err := rundir("tests", eggBin, args...)
 	status := mg.ExitStatus(err)
 	if status != 0 && status != 1 {
 		return err
@@ -106,8 +101,13 @@ func Test() error {
 }
 
 func TestDebug() error {
-	kernelTarget = KernelTest
-	err := QemuDebug()
+	mg.Deps(Egg)
+
+	var args []string
+	args = append(args, "test", "--")
+	args = append(args, QEMU_DEBUG_OPT...)
+
+	err := rundir("tests", eggBin, args...)
 	status := mg.ExitStatus(err)
 	if status != 0 && status != 1 {
 		return err
@@ -120,54 +120,26 @@ func TestDebug() error {
 // If env QEMU_GRAPHIC is set QEMU will run in graphic mode.
 // Use Crtl+a c to switch console, and type `quit`
 func Qemu() error {
-	mg.Deps(Multiboot)
+	mg.Deps(Kernel)
 
 	detectQemu()
-	args := append([]string{}, QEMU_OPT...)
-	args = append(args, "-kernel", "multiboot.elf")
-	args = append(args, "-initrd", "kernel.elf")
-	args = append(args, "-append", os.Getenv("EGGOS_ENV"))
-	return sh.RunV(QEMU64, args...)
+	return eggrun(QEMU_OPT, "-k", "kernel.elf")
 }
 
 // QemuDebug run multiboot.elf in debug mode.
 // Monitor GDB connection on port 1234
 func QemuDebug() error {
 	GOGCFLAGS += " -N -l"
-	mg.Deps(Multiboot)
+	mg.Deps(Kernel)
 
 	detectQemu()
-	args := append([]string{}, QEMU_DEBUG_OPT...)
-	args = append(args, "-kernel", "multiboot.elf")
-	args = append(args, "-initrd", "kernel.elf")
-	args = append(args, "-append", os.Getenv("EGGOS_ENV"))
-	return sh.RunV(QEMU64, args...)
+	return eggrun(QEMU_DEBUG_OPT, "-k", "kernel.elf")
 }
 
 // Iso generate eggos.iso, which can be used with qemu -cdrom option.
 func Iso() error {
-	mg.Deps(Multiboot)
-
-	tmpdir, err := ioutil.TempDir("", "eggos-iso")
-	if err != nil {
-		return err
-	}
-	defer os.RemoveAll(tmpdir)
-	grubDir := filepath.Join(tmpdir, "boot", "grub")
-	os.MkdirAll(grubDir, 0755)
-	sh.Copy(
-		filepath.Join(grubDir, "grub.cfg"),
-		filepath.Join("boot", "grub.cfg"),
-	)
-	sh.Copy(
-		filepath.Join(tmpdir, "boot", "multiboot.elf"),
-		"multiboot.elf",
-	)
-	sh.Copy(
-		filepath.Join(tmpdir, "boot", "kernel.elf"),
-		"kernel.elf",
-	)
-	return sh.RunV("grub-mkrescue", "-o", "eggos.iso", tmpdir)
+	mg.Deps(Kernel)
+	return sh.RunV(eggBin, "pack", "-o", "eggos.iso", "-k", "kernel.elf")
 }
 
 // Graphic run eggos.iso on qemu, which vbe is enabled.
@@ -175,9 +147,7 @@ func Graphic() error {
 	detectQemu()
 
 	mg.Deps(Iso)
-	args := append([]string{}, QEMU_OPT...)
-	args = append(args, "-cdrom", "eggos.iso")
-	return sh.RunV(QEMU64, args...)
+	return eggrun(QEMU_OPT, "-k", "eggos.iso")
 }
 
 // GraphicDebug run eggos.iso on qemu in debug mode.
@@ -186,9 +156,17 @@ func GraphicDebug() error {
 
 	GOGCFLAGS += " -N -l"
 	mg.Deps(Iso)
-	args := append([]string{}, QEMU_DEBUG_OPT...)
-	args = append(args, "-cdrom", "eggos.iso")
-	return sh.RunV(QEMU32, args...)
+	return eggrun(QEMU_DEBUG_OPT, "-k", "eggos.iso")
+}
+
+func Egg() error {
+	err := rundir("cmd", "go", "build", "-o", "../egg", "./egg")
+	if err != nil {
+		return err
+	}
+	current, _ := os.Getwd()
+	eggBin = filepath.Join(current, "egg")
+	return nil
 }
 
 func Clean() {
@@ -197,6 +175,10 @@ func Clean() {
 	rmGlob("multiboot.elf")
 	rmGlob("qemu.log")
 	rmGlob("qemu.pcap")
+	rmGlob("eggos.iso")
+	rmGlob("egg")
+	rmGlob("boot64.elf")
+	rmGlob("bochs.log")
 }
 
 func detectToolPrefix() string {
@@ -300,20 +282,14 @@ func initLdflags() []string {
 }
 
 func initQemuOpt() []string {
-	opts := `
-	-m 256M -no-reboot -serial mon:stdio
-	-netdev user,id=eth0,hostfwd=tcp::8080-:80,hostfwd=tcp::8081-:22
-	-device e1000,netdev=eth0
-	-device isa-debug-exit
-	`
-	out := strings.Fields(opts)
+	var opts []string
 	if os.Getenv("QEMU_ACCEL") != "" {
-		out = append(out, accelArg()...)
+		opts = append(opts, accelArg()...)
 	}
 	if os.Getenv("QEMU_GRAPHIC") == "" {
-		out = append(out, "-nographic")
+		opts = append(opts, "-nographic")
 	}
-	return out
+	return opts
 }
 
 func initQemuDebugOpt() []string {
@@ -334,6 +310,23 @@ func compileCfile(file string, extFlags ...string) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func rundir(dir string, cmd string, args ...string) error {
+	current, _ := os.Getwd()
+	os.Chdir(dir)
+	defer os.Chdir(current)
+	return sh.RunV(cmd, args...)
+}
+
+func eggrun(qemuArgs []string, flags ...string) error {
+	var args []string
+	args = append(args, "run")
+	args = append(args, "-p", "8080:80")
+	args = append(args, flags...)
+	args = append(args, "--")
+	args = append(args, qemuArgs...)
+	return sh.RunV(eggBin, args...)
 }
 
 func cmdOutput(cmd string, args ...string) ([]byte, error) {
