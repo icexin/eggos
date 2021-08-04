@@ -72,7 +72,7 @@ $ sudo apt-get install build-essential qemu
 $ mage qemu
 ```
 
-# Build you own unikernel
+# Build your own unikernel
 
 eggos has the ability to convert normal go program into an `ELF unikernel` which an be running on bare metal. 
 
