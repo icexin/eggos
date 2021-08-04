@@ -8,6 +8,7 @@ import (
 )
 
 type Config struct {
+	WorkDir      string
 	GoRoot       string
 	Basedir      string
 	BuildTest    bool
@@ -54,20 +55,20 @@ func (b *Builder) gobin() string {
 }
 
 func (b *Builder) fixGoTags() {
-	var idx int
 	args := b.cfg.GoArgs
 	for i, arg := range args {
 		if arg == "-tags" {
 			if i >= len(b.cfg.GoArgs)-1 {
 				return
 			}
-			idx = i + 1
-			break
+			idx := i + 1
+			tags := args[idx]
+			tags += " eggos"
+			args[idx] = tags
+			return
 		}
 	}
-	tags := args[idx]
-	tags += " eggos"
-	args[idx] = tags
+	b.cfg.GoArgs = append(args, "-tags", "eggos")
 }
 
 func (b *Builder) buildPkg() error {
@@ -79,9 +80,9 @@ func (b *Builder) buildPkg() error {
 		buildArgs = append(buildArgs, "test", "-c")
 	}
 	b.fixGoTags()
-	buildArgs = append(buildArgs, b.cfg.GoArgs...)
 	buildArgs = append(buildArgs, "-ldflags", ldflags)
 	buildArgs = append(buildArgs, "-overlay", b.overlayFile())
+	buildArgs = append(buildArgs, b.cfg.GoArgs...)
 
 	env := append([]string{}, os.Environ()...)
 	env = append(env, []string{
@@ -95,6 +96,9 @@ func (b *Builder) buildPkg() error {
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
+	if b.cfg.WorkDir != "" {
+		cmd.Dir = b.cfg.WorkDir
+	}
 	err := cmd.Run()
 	return err
 }

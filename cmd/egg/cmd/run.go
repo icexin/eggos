@@ -33,10 +33,8 @@ const (
 )
 
 var (
-	kernelFile  string
-	showgraphic bool
-	envs        []string
-	ports       []string
+	kernelFile string
+	ports      []string
 )
 
 // runCmd represents the run command
@@ -44,11 +42,11 @@ var runCmd = &cobra.Command{
 	Use:   "run",
 	Short: "run running a eggos kernel in qemu",
 	Run: func(cmd *cobra.Command, args []string) {
-		runKernel()
+		runKernel(args)
 	},
 }
 
-func runKernel() {
+func runKernel(qemuArgs []string) {
 	base, err := ioutil.TempDir("", "eggos-run")
 	if err != nil {
 		log.Fatal(err)
@@ -67,7 +65,6 @@ func runKernel() {
 		mustLoaderFile(loaderFile)
 		runArgs = append(runArgs, "-kernel", loaderFile)
 		runArgs = append(runArgs, "-initrd", kernelFile)
-		runArgs = append(runArgs, "-append", strings.Join(envs, " "))
 	case ".iso":
 		runArgs = append(runArgs, "-cdrom", kernelFile)
 	}
@@ -76,10 +73,7 @@ func runKernel() {
 	runArgs = append(runArgs, "-netdev", "user,id=eth0"+portMapingArgs())
 	runArgs = append(runArgs, "-device", "e1000,netdev=eth0")
 	runArgs = append(runArgs, "-device", "isa-debug-exit")
-
-	if !showgraphic {
-		runArgs = append(runArgs, "-nographic")
-	}
+	runArgs = append(runArgs, qemuArgs...)
 
 	cmd := exec.Command(qemu64, runArgs...)
 	cmd.Stdin = os.Stdin
@@ -120,7 +114,5 @@ func portMapingArgs() string {
 func init() {
 	rootCmd.AddCommand(runCmd)
 	runCmd.Flags().StringVarP(&kernelFile, "kernel", "k", "", "eggos kernel file, kernel.elf|eggos.iso")
-	runCmd.Flags().BoolVarP(&showgraphic, "graphic", "g", false, "show qemu graphic window")
-	runCmd.Flags().StringSliceVarP(&envs, "env", "e", nil, "env passed to kernel")
 	runCmd.Flags().StringSliceVarP(&ports, "port", "p", nil, "port mapping from host to kernel, format $host_port:$kernel_port")
 }
