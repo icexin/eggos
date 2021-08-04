@@ -72,14 +72,14 @@ $ mage qemu
 
 # 构建自己的unikernel
 
-eggos有将普通Go程序转换成运行于裸机上的ELF unikernel的能力。
+`eggos` 有将普通Go程序转换成运行于裸机上的 `ELF unikernel` 的能力。
 
-首先获取egg二进制，可以通过https://github.com/icexin/eggos/releases下载。也可以直接运行`go install github.com/icexin/eggos/cmd/egg`获取。
+首先获取egg二进制，可以通过 https://github.com/icexin/eggos/releases 下载。也可以直接运行`go install github.com/icexin/eggos/cmd/egg`获取。
 
 在你的项目目录运行`egg build -o kernel.elf`，接着运行`egg run -k kernel.elf`启动qemu虚拟机。
 
 
-`egg pack -o eggos.iso` 可以将内核打包成一个iso文件，通过https://github.com/ventoy/Ventoy即可运行在真实的机器上。
+`egg pack -o eggos.iso` 可以将内核打包成一个iso文件，通过 https://github.com/ventoy/Ventoy 即可运行在真实的机器上。
 
 Happy hacking!
 
