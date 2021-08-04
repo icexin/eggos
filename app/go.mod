@@ -15,6 +15,7 @@ require (
 	github.com/klauspost/cpuid v1.3.1
 	github.com/mattn/go-shellwords v1.0.12
 	github.com/peterh/liner v1.2.1
+	github.com/prometheus/client_golang v1.7.1
 	github.com/robertkrimen/otto v0.0.0-20210614181706-373ff5438452
 	github.com/spf13/afero v1.4.0
 	golang.org/x/exp v0.0.0-20210729172720-737cce5152fc
