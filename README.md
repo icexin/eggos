@@ -2,6 +2,8 @@
 
 ![CI](https://github.com/icexin/eggos/workflows/CI/badge.svg)
 
+[中文说明](README_CN.md)
+
 A Go unikernel running on x86 bare metal
 
 Run a single Go applications on x86 bare metal, written entirely in Go (only a small amount of C and some assembly), support most features of Go (like GC, goroutine) and standard libraries, also come with a network stack that can run most `net` based libraries.
@@ -69,6 +71,18 @@ $ sudo apt-get install build-essential qemu
 ``` bash
 $ mage qemu
 ```
+
+# Build you own unikernel
+
+eggos has the ability to convert normal go program into an ELF unikernel which an be running on bare metal. 
+
+First, get the `egg` binary, which can be accessed through https://github.com/icexin/eggos/releases, or directly through `go install github.com/icexin/eggos/cmd/egg`
+
+Run `egg build -o kernel.elf` in your project directory to get the kernel file, and then run `egg run -k kernel.elf` to start the qemu virtual machine to run the kernel.
+
+`egg pack -o eggos.iso` can pack the kernel as an iso file, and use https://github.com/ventoy/Ventoy to run the iso file on a bare metal.
+
+Happy hacking!
 
 # Debug
 
