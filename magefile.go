@@ -26,7 +26,7 @@ var (
 )
 
 var (
-	GOTAGS    = "nes phy"
+	GOTAGS    = "nes phy prometheus"
 	GOGCFLAGS = ""
 )
 
@@ -322,6 +322,7 @@ func rundir(dir string, cmd string, args ...string) error {
 func eggrun(qemuArgs []string, flags ...string) error {
 	var args []string
 	args = append(args, "run")
+	args = append(args, "-p", "8080:80")
 	args = append(args, flags...)
 	args = append(args, "--")
 	args = append(args, qemuArgs...)
