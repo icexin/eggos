@@ -54,21 +54,21 @@ func (b *Builder) gobin() string {
 	return filepath.Join(b.cfg.GoRoot, "bin", "go")
 }
 
-func (b *Builder) fixGoTags() {
+func (b *Builder) fixGoTags() bool {
 	args := b.cfg.GoArgs
 	for i, arg := range args {
 		if arg == "-tags" {
 			if i >= len(b.cfg.GoArgs)-1 {
-				return
+				return false
 			}
 			idx := i + 1
 			tags := args[idx]
 			tags += " eggos"
 			args[idx] = tags
-			return
+			return true
 		}
 	}
-	b.cfg.GoArgs = append(args, "-tags", "eggos")
+	return false
 }
 
 func (b *Builder) buildPkg() error {
@@ -79,7 +79,10 @@ func (b *Builder) buildPkg() error {
 	} else {
 		buildArgs = append(buildArgs, "test", "-c")
 	}
-	b.fixGoTags()
+	hasGoTags := b.fixGoTags()
+	if !hasGoTags {
+		buildArgs = append(buildArgs, "-tags", "eggos")
+	}
 	buildArgs = append(buildArgs, "-ldflags", ldflags)
 	buildArgs = append(buildArgs, "-overlay", b.overlayFile())
 	buildArgs = append(buildArgs, b.cfg.GoArgs...)
