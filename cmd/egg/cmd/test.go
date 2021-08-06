@@ -30,21 +30,21 @@ var testCmd = &cobra.Command{
 	Use:   "test",
 	Short: "test likes go test but running in qemu",
 	Run: func(cmd *cobra.Command, args []string) {
-		err := runTest(args)
+		err := runTest()
 		if err != nil {
 			log.Fatal(err)
 		}
 	},
 }
 
-func runTest(qemuArgs []string) error {
+func runTest() error {
 	base, err := ioutil.TempDir("", "eggos-test")
 	if err != nil {
 		return err
 	}
 	defer os.RemoveAll(base)
 
-	outfile := filepath.Join(base, "eggos.test.elf")
+	outfile := filepath.Join(base, "kernel.test.elf")
 
 	b := build.NewBuilder(build.Config{
 		GoRoot:       goroot,
@@ -61,8 +61,7 @@ func runTest(qemuArgs []string) error {
 		return err
 	}
 
-	kernelFile = outfile
-	runKernel(qemuArgs)
+	runKernel([]string{outfile})
 	return nil
 }
 

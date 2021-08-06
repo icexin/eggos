@@ -78,7 +78,7 @@ eggos has the ability to convert normal go program into an `ELF unikernel` which
 
 First, get the `egg` binary, which can be accessed through https://github.com/icexin/eggos/releases, or directly through `go install github.com/icexin/eggos/cmd/egg`
 
-Run `egg build -o kernel.elf` in your project directory to get the kernel file, and then run `egg run -k kernel.elf` to start the qemu virtual machine to run the kernel.
+Run `egg build -o kernel.elf` in your project directory to get the kernel file, and then run `egg run kernel.elf` to start the qemu virtual machine to run the kernel.
 
 `egg pack -o eggos.iso -k kernel.elf` can pack the kernel into an iso file, and then you can use https://github.com/ventoy/Ventoy to run the iso file on a bare metal.
 

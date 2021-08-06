@@ -52,7 +52,7 @@ func Kernel() error {
 	mg.Deps(Egg)
 
 	detectGoVersion()
-	return rundir("app", eggBin, "build", "-o", "../kernel.elf",
+	return rundir("app", nil, eggBin, "build", "-o", "../kernel.elf",
 		"-gcflags", GOGCFLAGS,
 		"-tags", GOTAGS,
 		"./kmain")
@@ -88,11 +88,10 @@ func Multiboot() error {
 func Test() error {
 	mg.Deps(Egg)
 
-	var args []string
-	args = append(args, "test", "--")
-	args = append(args, QEMU_OPT...)
-
-	err := rundir("tests", eggBin, args...)
+	envs := map[string]string{
+		"QEMU_OPTS": quoteArgs(QEMU_OPT),
+	}
+	err := rundir("tests", envs, eggBin, "test")
 	status := mg.ExitStatus(err)
 	if status != 0 && status != 1 {
 		return err
@@ -103,11 +102,10 @@ func Test() error {
 func TestDebug() error {
 	mg.Deps(Egg)
 
-	var args []string
-	args = append(args, "test", "--")
-	args = append(args, QEMU_DEBUG_OPT...)
-
-	err := rundir("tests", eggBin, args...)
+	envs := map[string]string{
+		"QEMU_OPTS": quoteArgs(QEMU_DEBUG_OPT),
+	}
+	err := rundir("tests", envs, eggBin, "test")
 	status := mg.ExitStatus(err)
 	if status != 0 && status != 1 {
 		return err
@@ -123,7 +121,7 @@ func Qemu() error {
 	mg.Deps(Kernel)
 
 	detectQemu()
-	return eggrun(QEMU_OPT, "-k", "kernel.elf")
+	return eggrun(QEMU_OPT, "kernel.elf")
 }
 
 // QemuDebug run multiboot.elf in debug mode.
@@ -133,7 +131,7 @@ func QemuDebug() error {
 	mg.Deps(Kernel)
 
 	detectQemu()
-	return eggrun(QEMU_DEBUG_OPT, "-k", "kernel.elf")
+	return eggrun(QEMU_DEBUG_OPT, "kernel.elf")
 }
 
 // Iso generate eggos.iso, which can be used with qemu -cdrom option.
@@ -160,7 +158,7 @@ func GraphicDebug() error {
 }
 
 func Egg() error {
-	err := rundir("cmd", "go", "build", "-o", "../egg", "./egg")
+	err := rundir("cmd", nil, "go", "build", "-o", "../egg", "./egg")
 	if err != nil {
 		return err
 	}
@@ -299,7 +297,8 @@ func initQemuDebugOpt() []string {
 	-s -S
 	`
 	ret := append([]string{}, initQemuOpt()...)
-	return append(ret, strings.Fields(opts)...)
+	ret = append(ret, strings.Fields(opts)...)
+	return ret
 }
 
 func compileCfile(file string, extFlags ...string) {
@@ -312,25 +311,40 @@ func compileCfile(file string, extFlags ...string) {
 	}
 }
 
-func rundir(dir string, cmd string, args ...string) error {
+func rundir(dir string, envs map[string]string, cmd string, args ...string) error {
 	current, _ := os.Getwd()
 	os.Chdir(dir)
 	defer os.Chdir(current)
-	return sh.RunV(cmd, args...)
+	return sh.RunWithV(envs, cmd, args...)
 }
 
 func eggrun(qemuArgs []string, flags ...string) error {
+	qemuOpts := quoteArgs(qemuArgs)
 	var args []string
 	args = append(args, "run")
 	args = append(args, "-p", "8080:80")
 	args = append(args, flags...)
-	args = append(args, "--")
-	args = append(args, qemuArgs...)
-	return sh.RunV(eggBin, args...)
+	envs := map[string]string{
+		"QEMU_OPTS": qemuOpts,
+	}
+	return sh.RunWithV(envs, eggBin, args...)
 }
 
 func cmdOutput(cmd string, args ...string) ([]byte, error) {
 	return exec.Command(cmd, args...).CombinedOutput()
+}
+
+// quote string which has spaces with ""
+func quoteArgs(args []string) string {
+	var ret []string
+	for _, s := range args {
+		if strings.Index(s, " ") != -1 {
+			ret = append(ret, strconv.Quote(s))
+		} else {
+			ret = append(ret, s)
+		}
+	}
+	return strings.Join(ret, " ")
 }
 
 func hasCommand(cmd string) bool {
