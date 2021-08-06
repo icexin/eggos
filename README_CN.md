@@ -1,4 +1,4 @@
-# EggOS
+![eggos](assets/files/eggos.png)
 
 ![CI](https://github.com/icexin/eggos/workflows/CI/badge.svg)
 
