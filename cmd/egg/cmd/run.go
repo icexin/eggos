@@ -24,7 +24,9 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/google/shlex"
 	"github.com/icexin/eggos/cmd/egg/assets"
+	"github.com/icexin/eggos/cmd/egg/build"
 	"github.com/spf13/cobra"
 )
 
@@ -33,27 +35,47 @@ const (
 )
 
 var (
-	kernelFile string
-	ports      []string
+	ports []string
 )
 
 // runCmd represents the run command
 var runCmd = &cobra.Command{
-	Use:   "run",
+	Use:   "run <kernel>",
 	Short: "run running a eggos kernel in qemu",
 	Run: func(cmd *cobra.Command, args []string) {
-		runKernel(args)
+		err := runKernel(args)
+		if err != nil {
+			log.Fatal(err)
+		}
 	},
 }
 
-func runKernel(qemuArgs []string) {
+func runKernel(args []string) error {
 	base, err := ioutil.TempDir("", "eggos-run")
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer os.RemoveAll(base)
-	if kernelFile == "" {
-		log.Fatal("missing kernel file")
+
+	var kernelFile string
+
+	if len(args) == 0 || args[0] == "" {
+		kernelFile = filepath.Join(base, "kernel.elf")
+
+		b := build.NewBuilder(build.Config{
+			GoRoot:       goroot,
+			Basedir:      base,
+			BuildTest:    false,
+			EggosVersion: eggosVersion,
+			GoArgs: []string{
+				"-o", kernelFile,
+			},
+		})
+		if err := b.Build(); err != nil {
+			return fmt.Errorf("error building kernel: %s", err)
+		}
+	} else {
+		kernelFile = args[0]
 	}
 
 	var runArgs []string
@@ -69,6 +91,11 @@ func runKernel(qemuArgs []string) {
 		runArgs = append(runArgs, "-cdrom", kernelFile)
 	}
 
+	var qemuArgs []string
+	if qemuArgs, err = shlex.Split(os.Getenv("QEMU_OPTS")); err != nil {
+		return fmt.Errorf("error parsing QEMU_OPTS: %s", err)
+	}
+
 	runArgs = append(runArgs, "-m", "256M", "-no-reboot", "-serial", "mon:stdio")
 	runArgs = append(runArgs, "-netdev", "user,id=eth0"+portMapingArgs())
 	runArgs = append(runArgs, "-device", "e1000,netdev=eth0")
@@ -79,12 +106,29 @@ func runKernel(qemuArgs []string) {
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	cmd.Run()
+	err = cmd.Run()
 	if err == nil {
-		return
+		return nil
 	}
-	exiterr := err.(*exec.ExitError)
-	os.Exit(exiterr.ExitCode())
+	switch e := err.(type) {
+	case *exec.ExitError:
+		code := e.ExitCode()
+		if code == 0 || code == 1 {
+			return nil
+		}
+		return err
+	default:
+		return err
+	}
+}
+
+func fileExists(name string) bool {
+	if _, err := os.Stat(name); err != nil {
+		if os.IsNotExist(err) {
+			return false
+		}
+	}
+	return true
 }
 
 func mustLoaderFile(fname string) {
@@ -113,6 +157,5 @@ func portMapingArgs() string {
 
 func init() {
 	rootCmd.AddCommand(runCmd)
-	runCmd.Flags().StringVarP(&kernelFile, "kernel", "k", "", "eggos kernel file, kernel.elf|eggos.iso")
 	runCmd.Flags().StringSliceVarP(&ports, "port", "p", nil, "port mapping from host to kernel, format $host_port:$kernel_port")
 }
