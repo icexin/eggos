@@ -7,7 +7,7 @@ on:
 name: CI
 jobs:
   ubuntu-latest:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-21.04
     steps:
     - name: Install Go
       uses: actions/setup-go@v2
@@ -20,7 +20,7 @@ jobs:
 
     - name: Install Qemu
       run: |
-        sudo apt-get update && sudo apt-get install -y qemu
+        sudo apt-get update && sudo apt-get install -y qemu-system-x86
 
     - name: Checkout code
       uses: actions/checkout@v2
