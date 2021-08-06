@@ -91,12 +91,7 @@ func Test() error {
 	envs := map[string]string{
 		"QEMU_OPTS": quoteArgs(QEMU_OPT),
 	}
-	err := rundir("tests", envs, eggBin, "test")
-	status := mg.ExitStatus(err)
-	if status != 0 && status != 1 {
-		return err
-	}
-	return nil
+	return rundir("tests", envs, eggBin, "test")
 }
 
 func TestDebug() error {
@@ -105,12 +100,7 @@ func TestDebug() error {
 	envs := map[string]string{
 		"QEMU_OPTS": quoteArgs(QEMU_DEBUG_OPT),
 	}
-	err := rundir("tests", envs, eggBin, "test")
-	status := mg.ExitStatus(err)
-	if status != 0 && status != 1 {
-		return err
-	}
-	return nil
+	return rundir("tests", envs, eggBin, "test")
 }
 
 // Qemu run multiboot.elf on qemu.

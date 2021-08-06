@@ -43,14 +43,17 @@ var runCmd = &cobra.Command{
 	Use:   "run <kernel>",
 	Short: "run running a eggos kernel in qemu",
 	Run: func(cmd *cobra.Command, args []string) {
-		runKernel(args)
+		err := runKernel(args)
+		if err != nil {
+			log.Fatal(err)
+		}
 	},
 }
 
-func runKernel(args []string) {
+func runKernel(args []string) error {
 	base, err := ioutil.TempDir("", "eggos-run")
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer os.RemoveAll(base)
 
@@ -69,7 +72,7 @@ func runKernel(args []string) {
 			},
 		})
 		if err := b.Build(); err != nil {
-			log.Fatalf("error building kernel: %s", err)
+			return fmt.Errorf("error building kernel: %s", err)
 		}
 	} else {
 		kernelFile = args[0]
@@ -90,7 +93,7 @@ func runKernel(args []string) {
 
 	var qemuArgs []string
 	if qemuArgs, err = shlex.Split(os.Getenv("QEMU_OPTS")); err != nil {
-		log.Fatalf("error parsing QEMU_OPTS: %s", err)
+		return fmt.Errorf("error parsing QEMU_OPTS: %s", err)
 	}
 
 	runArgs = append(runArgs, "-m", "256M", "-no-reboot", "-serial", "mon:stdio")
@@ -105,10 +108,18 @@ func runKernel(args []string) {
 	cmd.Stderr = os.Stderr
 	err = cmd.Run()
 	if err == nil {
-		return
+		return nil
 	}
-	exiterr := err.(*exec.ExitError)
-	os.Exit(exiterr.ExitCode())
+	switch e := err.(type) {
+	case *exec.ExitError:
+		code := e.ExitCode()
+		if code == 0 || code == 1 {
+			return nil
+		}
+		return err
+	default:
+		return err
+	}
 }
 
 func fileExists(name string) bool {

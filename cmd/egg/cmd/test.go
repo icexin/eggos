@@ -61,8 +61,7 @@ func runTest() error {
 		return err
 	}
 
-	runKernel([]string{outfile})
-	return nil
+	return runKernel([]string{outfile})
 }
 
 func init() {
