@@ -84,6 +84,8 @@ Run `egg build -o kernel.elf` in your project directory to get the kernel file, 
 
 `egg pack -o eggos.iso -k kernel.elf` can pack the kernel into an iso file, and then you can use https://github.com/ventoy/Ventoy to run the iso file on a bare metal.
 
+Here are some examples [examples](./app/examples)
+
 Happy hacking!
 
 # Debug
