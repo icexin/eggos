@@ -1,4 +1,6 @@
-![eggos](assets/files/eggos.png)
+<h1 align="center">
+    <img src="./assets/files/eggos.png" />
+</h1
 
 ![CI](https://github.com/icexin/eggos/workflows/CI/badge.svg)
 
