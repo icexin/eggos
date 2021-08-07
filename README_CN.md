@@ -83,6 +83,8 @@ $ mage qemu
 
 `egg pack -o eggos.iso -k kernel.elf` 可以将内核打包成一个iso文件，通过 https://github.com/ventoy/Ventoy 即可运行在真实的机器上。
 
+这里是一些例子[例子](./app/examples)
+
 Happy hacking!
 
 # Debug
