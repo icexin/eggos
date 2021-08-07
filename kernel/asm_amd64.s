@@ -35,6 +35,21 @@ TEXT ·sseInit(SB), NOSPLIT, $0
 	MOVL AX, CR4
 	RET
 
+TEXT ·avxInit(SB), NOSPLIT, $0
+	// enable XGETBV and XSETBV
+	MOVL CR4, AX
+	ORL  $1<<18, AX
+	MOVL AX, CR4
+
+	// enable avx
+	XORQ CX, CX
+	XGETBV
+
+	ORQ  $7, AX
+	XORQ CX, CX
+	XSETBV
+	RET
+
 TEXT ·rdmsr(SB), NOSPLIT, $0-16
 	MOVL reg+0(FP), CX
 	RDMSR
@@ -55,3 +70,12 @@ TEXT ·getg(SB), NOSPLIT, $0-8
 	MOVQ BX, ret+0(FP)
 	RET
 
+TEXT ·cpuid(SB), NOSPLIT, $0-24
+	MOVL fn+0(FP), AX
+	MOVL cx+4(FP), CX
+	CPUID
+	MOVL AX, eax+8(FP)
+	MOVL BX, ebx+12(FP)
+	MOVL CX, ecx+16(FP)
+	MOVL DX, edx+20(FP)
+	RET
