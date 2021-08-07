@@ -135,7 +135,7 @@ func Graphic() error {
 	detectQemu()
 
 	mg.Deps(Iso)
-	return eggrun(QEMU_OPT, "-k", "eggos.iso")
+	return eggrun(QEMU_OPT, "eggos.iso")
 }
 
 // GraphicDebug run eggos.iso on qemu in debug mode.
@@ -144,7 +144,7 @@ func GraphicDebug() error {
 
 	GOGCFLAGS += " -N -l"
 	mg.Deps(Iso)
-	return eggrun(QEMU_DEBUG_OPT, "-k", "eggos.iso")
+	return eggrun(QEMU_DEBUG_OPT, "eggos.iso")
 }
 
 func Egg() error {

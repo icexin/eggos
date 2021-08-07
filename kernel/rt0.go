@@ -14,9 +14,6 @@ func rt0()
 func go_entry()
 
 //go:nosplit
-func sseInit()
-
-//go:nosplit
 func wrmsr(reg uint32, value uintptr)
 
 //go:nosplit
@@ -24,7 +21,7 @@ func rdmsr(reg uint32) (value uintptr)
 
 //go:nosplit
 func preinit(magic, mbiptr uintptr) {
-	sseInit()
+	simdInit()
 	gdtInit()
 	idtInit()
 	multiboot.Init(magic, mbiptr)
