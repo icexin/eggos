@@ -8,7 +8,7 @@
 
 A Go unikernel running on x86 bare metal
 
-Run a single Go applications on x86 bare metal, written entirely in Go (only a small amount of C and some assembly), support most features of Go (like GC, goroutine) and standard libraries, also come with a network stack that can run most `net` based libraries.
+Run Go applications on x86 bare metal, written entirely in Go (only a small amount of C and some assembly), support most features of Go (like GC, goroutine) and standard libraries, also come with a network stack that can run most `net` based libraries.
 
 The entire kernel is a go application running on ring0. There are no processes and process synchronization primitives, only goroutines and channels. There is no elf loader, but there is a Javascript interpreter that can run js script files, and a WASM interpreter will be added to run WASM files later.
 
