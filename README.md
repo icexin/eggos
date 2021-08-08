@@ -42,7 +42,7 @@ In general, writing kernel in Go is a very interesting experience. On the one ha
 - A nes game emulator using [nes](https://github.com/fogleman/nes)
 - A Javascript interpreter using [otto](https://github.com/robertkrimen/otto)
 - VBE based frame buffer.
-- Some simple network apps l(httpd, sshd).
+- Some simple network apps (httpd, sshd).
 - GUI support by [nucular](https://github.com/aarzilli/nucular).
 
 
