@@ -130,4 +130,5 @@ The program still has a lot of bugs, often loses response or panic. If you are w
 
 # Special thanks
 
-The birth of my little daughter brought a lot of joy to the family. This project was named after her name `xiao dan dan`. My wife and mother also gave me a lot of support and let me update this project in my spare time. :heart: :heart: :heart:
+The birth of my little daughter brought a lot of joy to the family. This project was named after her name `
+Xiao Dandan`. My wife and mother also gave me a lot of support and let me work on this project in my spare time. :heart: :heart: :heart:
