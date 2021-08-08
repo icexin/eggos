@@ -36,13 +36,13 @@ In general, writing kernel in Go is a very interesting experience. On the one ha
 # Feature list
 
 - Basic Go features, such as GC, goroutine, channel.
-- A simple console support basic line editting.
-- Network stack support tcp/udp.
+- A simple console supports basic line editting.
+- Network stack supports tcp/udp.
 - Go style vfs abstraction using [afero](https://github.com/spf13/afero)
 - A nes game emulator using [nes](https://github.com/fogleman/nes)
 - A Javascript interpreter using [otto](https://github.com/robertkrimen/otto)
 - VBE based frame buffer.
-- Some simple network apps(httpd, sshd).
+- Some simple network apps (httpd, sshd).
 - GUI support by [nucular](https://github.com/aarzilli/nucular).
 
 
@@ -126,8 +126,9 @@ The multiboot.elf generated after executing the make command is a kernel image c
 
 # Bugs
 
-The program still has a lot of bugs, and often loses response or panic. If you are willing to contribute, please submit a PR, thank you!
+The program still has a lot of bugs, often loses response or panic. If you are willing to contribute, please submit a PR, thank you!
 
 # Special thanks
 
-The birth of my little daughter brought a lot of joy to the family. This project was named after her name `xiao dan dan`. My wife and mother also gave me a lot of support and let me update this project in my spare time. :heart: :heart: :heart:
+The birth of my little daughter brought a lot of joy to the family. This project was named after her name `
+Xiao Dandan`. My wife and mother also gave me a lot of support and let me work on this project in my spare time. :heart: :heart: :heart:
