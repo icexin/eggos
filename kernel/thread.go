@@ -73,6 +73,8 @@ type Thread struct {
 	// sysmon 会调用usleep，进而调用sleepon，如果sleepKey是个指针会触发gcWriteBarrier
 	// 而sysmon没有P，会导致空指针
 	sleepKey uintptr
+	// for sleep timeout
+	timerKey uintptr
 
 	// store goroutine tls
 	fsBase uintptr

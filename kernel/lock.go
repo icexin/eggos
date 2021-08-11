@@ -41,8 +41,14 @@ func sleeptimeout(addr *uintptr, val uintptr, ts *linux.Timespec) {
 	deadline := nanosecond() + int64(ts.Nsec) + int64(ts.Sec)*second
 	// check on every timer intr
 	now := nanosecond()
+	t := Mythread()
 	for now < deadline && *addr == val {
-		sleepon(&sleeplock)
+		t.timerKey = uintptr(unsafe.Pointer(&sleeplock))
+		t.sleepKey = uintptr(unsafe.Pointer(addr))
+		t.state = SLEEPING
+		Sched()
+		t.timerKey = 0
+		t.sleepKey = 0
 		now = nanosecond()
 	}
 }
@@ -61,9 +67,10 @@ func sleepon(lock *uintptr) {
 func wakeup(lock *uintptr, n int) {
 	limit := uint(n)
 	cnt := uint(0)
+	lockKey := uintptr(unsafe.Pointer(lock))
 	for i := 0; i < _NTHREDS; i++ {
 		t := &threads[i]
-		if t.sleepKey == uintptr(unsafe.Pointer(lock)) && cnt < limit {
+		if (t.sleepKey == lockKey || t.timerKey == lockKey) && cnt < limit {
 			cnt++
 			t.state = RUNNABLE
 		}
