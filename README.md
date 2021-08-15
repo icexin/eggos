@@ -124,7 +124,7 @@ The multiboot.elf generated after executing the make command is a kernel image c
 - [x] x86_64 support
 - [ ] SMP support
 - [ ] Cloud server support (virtio)
-- [ ] arm64 support (especially Raspberry Pi 4)
+- [ ] Raspberry Pi support (arm64 aka aarch64)
 
 # Bugs
 
