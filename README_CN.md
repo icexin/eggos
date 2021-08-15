@@ -117,6 +117,8 @@ vscode用户通过安装`Native Debug` 扩展来支持GDB。
 - [x] 3D graphic
 - [x] x86_64 support
 - [ ] SMP support
+- [ ] Cloud server support (virtio)
+- [ ] arm64 support (especially Raspberry Pi 4)
 
 # 关于贡献
 
