@@ -1,79 +1,76 @@
 package kernel
 
 import (
-	"fmt"
-	"runtime"
-	"syscall"
 	"unsafe"
 
-	"github.com/icexin/eggos/debug"
+	"github.com/icexin/eggos/drivers/pic"
+	"github.com/icexin/eggos/kernel/isyscall"
+	"github.com/icexin/eggos/kernel/sys"
 	"github.com/icexin/eggos/kernel/trap"
-	"github.com/icexin/eggos/pic"
-	"github.com/icexin/eggos/sys"
+	"github.com/icexin/eggos/log"
 )
 
-//go:generate go run genvector.go
-
-const (
-	STS_IG32 = 0x8e
-	DPL_KERN = 0x0
-
-	IRQ_BASE = 0x20
+var (
+	trapnum = [...]string{
+		"#DE(0) Divide by zero",
+		"#DB(1) Debug exception",
+		"#NMI(2) Non maskable interrupt exception",
+		"#BP(3) Breakpoint exception",
+		"#OF(4) Overflow exception",
+		"#BR(5) Bound range exception",
+		"#UD(6) Invalid opcode exception",
+		"#NM(7) Device not avaiable exception",
+		"#DF(8) Double fault exception",
+		"(9)Coprocessor segment overrun exception",
+		"#TS(10) Invalid TSS exception",
+		"#NP(11) Segment not present exception",
+		"#SS(12) Stack exception",
+		"#GP(13) General protection exception",
+		"#PF(14) Page fault exception",
+		"#MF(15) x87 floating point exception",
+		"#AC(16) Alignment check exception",
+		"#MC(17) Machine check exception",
+		"#XF(18) SIMD floating point exception",
+		"#HV(19) Hypervisor injection exception",
+		"#VC(20) VMM communication exception",
+		"#SX(21) Security Exception",
+	}
 )
 
-type gateDesc struct {
-	offsetLow  uint16
-	selector   uint16
-	dcount     uint8
-	attr       uint8
-	offsetHigh uint16
+//go:notinheap
+type trapFrame struct {
+	AX, BX, CX, DX    uintptr
+	BP, SI, DI, R8    uintptr
+	R9, R10, R11, R12 uintptr
+	R13, R14, R15     uintptr
+
+	Trapno, Err uintptr
+
+	// pushed by hardware
+	IP, CS, FLAGS, SP, SS uintptr
 }
 
-var (
-	idt    [256]gateDesc
-	idtptr [6]byte
-
-	traptask threadptr
-)
-
-var (
-	// 因为中断处理是异步的，在获取一次中断期间可能发生了多次中断，
-	// irqset按位保存发生的中断，对应的中断号为IRQ_BASE+1<<bit
-	irqset uintptr
-)
-
-//go:nosplit
-func idt_init()
+func (t *trapFrame) SyscallRequest() isyscall.Request {
+	return isyscall.NewRequest(uintptr(unsafe.Pointer(t)))
+}
 
 //go:nosplit
 func trapret()
 
 //go:nosplit
-func setGateDesc(gate *gateDesc, handler func(), tp, pl uint8) {
-	base := uint32(sys.FuncPC(handler))
-	gate.offsetLow = uint16(base & 0xffff)
-	gate.selector = _KCODE_IDX << 3
-	gate.dcount = 0
-	gate.attr = tp | pl
-	gate.offsetHigh = uint16((base >> 16) & 0xffff)
+func trapPanic() {
+	tf := Mythread().tf
+	log.PrintStr("trap panic: ")
+	if tf.Trapno < uintptr(len(trapnum)) {
+		log.PrintStr(trapnum[tf.Trapno])
+	}
+	log.PrintStr("\n")
+	throwtf(tf, "stack trace:")
 }
 
 //go:nosplit
-func fillidt() {
-	if unsafe.Sizeof(gateDesc{}) != 8 {
-		panic("invalid gateDesc size")
-	}
-
-	for i := 0; i < 256; i++ {
-		setGateDesc(&idt[i], vectors[i], STS_IG32, DPL_KERN)
-	}
-	// set syscall gate to user mode
-	setGateDesc(&idt[0x80], vectors[0x80], STS_IG32, DPL_USER)
-
-	limit := (*uint16)(unsafe.Pointer(&idtptr[0]))
-	base := (*uint32)(unsafe.Pointer(&idtptr[2]))
-	*limit = uint16(unsafe.Sizeof(idt) - 1)
-	*base = uint32(uintptr(unsafe.Pointer(&idt[0])))
+func pageFaultPanic() {
+	panic("nil pointer or invalid memory access")
 }
 
 //go:nosplit
@@ -84,22 +81,20 @@ func ignoreHandler() {
 func pageFaultHandler() {
 	t := Mythread()
 	checkKernelPanic(t)
-	ChangeReturnPC(t.tf, sys.FuncPC(pageFaultPanic))
+	changeReturnPC(t.tf, sys.FuncPC(pageFaultPanic))
 }
 
 //go:nosplit
 func faultHandler() {
-	t := Mythread()
-	checkKernelPanic(t)
-	ChangeReturnPC(t.tf, sys.FuncPC(trapPanic))
+	trapPanic()
 }
 
 //go:nosplit
 func printReg(name string, reg uintptr) {
-	debug.PrintStr(name)
-	debug.PrintStr("=")
-	debug.PrintHex(reg)
-	debug.PrintStr("\n")
+	log.PrintStr(name)
+	log.PrintStr("=")
+	log.PrintHex(reg)
+	log.PrintStr("\n")
 }
 
 //go:nosplit
@@ -108,46 +103,29 @@ func checkKernelPanic(t *Thread) {
 	if tf.CS != _KCODE_IDX<<3 {
 		return
 	}
-	debug.PrintStr("trap fault in kernel\n")
 	printReg("tid", uintptr(t.id))
 	printReg("no", tf.Trapno)
 	printReg("err", tf.Err)
 	printReg("cr2", sys.Cr2())
 	printReg("ip", tf.IP)
-	printReg("sp", tf._SP)
+	printReg("sp", tf.SP)
 	printReg("ax", tf.AX)
 	printReg("bx", tf.BX)
 	printReg("cx", tf.CX)
 	printReg("dx", tf.CX)
 	printReg("cs", tf.CS)
-	printReg("gs", uintptr(tf.GS))
-	printReg("fs", uintptr(tf.FS))
-
-	sys.Cli()
-	sys.Hlt()
-	for {
-	}
+	throw("trap fault in kernel\n")
 }
 
 //go:nosplit
-func trapPanic() {
-	panic("trap panic")
-}
-
-//go:nosplit
-func pageFaultPanic() {
-	panic("nil pointer or invalid memory access")
-}
-
-//go:nosplit
-func PreparePanic(tf *TrapFrame) {
-	ChangeReturnPC(tf, sys.FuncPC(trapPanic))
+func preparePanic(tf *trapFrame) {
+	changeReturnPC(tf, sys.FuncPC(trapPanic))
 }
 
 // ChangeReturnPC change the return pc of a trap
 // must be called in trap handler
 //go:nosplit
-func ChangeReturnPC(tf *TrapFrame, pc uintptr) {
+func changeReturnPC(tf *trapFrame, pc uintptr) {
 	// tf.Err, tf.IP, tf.CS, tf.FLAGS = pc, tf.CS, tf.FLAGS, tf.IP
 	sp := tf.SP
 	sp -= sys.PtrSize
@@ -157,7 +135,15 @@ func ChangeReturnPC(tf *TrapFrame, pc uintptr) {
 }
 
 //go:nosplit
-func dotrap(tf *TrapFrame) {
+func dotrap(tf *trapFrame) {
+	if sys.Flags()&_FLAGS_IF != 0 {
+		throw("IF should clear")
+	}
+	my := Mythread()
+	// ugly as it is, avoid writeBarrier
+	// my.tf = tf
+	*(*uintptr)(unsafe.Pointer(&my.tf)) = uintptr(unsafe.Pointer(tf))
+
 	handler := trap.Handler(int(tf.Trapno))
 	if handler == nil {
 		faultHandler()
@@ -176,57 +162,9 @@ func dotrap(tf *TrapFrame) {
 	handler()
 }
 
-func traploop() {
-	runtime.LockOSThread()
-	var trapset uintptr
-	const setsize = unsafe.Sizeof(irqset) * 8
-
-	my := Mythread()
-	traptask = (threadptr)(unsafe.Pointer(my))
-	debug.Logf("[trap] tid:%d", my.id)
-	for {
-		trapset, _, _ = syscall.Syscall(SYS_WAIT_IRQ, 0, 0, 0)
-		for i := uintptr(0); i < setsize; i++ {
-			if trapset&(1<<i) == 0 {
-				continue
-			}
-			trapno := uintptr(IRQ_BASE + i)
-
-			handler := trap.Handler(int(trapno))
-			if handler == nil {
-				fmt.Printf("trap handler for %d not found\n", trapno)
-				pic.EOI(trapno)
-				continue
-			}
-			handler()
-		}
-	}
-}
-
 //go:nosplit
-func trap_init() {
-	idt_init()
+func trapInit() {
 	trap.Register(14, pageFaultHandler)
 	trap.Register(39, ignoreHandler)
 	trap.Register(47, ignoreHandler)
-}
-
-//go:nosplit
-func wakeIRQ(no uintptr) {
-	irqset |= 1 << (no - IRQ_BASE)
-	wakeup(&irqset, 1)
-	Yield()
-}
-
-//go:nosplit
-func waitIRQ() uintptr {
-	if irqset != 0 {
-		ret := irqset
-		irqset = 0
-		return ret
-	}
-	sleepon(&irqset)
-	ret := irqset
-	irqset = 0
-	return ret
 }

@@ -5,11 +5,12 @@ import (
 	"errors"
 	"time"
 
-	"github.com/icexin/eggos/debug"
 	"github.com/icexin/eggos/inet/dhcp"
+	"github.com/icexin/eggos/log"
 
 	"gvisor.dev/gvisor/pkg/tcpip"
 	"gvisor.dev/gvisor/pkg/tcpip/header"
+	"gvisor.dev/gvisor/pkg/tcpip/link/loopback"
 	"gvisor.dev/gvisor/pkg/tcpip/network/arp"
 	"gvisor.dev/gvisor/pkg/tcpip/network/ipv4"
 	"gvisor.dev/gvisor/pkg/tcpip/stack"
@@ -18,7 +19,8 @@ import (
 )
 
 const (
-	defaultNIC = 1
+	defaultNIC  = 1
+	loopbackNIC = 2
 )
 
 var (
@@ -32,64 +34,73 @@ func e(err tcpip.Error) error {
 	return errors.New(err.String())
 }
 
-func Init() error {
+func Init() {
 	nstack = stack.New(stack.Options{
 		NetworkProtocols:   []stack.NetworkProtocolFactory{arp.NewProtocol, ipv4.NewProtocol},
 		TransportProtocols: []stack.TransportProtocolFactory{tcp.NewProtocol, udp.NewProtocol},
+		HandleLocal:        true,
 	})
+
+	// add net card interface
 	endpoint := New(&Options{})
 	err := nstack.CreateNIC(defaultNIC, endpoint)
 	if err != nil {
-		return e(err)
+		panic(err)
 	}
-	// err = nstack.AddAddress(defaultNIC, arp.ProtocolNumber, arp.ProtocolAddress)
-	// if err != nil {
-	// 	return e(err)
-	// }
-
 	err1 := dodhcp(endpoint.LinkAddress())
 	if err1 != nil {
-		return err1
+		panic(err)
 	}
-	return nil
 
-	nstack.AddAddress(defaultNIC, ipv4.ProtocolNumber, tcpip.Address([]byte{10, 0, 2, 15}))
-	// nstack.AddAddress(defaultNIC, ipv4.ProtocolNumber, tcpip.Address([]byte{10, 0, 0, 7}))
-	setroute(nstack, dhcp.Config{
-		SubnetMask: tcpip.AddressMask([]byte{255, 255, 255, 0}),
-		Gateway:    tcpip.Address([]byte{10, 0, 2, 2}),
-		// Gateway: tcpip.Address([]byte{10, 0, 0, 1}),
-	})
+	// add loopback interface
+	err = nstack.CreateNIC(loopbackNIC, loopback.New())
+	if err != nil {
+		panic(err)
+	}
+	addInterfaceAddr(nstack, loopbackNIC, tcpip.Address([]byte{127, 0, 0, 1}))
+	return
+}
 
-	return nil
+func addInterfaceAddr(s *stack.Stack, nic tcpip.NICID, addr tcpip.Address) {
+	s.AddAddress(nic, ipv4.ProtocolNumber, addr)
+	// Add route for local network if it doesn't exist already.
+	localRoute := tcpip.Route{
+		Destination: addr.WithPrefix().Subnet(),
+		Gateway:     "", // No gateway for local network.
+		NIC:         nic,
+	}
+
+	for _, rt := range s.GetRouteTable() {
+		if rt.Equal(localRoute) {
+			return
+		}
+	}
+
+	// Local route does not exist yet. Add it.
+	s.AddRoute(localRoute)
 }
 
 func dodhcp(linkaddr tcpip.LinkAddress) error {
 	dhcpclient := dhcp.NewClient(nstack, defaultNIC, linkaddr)
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	debug.Logf("[inet] begin dhcp")
+	log.Infof("[inet] begin dhcp")
 	err1 := dhcpclient.Request(ctx, "")
 	cancel()
 	if err1 != nil {
 		return err1
 	}
-	debug.Logf("[inet] dhcp done")
+	log.Infof("[inet] dhcp done")
 	cfg := dhcpclient.Config()
-	debug.Logf("[inet] addr:%v", dhcpclient.Address())
-	debug.Logf("[inet] gateway:%v", cfg.Gateway)
-	debug.Logf("[inet] mask:%v", cfg.SubnetMask)
-	debug.Logf("[inet] dns:%v", cfg.DomainNameServer)
+	log.Infof("[inet] addr:%v", dhcpclient.Address())
+	log.Infof("[inet] gateway:%v", cfg.Gateway)
+	log.Infof("[inet] mask:%v", cfg.SubnetMask)
+	log.Infof("[inet] dns:%v", cfg.DomainNameServer)
 
-	setroute(nstack, dhcpclient.Config())
+	addInterfaceAddr(nstack, defaultNIC, dhcpclient.Address())
+	nstack.AddRoute(tcpip.Route{
+		Destination: header.IPv4EmptySubnet,
+		Gateway:     cfg.Gateway,
+		NIC:         defaultNIC,
+	})
 	return nil
-}
-
-func setroute(nstack *stack.Stack, cfg dhcp.Config) {
-	nstack.SetRouteTable([]tcpip.Route{
-		{
-			Destination: header.IPv4EmptySubnet,
-			Gateway:     cfg.Gateway,
-			NIC:         defaultNIC,
-		}},
-	)
 }

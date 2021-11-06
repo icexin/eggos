@@ -11,9 +11,9 @@ import (
 	"time"
 
 	"github.com/icexin/eggos/app"
-	"github.com/icexin/eggos/debug"
-	"github.com/icexin/eggos/kbd"
-	"github.com/icexin/eggos/vbe"
+	"github.com/icexin/eggos/drivers/kbd"
+	"github.com/icexin/eggos/drivers/vbe"
+	"github.com/icexin/eggos/log"
 
 	"github.com/fogleman/nes/nes"
 	"golang.org/x/image/draw"
@@ -117,7 +117,7 @@ func runGame(rom io.Reader, scaler draw.Interpolator) error {
 		sum += used
 		cnt++
 		if cnt%30 == 0 {
-			debug.Logf("used %s", sum/time.Duration(cnt))
+			log.Infof("used %s", sum/time.Duration(cnt))
 			cnt = 0
 			sum = 0
 		}

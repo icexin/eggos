@@ -9,13 +9,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"math/rand"
 	"net"
 	"sync"
 	"time"
 
-	"github.com/icexin/eggos/debug"
+	"github.com/icexin/eggos/log"
 
 	"gvisor.dev/gvisor/pkg/tcpip"
 	"gvisor.dev/gvisor/pkg/tcpip/adapters/gonet"
@@ -55,7 +54,6 @@ func NewClient(s *stack.Stack, nicid tcpip.NICID, linkAddr tcpip.LinkAddress) *C
 func (c *Client) Start() {
 	go func() {
 		for {
-			log.Print("DHCP request")
 			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 			err := c.Request(ctx, "")
 			cancel()
@@ -63,7 +61,6 @@ func (c *Client) Start() {
 				break
 			}
 		}
-		log.Printf("DHCP acquired IP %s for %s", c.Address(), c.Config().LeaseLength)
 	}()
 }
 
@@ -171,7 +168,7 @@ func (c *Client) Request(ctx context.Context, requestedAddr tcpip.Address) error
 	if err != nil {
 		return fmt.Errorf("dhcp offer: %v", err)
 	}
-	debug.Logf("[dhcp] offer done")
+	log.Infof("[dhcp] offer done")
 
 	var ack bool
 	var cfg Config
@@ -207,7 +204,7 @@ func (c *Client) Request(ctx context.Context, requestedAddr tcpip.Address) error
 		{optReqIPAddr, []byte(addr)},
 		{optDHCPServer, []byte(cfg.ServerAddress)},
 	})
-	debug.Logf("[dhcp] offer ip:%s server:%s", addr, cfg.ServerAddress)
+	log.Infof("[dhcp] offer ip:%s server:%s", addr, cfg.ServerAddress)
 	_, err = conn.WriteTo(h, serverAddr)
 	if err != nil {
 		return err
@@ -239,7 +236,7 @@ func (c *Client) Request(ctx context.Context, requestedAddr tcpip.Address) error
 	if !ack {
 		return fmt.Errorf("dhcp: request not acknowledged")
 	}
-	debug.Logf("[dhcp] lease:%s", cfg.LeaseLength)
+	log.Infof("[dhcp] lease:%s", cfg.LeaseLength)
 	if cfg.LeaseLength != 0 {
 		go c.renewAfter(cfg.LeaseLength)
 	}
@@ -261,7 +258,7 @@ func (c *Client) renewAfter(d time.Duration) {
 		case <-ctx.Done():
 		case <-timer.C:
 			if err := c.Request(ctx, c.addr); err != nil {
-				log.Printf("address renewal failed: %v", err)
+				log.Errorf("address renewal failed: %v", err)
 				go c.renewAfter(1 * time.Minute)
 			}
 		}

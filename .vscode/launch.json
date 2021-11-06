@@ -21,6 +21,8 @@
             "type": "gdb",
             "request": "attach",
             "name": "Attach to qemu",
+            // "executable": "./multiboot.elf",
+            // "executable": "./boot64.elf",
             "executable": "./kernel.elf",
             "target": ":1234",
             "remote": true,

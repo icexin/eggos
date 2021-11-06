@@ -2,8 +2,6 @@ on:
   push:
     branches:
       - main
-    tags:
-      - .*
   pull_request:
 
 name: CI
@@ -20,9 +18,9 @@ jobs:
       run: |
         go get github.com/magefile/mage
 
-    - name: Install Grub
+    - name: Install Qemu
       run: |
-        sudo apt install grub-common grub-pc-bin xorriso mtools
+        sudo apt-get update && sudo apt-get install -y qemu-system-x86
 
     - name: Checkout code
       uses: actions/checkout@v2
@@ -30,16 +28,9 @@ jobs:
     - name: Build
       run: |
         diff -u <(echo -n) <(gofmt -d $(find . -type f -name '*.go')) 
+        mage -v multiboot
         mage -v iso
-
-    - name: Release
-      uses: softprops/action-gh-release@v1
-      if: startsWith(github.ref, 'refs/tags/')
-      with:
-        files: eggos.iso
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+        mage -v test
 
   macos-latest:
     runs-on: macos-latest
@@ -64,3 +55,4 @@ jobs:
       run: |
         diff -u <(echo -n) <(gofmt -d $(find . -type f -name '*.go')) 
         mage -v multiboot
+        mage -v kernel
