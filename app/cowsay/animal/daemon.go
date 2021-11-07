@@ -2,17 +2,9 @@
  * @Descripttion:
  * @version:
  * @Author: cm.d
- * @Date: 2021-11-07 15:09:19
- * @LastEditors: cm.d
- * @LastEditTime: 2021-11-07 15:27:36
- */
-/*
- * @Descripttion:
- * @version:
- * @Author: cm.d
  * @Date: 2021-11-07 15:00:52
  * @LastEditors: cm.d
- * @LastEditTime: 2021-11-07 15:04:29
+ * @LastEditTime: 2021-11-07 15:37:45
  */
 
 package animal
