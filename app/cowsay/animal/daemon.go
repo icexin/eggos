@@ -4,7 +4,7 @@
  * @Author: cm.d
  * @Date: 2021-11-07 15:09:19
  * @LastEditors: cm.d
- * @LastEditTime: 2021-11-07 15:11:55
+ * @LastEditTime: 2021-11-07 15:27:36
  */
 /*
  * @Descripttion:
@@ -17,11 +17,11 @@
 
 package animal
 
-type DaemonTemplate struct {
+type DemonTemplate struct {
 }
 
-func (dt DaemonTemplate) Get() string {
-	daemonTemplate := `
+func (dt DemonTemplate) Get() string {
+	demonTemplate := `
    \         ,        ,
     \       /(        )'
      \      \\ \\___   / |
@@ -42,5 +42,5 @@ func (dt DaemonTemplate) Get() string {
       ,'  ,-----'   |        \\
       '--{__________)        \\
  `
-	return daemonTemplate
+	return demonTemplate
 }

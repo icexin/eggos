@@ -4,7 +4,7 @@
  * @Author: cm.d
  * @Date: 2021-11-06 19:49:21
  * @LastEditors: cm.d
- * @LastEditTime: 2021-11-07 15:12:36
+ * @LastEditTime: 2021-11-07 15:28:01
  */
 
 package cowsay
@@ -60,7 +60,7 @@ func init() {
 	RegisterAnimalTemplate("", animal.CowTemplate{})
 	RegisterAnimalTemplate("cow", animal.CowTemplate{})
 	RegisterAnimalTemplate("sheep", animal.SheepTemplate{})
-	RegisterAnimalTemplate("deamon", animal.DaemonTemplate{})
+	RegisterAnimalTemplate("demon", animal.DemonTemplate{})
 	RegisterAnimalTemplate("pig", animal.PigTemplate{})
 	RegisterAnimalTemplate("monkey", animal.MonkeyTemplate{})
 	app.Register("cowsay", cowsay)
