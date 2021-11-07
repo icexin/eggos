@@ -4,6 +4,7 @@ go 1.16
 
 require (
 	github.com/aarzilli/nucular v0.0.0-20210408133902-d3dd7b05a80a
+	github.com/dj456119/go-cowsay v0.0.5
 	github.com/fogleman/fauxgl v0.0.0-20200818143847-27cddc103802
 	github.com/fogleman/gg v1.3.0
 	github.com/fogleman/nes v0.0.0-20210605215016-0aace4b1814a
