@@ -77,7 +77,7 @@ uint64 loadKernelElf(multiboot_info_t *info)
         return 0;
     }
     multiboot_module_t *mod = (multiboot_module_t *)(info->mods_addr);
-    char *new_addr = (char *)(100 << 20);
+    char *new_addr = (char *)(100 << 20); // 100 MB
     memcpy(new_addr, (char *)(mod->mod_start), mod->mod_end - mod->mod_start + 1);
     return loadelf(new_addr);
 }
