@@ -32,11 +32,13 @@ TEXT ·swtch(SB), NOSPLIT, $0-16
 	POPQ BP
 	RET
 
+// Mythread() uint64
 TEXT ·Mythread(SB), NOSPLIT, $0-8
 	MOVQ tls_my(GS), AX
 	MOVQ AX, ret+0(FP)
 	RET
 
+// ksysClone(pc, stack, flags uint64) (ax uint64) invokes SYS_clone.
 TEXT ·ksysClone(SB), NOSPLIT, $0-32
 	MOVQ $SYS_clone, AX
 	MOVQ pc+0(FP), R12
@@ -57,6 +59,7 @@ TEXT ·ksysClone(SB), NOSPLIT, $0-32
 	NOP SP  // tell vet SP changed - stop checking offsets
 	JMP R12
 
+// ksysYield invokes SYS_sched_yield.
 TEXT ·ksysYield(SB), NOSPLIT, $0
 	MOVQ $SYS_sched_yield, AX
 	INT  $0x80
