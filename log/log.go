@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"os"
-	"sync"
 
 	"github.com/icexin/eggos/console"
 	"github.com/icexin/eggos/drivers/uart"
@@ -19,39 +18,37 @@ const (
 	loglvlEnvError = "error"
 	loglvlEnvNone  = "none"
 
-	loglvlDebug = iota
-	loglvlInfo
-	loglvlWarn
-	loglvlError
-	loglvlNone
+	LoglvlDebug = iota
+	LoglvlInfo
+	LoglvlWarn
+	LoglvlError
+	LoglvlNone
 
-	defaultLoglvl = loglvlError
+	defaultLoglvl = LoglvlError
 )
 
 var (
-	loglvl     int
-	loglvlonce sync.Once
+	Level int
 )
 
-func setLoglvl() {
+func init() {
 	lvl := os.Getenv("EGGOS_LOGLVL")
 	switch lvl {
 	case loglvlEnvDebug:
-		loglvl = loglvlDebug
+		Level = LoglvlDebug
 	case loglvlEnvInfo:
-		loglvl = loglvlInfo
+		Level = LoglvlInfo
 	case loglvlEnvWarn:
-		loglvl = loglvlWarn
+		Level = LoglvlWarn
 	case loglvlEnvError:
-		loglvl = loglvlError
+		Level = LoglvlError
 	default:
-		loglvl = defaultLoglvl
+		Level = defaultLoglvl
 	}
 }
 
 func logf(lvl int, fmtstr string, args ...interface{}) {
-	loglvlonce.Do(setLoglvl)
-	if lvl < loglvl {
+	if lvl < Level {
 		return
 	}
 
@@ -62,19 +59,19 @@ func logf(lvl int, fmtstr string, args ...interface{}) {
 }
 
 func Debugf(fmtstr string, args ...interface{}) {
-	logf(loglvlDebug, fmtstr, args...)
+	logf(LoglvlDebug, fmtstr, args...)
 }
 
 func Infof(fmtstr string, args ...interface{}) {
-	logf(loglvlInfo, fmtstr, args...)
+	logf(LoglvlInfo, fmtstr, args...)
 }
 
 func Warnf(fmtstr string, args ...interface{}) {
-	logf(loglvlWarn, fmtstr, args...)
+	logf(LoglvlWarn, fmtstr, args...)
 }
 
 func Errorf(fmtstr string, args ...interface{}) {
-	logf(loglvlError, fmtstr, args...)
+	logf(LoglvlError, fmtstr, args...)
 }
 
 //go:nosplit
