@@ -10,6 +10,16 @@ import (
 	"github.com/icexin/eggos/kernel/sys"
 )
 
+type LogLevel int8
+
+const (
+	LoglvlDebug LogLevel = iota
+	LoglvlInfo
+	LoglvlWarn
+	LoglvlError
+	LoglvlNone
+)
+
 const (
 	loglvlEnv      = "EGGOS_LOGLVL"
 	loglvlEnvDebug = "debug"
@@ -18,17 +28,13 @@ const (
 	loglvlEnvError = "error"
 	loglvlEnvNone  = "none"
 
-	LoglvlDebug = iota
-	LoglvlInfo
-	LoglvlWarn
-	LoglvlError
-	LoglvlNone
-
 	defaultLoglvl = LoglvlError
 )
 
 var (
-	Level int
+	Level LogLevel
+
+	ErrInvalidLogLevel = fmt.Errorf("invalid log level")
 )
 
 func init() {
@@ -47,7 +53,17 @@ func init() {
 	}
 }
 
-func logf(lvl int, fmtstr string, args ...interface{}) {
+func SetLevel(l LogLevel) error {
+	if l < LoglvlDebug || l > LoglvlNone {
+		return ErrInvalidLogLevel
+	}
+
+	Level = l
+
+	return nil
+}
+
+func logf(lvl LogLevel, fmtstr string, args ...interface{}) {
 	if lvl < Level {
 		return
 	}
