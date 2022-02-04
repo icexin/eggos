@@ -6,19 +6,19 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time to open this issue.!
+        Thanks for taking the time to open this issue.
 
         Before submitting, please ensure you're using go 1.16.x. Please see [the FAQ](/FAQ.md) for more information.
   - type: textarea
     id: what-happened
     attributes:
-      label: What happened?
-      description: Also tell us, what did you expect to happen?
+      label: Describe your bug or error
+      description: |
+        What happened? What did you expect to happen?
       placeholder: Tell us what you see!
-      value: ""
     validations:
       required: true
-  - type: textarea
+  - type: input
     id: version
     attributes:
       label: Go Version
