@@ -31,7 +31,7 @@ _start:
   mov $512, %ecx
 ptbl_loop:
   mov %eax, (%ebx)
-  add $0x200000, %eax
+  add $0x200000, %eax # 2 MB
   add $0x8, %ebx
   dec %ecx
   jnz ptbl_loop
