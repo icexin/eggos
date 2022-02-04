@@ -76,7 +76,7 @@ $ mage qemu
 
 # Build your own unikernel
 
-eggos has the ability to convert normal go program into an `ELF unikernel` which an be running on bare metal. 
+eggos has the ability to convert normal go program into an `ELF unikernel` which can be running on bare metal.
 
 First, get the `egg` binary, which can be accessed through https://github.com/icexin/eggos/releases, or directly through `go install github.com/icexin/eggos/cmd/egg`
 
