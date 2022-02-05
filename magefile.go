@@ -1,4 +1,5 @@
-//+build mage
+//go:build mage
+// +build mage
 
 package main
 
@@ -155,6 +156,11 @@ func Egg() error {
 	current, _ := os.Getwd()
 	eggBin = filepath.Join(current, "egg")
 	return nil
+}
+
+func Includes() error {
+	mg.Deps(Egg)
+	return sh.RunV(eggBin, "generate")
 }
 
 func Clean() {

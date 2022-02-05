@@ -1,3 +1,4 @@
+//+build eggos
 package eggos
 
 import (
