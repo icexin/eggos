@@ -4,8 +4,6 @@ import (
 	"net"
 	"net/http"
 	"testing"
-
-	_ "github.com/icexin/eggos"
 )
 
 func TestHTTP(t *testing.T) {
