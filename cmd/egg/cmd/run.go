@@ -122,15 +122,6 @@ func runKernel(args []string) error {
 	}
 }
 
-func fileExists(name string) bool {
-	if _, err := os.Stat(name); err != nil {
-		if os.IsNotExist(err) {
-			return false
-		}
-	}
-	return true
-}
-
 func mustLoaderFile(fname string) {
 	content, err := assets.Boot.ReadFile("boot/multiboot.elf")
 	if err != nil {

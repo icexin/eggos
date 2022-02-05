@@ -4,7 +4,8 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"path/filepath"
+
+	"github.com/icexin/eggos/cmd/egg/util"
 )
 
 type Config struct {
@@ -19,11 +20,13 @@ type Config struct {
 type Builder struct {
 	cfg     Config
 	basedir string
+	gobin   string
 }
 
 func NewBuilder(cfg Config) *Builder {
 	return &Builder{
-		cfg: cfg,
+		cfg:   cfg,
+		gobin: util.GoBin(),
 	}
 }
 
@@ -34,6 +37,7 @@ func (b *Builder) Build() error {
 			return err
 		}
 		b.basedir = basedir
+
 		defer os.RemoveAll(basedir)
 	} else {
 		b.basedir = b.cfg.Basedir
@@ -45,13 +49,6 @@ func (b *Builder) Build() error {
 	}
 
 	return b.buildPkg()
-}
-
-func (b *Builder) gobin() string {
-	if b.cfg.GoRoot == "" {
-		return "go"
-	}
-	return filepath.Join(b.cfg.GoRoot, "bin", "go")
 }
 
 func (b *Builder) fixGoTags() bool {
@@ -84,7 +81,11 @@ func (b *Builder) buildPkg() error {
 		buildArgs = append(buildArgs, "-tags", "eggos")
 	}
 	buildArgs = append(buildArgs, "-ldflags", ldflags)
-	buildArgs = append(buildArgs, "-overlay", b.overlayFile())
+
+	if !b.localImportFileExists() {
+		buildArgs = append(buildArgs, "-overlay", b.overlayFile())
+	}
+
 	buildArgs = append(buildArgs, b.cfg.GoArgs...)
 
 	env := append([]string{}, os.Environ()...)
@@ -94,7 +95,7 @@ func (b *Builder) buildPkg() error {
 		"CGO_ENABLED=0",
 	}...)
 
-	cmd := exec.Command(b.gobin(), buildArgs...)
+	cmd := exec.Command(b.gobin, buildArgs...)
 	cmd.Env = env
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
