@@ -53,7 +53,7 @@ type Info struct {
 	MmapAddr   uint32
 
 	DriversLength uint32
-	DrivesrAddr   uint32
+	DriversAddr   uint32
 
 	ConfigTable uint32
 
