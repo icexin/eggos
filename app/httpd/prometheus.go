@@ -1,4 +1,6 @@
+//go:build prometheus
 // +build prometheus
+
 package httpd
 
 import (

@@ -1,3 +1,4 @@
+//go:build nes
 // +build nes
 
 package cmd

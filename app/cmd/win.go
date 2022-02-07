@@ -1,3 +1,4 @@
+//go:build nk
 // +build nk
 
 package cmd

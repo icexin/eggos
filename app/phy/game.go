@@ -1,3 +1,4 @@
+//go:build phy
 // +build phy
 
 package phy
