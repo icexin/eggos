@@ -1,3 +1,4 @@
+//go:build sshd
 // +build sshd
 
 package sshd

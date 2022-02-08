@@ -1,3 +1,4 @@
+//go:build gin
 // +build gin
 
 package ginserver
