@@ -9,6 +9,9 @@ import (
 	"github.com/spf13/afero"
 )
 
+// assert that logger.logger implements afero.Fs.
+var _ afero.Fs = (*logger)(nil)
+
 type logger struct {
 	w       io.Writer
 	backend afero.Fs
@@ -104,6 +107,13 @@ func (l *logger) Name() string {
 func (l *logger) Chmod(name string, mode os.FileMode) error {
 	err := l.backend.Chmod(name, mode)
 	l.logf("Chmod(%s, %s) %v", name, mode, err)
+	return err
+}
+
+// Chown changes the uid and gid of the named file.
+func (l *logger) Chown(name string, uid, gid int) error {
+	err := l.backend.Chown(name, uid, gid)
+	l.logf("Chown(%s, %d, %d) %v", name, uid, gid, err)
 	return err
 }
 

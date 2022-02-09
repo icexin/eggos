@@ -11,6 +11,9 @@ import (
 	"github.com/spf13/afero"
 )
 
+// assert that stripprefix.fs implements afero.Fs.
+var _ afero.Fs = (*fs)(nil)
+
 type fs struct {
 	prefix  string
 	backend afero.Fs
@@ -140,6 +143,15 @@ func (f *fs) Chmod(name string, mode os.FileMode) error {
 		return err
 	}
 	return f.backend.Chmod(p, mode)
+}
+
+// Chown changes the uid and gid of the named file.
+func (f *fs) Chown(name string, uid, gid int) error {
+	p, err := f.strip(name)
+	if err != nil {
+		return err
+	}
+	return f.backend.Chown(p, uid, gid)
 }
 
 //Chtimes changes the access and modification times of the named file

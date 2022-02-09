@@ -8,6 +8,9 @@ import (
 	"github.com/spf13/afero"
 )
 
+// assert that smb.Fs implements afero.Fs.
+var _ afero.Fs = (*Fs)(nil)
+
 type Config struct {
 	Host     string
 	User     string
@@ -76,4 +79,9 @@ func (f *Fs) OpenFile(name string, flag int, perm os.FileMode) (afero.File, erro
 // The name of this FileSystem
 func (f *Fs) Name() string {
 	return "smbfs"
+}
+
+// Chown changes the uid and gid of the named file.
+func (f *Fs) Chown(name string, uid, gid int) error {
+	panic("not implemented") // TODO: figure out how to implement.
 }
