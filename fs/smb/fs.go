@@ -1,6 +1,7 @@
 package smb
 
 import (
+	"io/fs"
 	"net"
 	"os"
 
@@ -83,5 +84,7 @@ func (f *Fs) Name() string {
 
 // Chown changes the uid and gid of the named file.
 func (f *Fs) Chown(name string, uid, gid int) error {
-	panic("not implemented") // TODO: figure out how to implement.
+	// NOTE: go-smb2 doesn't implement the CAP_UNIX extensions, which are
+	// required to handle Unix uid/guid.
+	return fs.ErrInvalid
 }
