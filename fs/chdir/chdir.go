@@ -9,6 +9,9 @@ import (
 	"github.com/spf13/afero"
 )
 
+// assert that chdir.Chdirfs implements afero.Fs.
+var _ afero.Fs = (*Chdirfs)(nil)
+
 type Chdirfs struct {
 	dir     string
 	backend afero.Fs
@@ -100,6 +103,11 @@ func (c *Chdirfs) Name() string {
 //Chmod changes the mode of the named file to mode.
 func (c *Chdirfs) Chmod(name string, mode os.FileMode) error {
 	return c.backend.Chmod(c.name(name), mode)
+}
+
+// Chown changes the uid and gid of the named file.
+func (c *Chdirfs) Chown(name string, uid, gid int) error {
+	return c.backend.Chown(name, uid, gid)
 }
 
 //Chtimes changes the access and modification times of the named file

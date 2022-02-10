@@ -25,6 +25,9 @@ import (
 	. "github.com/spf13/afero"
 )
 
+// assert that mount.MountableFs implements afero.Fs.
+var _ Fs = (*MountableFs)(nil)
+
 // MountableFs allows different paths in a hierarchy to be served by different
 // afero.Fs objects.
 type MountableFs struct {
@@ -313,6 +316,12 @@ func (m *MountableFs) Name() string {
 func (m *MountableFs) Chmod(name string, mode os.FileMode) error {
 	fs, _, rel := m.node.findPath(name)
 	return wrapErrorPath(name, fs.Chmod(rel, mode))
+}
+
+// Chown changes the uid and gid of the named file.
+func (m *MountableFs) Chown(name string, uid, gid int) error {
+	fs, _, rel := m.node.findPath(name)
+	return wrapErrorPath(name, fs.Chown(rel, uid, gid))
 }
 
 func (m *MountableFs) Chtimes(name string, atime time.Time, mtime time.Time) error {

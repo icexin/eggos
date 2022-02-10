@@ -1,12 +1,16 @@
 package smb
 
 import (
+	"io/fs"
 	"net"
 	"os"
 
 	"github.com/hirochachacha/go-smb2"
 	"github.com/spf13/afero"
 )
+
+// assert that smb.Fs implements afero.Fs.
+var _ afero.Fs = (*Fs)(nil)
 
 type Config struct {
 	Host     string
@@ -76,4 +80,11 @@ func (f *Fs) OpenFile(name string, flag int, perm os.FileMode) (afero.File, erro
 // The name of this FileSystem
 func (f *Fs) Name() string {
 	return "smbfs"
+}
+
+// Chown changes the uid and gid of the named file.
+func (f *Fs) Chown(name string, uid, gid int) error {
+	// NOTE: go-smb2 doesn't implement the CAP_UNIX extensions, which are
+	// required to handle Unix uid/guid.
+	return fs.ErrInvalid
 }

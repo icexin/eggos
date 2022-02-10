@@ -18,7 +18,7 @@ require (
 	github.com/peterh/liner v1.2.1
 	github.com/prometheus/client_golang v1.7.1
 	github.com/robertkrimen/otto v0.0.0-20210614181706-373ff5438452
-	github.com/spf13/afero v1.4.0
+	github.com/spf13/afero v1.8.1
 	golang.org/x/exp v0.0.0-20210729172720-737cce5152fc
 	golang.org/x/image v0.0.0-20210628002857-a66eb6448b8d
 	golang.org/x/mobile v0.0.0-20210716004757-34ab1303b554
