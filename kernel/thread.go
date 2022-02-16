@@ -317,9 +317,9 @@ func pickup(pidx *int) *Thread {
 //go:nosplit
 func switchto(t *Thread) {
 	begin := nanosecond()
-	// assert interrupt is enableds
+	// assert that interrupt is enabled
 	// TODO: enable check
-	if t.tf != nil && t.tf.FLAGS&0x200 == 0 {
+	if t.tf != nil && t.tf.FLAGS&_FLAGS_IF == 0 {
 		throw("bad eflags")
 	}
 	setMythread(t)

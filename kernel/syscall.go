@@ -415,7 +415,7 @@ func syscallInit() {
 	// write syscall selector
 	wrmsr(_MSR_STAR, 8<<32)
 	// clear IF when enter syscall
-	wrmsr(_MSR_FSTAR, 0x200)
+	wrmsr(_MSR_FSTAR, _FLAGS_IF)
 	// set syscall entry
 	wrmsr(_MSR_LSTAR, sys.FuncPC(syscallEntry))
 
