@@ -4,7 +4,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/icexin/eggos/app"
+	"github.com/jspc/eggos/app"
 	"github.com/spf13/afero"
 )
 

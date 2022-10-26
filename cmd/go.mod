@@ -1,4 +1,4 @@
-module github.com/icexin/eggos/cmd
+module github.com/jspc/eggos/cmd
 
 go 1.16
 

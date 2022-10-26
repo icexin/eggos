@@ -8,10 +8,10 @@ import (
 	"syscall"
 	"unsafe"
 
-	"github.com/icexin/eggos/console"
-	"github.com/icexin/eggos/fs/mount"
-	"github.com/icexin/eggos/kernel/isyscall"
-	"github.com/icexin/eggos/kernel/sys"
+	"github.com/jspc/eggos/console"
+	"github.com/jspc/eggos/fs/mount"
+	"github.com/jspc/eggos/kernel/isyscall"
+	"github.com/jspc/eggos/kernel/sys"
 
 	"github.com/spf13/afero"
 )
@@ -215,8 +215,8 @@ func sysUname(c *isyscall.Request) {
 	}
 	buf := (*syscall.Utsname)(unsafe.Pointer(c.Arg(0)))
 	copy(unsafebuf(&buf.Machine), "x86_32")
-	copy(unsafebuf(&buf.Domainname), "icexin.com")
-	copy(unsafebuf(&buf.Nodename), "icexin.local")
+	copy(unsafebuf(&buf.Domainname), "jspc.com")
+	copy(unsafebuf(&buf.Nodename), "jspc.local")
 	copy(unsafebuf(&buf.Release), "0")
 	copy(unsafebuf(&buf.Sysname), "eggos")
 	copy(unsafebuf(&buf.Version), "0")

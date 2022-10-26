@@ -6,10 +6,10 @@ import (
 	"os"
 	"runtime"
 
-	_ "github.com/icexin/eggos"
-	"github.com/icexin/eggos/app/sh"
-	"github.com/icexin/eggos/console"
-	"github.com/icexin/eggos/log"
+	_ "github.com/jspc/eggos"
+	"github.com/jspc/eggos/app/sh"
+	"github.com/jspc/eggos/console"
+	"github.com/jspc/eggos/log"
 )
 
 func main() {

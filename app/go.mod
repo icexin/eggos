@@ -1,4 +1,4 @@
-module github.com/icexin/eggos/app
+module github.com/jspc/eggos/app
 
 go 1.16
 
@@ -10,8 +10,8 @@ require (
 	github.com/fogleman/nes v0.0.0-20210605215016-0aace4b1814a
 	github.com/gin-gonic/gin v1.7.2
 	github.com/gliderlabs/ssh v0.3.3
-	github.com/icexin/eggos v0.0.0-00010101000000-000000000000
-	github.com/icexin/nk v0.1.0
+	github.com/jspc/eggos v0.0.0-00010101000000-000000000000
+	github.com/jspc/nk v0.1.0
 	github.com/jakecoffman/cp v1.1.0
 	github.com/klauspost/cpuid v1.3.1
 	github.com/mattn/go-shellwords v1.0.12
@@ -27,7 +27,7 @@ require (
 )
 
 replace (
-	github.com/aarzilli/nucular => github.com/icexin/nucular v0.0.0-20210713192454-c3f236ca56cb
-	github.com/fogleman/nes => github.com/icexin/nes v0.0.0-20200906065456-8ff789fac016
-	github.com/icexin/eggos => ../
+	github.com/aarzilli/nucular => github.com/jspc/nucular v0.0.0-20210713192454-c3f236ca56cb
+	github.com/fogleman/nes => github.com/jspc/nes v0.0.0-20200906065456-8ff789fac016
+	github.com/jspc/eggos => ../
 )

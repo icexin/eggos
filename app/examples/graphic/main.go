@@ -8,7 +8,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/icexin/eggos/drivers/vbe"
+	"github.com/jspc/eggos/drivers/vbe"
 )
 
 var palette = []color.Color{color.White, color.Black}

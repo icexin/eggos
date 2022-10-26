@@ -3,8 +3,8 @@ package httpd
 import (
 	"net/http"
 
-	"github.com/icexin/eggos/app"
-	"github.com/icexin/eggos/fs"
+	"github.com/jspc/eggos/app"
+	"github.com/jspc/eggos/fs"
 	"github.com/spf13/afero"
 )
 

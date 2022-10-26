@@ -6,12 +6,12 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/icexin/eggos/drivers/pci"
-	"github.com/icexin/eggos/drivers/pic"
-	"github.com/icexin/eggos/inet"
-	"github.com/icexin/eggos/kernel/mm"
-	"github.com/icexin/eggos/kernel/sys"
-	"github.com/icexin/eggos/log"
+	"github.com/jspc/eggos/drivers/pci"
+	"github.com/jspc/eggos/drivers/pic"
+	"github.com/jspc/eggos/inet"
+	"github.com/jspc/eggos/kernel/mm"
+	"github.com/jspc/eggos/kernel/sys"
+	"github.com/jspc/eggos/log"
 
 	"gvisor.dev/gvisor/pkg/tcpip/buffer"
 	"gvisor.dev/gvisor/pkg/tcpip/stack"

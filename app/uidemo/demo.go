@@ -14,8 +14,8 @@ import (
 	"github.com/aarzilli/nucular/rect"
 	nstyle "github.com/aarzilli/nucular/style"
 	styled "github.com/aarzilli/nucular/style-editor"
-	"github.com/icexin/eggos/app"
-	"github.com/icexin/eggos/app/shiny"
+	"github.com/jspc/eggos/app"
+	"github.com/jspc/eggos/app/shiny"
 
 	"golang.org/x/mobile/event/key"
 )

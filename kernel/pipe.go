@@ -4,7 +4,7 @@ import (
 	"syscall"
 	"unsafe"
 
-	"github.com/icexin/eggos/kernel/isyscall"
+	"github.com/jspc/eggos/kernel/isyscall"
 )
 
 // Timer depends on epoll and pipe.

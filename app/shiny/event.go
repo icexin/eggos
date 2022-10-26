@@ -1,8 +1,8 @@
 package shiny
 
 import (
-	"github.com/icexin/eggos/console"
-	imouse "github.com/icexin/eggos/drivers/ps2/mouse"
+	"github.com/jspc/eggos/console"
+	imouse "github.com/jspc/eggos/drivers/ps2/mouse"
 	"golang.org/x/mobile/event/key"
 	"golang.org/x/mobile/event/mouse"
 	"golang.org/x/sys/unix"

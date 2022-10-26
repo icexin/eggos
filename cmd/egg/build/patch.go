@@ -10,11 +10,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/icexin/eggos/cmd/egg/generate"
+	"github.com/jspc/eggos/cmd/egg/generate"
 )
 
 const (
-	eggosModulePath = "github.com/icexin/eggos"
+	eggosModulePath = "github.com/jspc/eggos"
 	overlayFile     = "overlay.json"
 )
 

@@ -3,7 +3,7 @@ package inet
 import (
 	"syscall"
 
-	"github.com/icexin/eggos/kernel/isyscall"
+	"github.com/jspc/eggos/kernel/isyscall"
 
 	"gvisor.dev/gvisor/pkg/tcpip"
 	"gvisor.dev/gvisor/pkg/tcpip/network/ipv4"

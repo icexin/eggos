@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/icexin/eggos/app"
+	"github.com/jspc/eggos/app"
 )
 
 func sleepmain(ctx *app.Context) error {

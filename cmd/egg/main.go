@@ -15,7 +15,7 @@ limitations under the License.
 */
 package main
 
-import "github.com/icexin/eggos/cmd/egg/cmd"
+import "github.com/jspc/eggos/cmd/egg/cmd"
 
 func main() {
 	cmd.Execute()

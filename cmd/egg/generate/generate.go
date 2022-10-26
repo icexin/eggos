@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/icexin/eggos/cmd/egg/util"
+	"github.com/jspc/eggos/cmd/egg/util"
 )
 
 const (

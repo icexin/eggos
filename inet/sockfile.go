@@ -8,15 +8,15 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/icexin/eggos/fs"
-	"github.com/icexin/eggos/log"
+	"github.com/jspc/eggos/fs"
+	"github.com/jspc/eggos/log"
 
 	"gvisor.dev/gvisor/pkg/abi/linux"
 	"gvisor.dev/gvisor/pkg/tcpip"
 	"gvisor.dev/gvisor/pkg/waiter"
 )
 
-//go:linkname evnotify github.com/icexin/eggos/kernel.epollNotify
+//go:linkname evnotify github.com/jspc/eggos/kernel.epollNotify
 func evnotify(fd, events uintptr)
 
 type sockFile struct {

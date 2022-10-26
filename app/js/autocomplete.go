@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/icexin/eggos/app"
+	"github.com/jspc/eggos/app"
 	"github.com/peterh/liner"
 	"github.com/robertkrimen/otto"
 )

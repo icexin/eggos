@@ -25,8 +25,8 @@ import (
 	"strings"
 
 	"github.com/google/shlex"
-	"github.com/icexin/eggos/cmd/egg/assets"
-	"github.com/icexin/eggos/cmd/egg/build"
+	"github.com/jspc/eggos/cmd/egg/assets"
+	"github.com/jspc/eggos/cmd/egg/build"
 	"github.com/spf13/cobra"
 )
 

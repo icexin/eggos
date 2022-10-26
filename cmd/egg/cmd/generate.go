@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/icexin/eggos/cmd/egg/generate"
+	"github.com/jspc/eggos/cmd/egg/generate"
 	"github.com/spf13/cobra"
 )
 

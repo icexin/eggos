@@ -6,7 +6,7 @@ import (
 	"net"
 
 	"github.com/gliderlabs/ssh"
-	"github.com/icexin/eggos/app"
+	"github.com/jspc/eggos/app"
 )
 
 var rsaContent = `

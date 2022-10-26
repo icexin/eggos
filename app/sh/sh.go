@@ -5,8 +5,8 @@ import (
 	"log"
 	"strings"
 
-	"github.com/icexin/eggos/app"
-	"github.com/icexin/eggos/console"
+	"github.com/jspc/eggos/app"
+	"github.com/jspc/eggos/console"
 
 	"github.com/mattn/go-shellwords"
 )

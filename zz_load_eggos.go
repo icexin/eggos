@@ -4,17 +4,17 @@ package eggos
 import (
 	"runtime"
 
-	"github.com/icexin/eggos/console"
-	"github.com/icexin/eggos/drivers/cga/fbcga"
-	_ "github.com/icexin/eggos/drivers/e1000"
-	"github.com/icexin/eggos/drivers/kbd"
-	"github.com/icexin/eggos/drivers/pci"
-	"github.com/icexin/eggos/drivers/ps2/mouse"
-	"github.com/icexin/eggos/drivers/uart"
-	"github.com/icexin/eggos/drivers/vbe"
-	"github.com/icexin/eggos/fs"
-	"github.com/icexin/eggos/inet"
-	"github.com/icexin/eggos/kernel"
+	"github.com/jspc/eggos/console"
+	"github.com/jspc/eggos/drivers/cga/fbcga"
+	_ "github.com/jspc/eggos/drivers/e1000"
+	"github.com/jspc/eggos/drivers/kbd"
+	"github.com/jspc/eggos/drivers/pci"
+	"github.com/jspc/eggos/drivers/ps2/mouse"
+	"github.com/jspc/eggos/drivers/uart"
+	"github.com/jspc/eggos/drivers/vbe"
+	"github.com/jspc/eggos/fs"
+	"github.com/jspc/eggos/inet"
+	"github.com/jspc/eggos/kernel"
 )
 
 func kernelInit() {

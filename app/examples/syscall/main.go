@@ -5,7 +5,7 @@ import (
 	"os"
 	"syscall"
 
-	"github.com/icexin/eggos/kernel/isyscall"
+	"github.com/jspc/eggos/kernel/isyscall"
 )
 
 var handler isyscall.Handler

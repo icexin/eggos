@@ -5,7 +5,7 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/icexin/eggos/cmd/egg/util"
+	"github.com/jspc/eggos/cmd/egg/util"
 )
 
 type Config struct {
@@ -70,7 +70,7 @@ func (b *Builder) fixGoTags() bool {
 
 func (b *Builder) buildPkg() error {
 	var buildArgs []string
-	ldflags := "-E github.com/icexin/eggos/kernel.rt0 -T 0x100000"
+	ldflags := "-E github.com/jspc/eggos/kernel.rt0 -T 0x100000"
 	if !b.cfg.BuildTest {
 		buildArgs = append(buildArgs, "build")
 	} else {

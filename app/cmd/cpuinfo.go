@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/icexin/eggos/app"
+	"github.com/jspc/eggos/app"
 	"github.com/klauspost/cpuid"
 )
 

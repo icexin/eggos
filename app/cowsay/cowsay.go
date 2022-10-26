@@ -15,8 +15,8 @@ import (
 
 	"github.com/dj456119/go-cowsay/gocowsay"
 
-	"github.com/icexin/eggos/app"
-	"github.com/icexin/eggos/app/cowsay/animal"
+	"github.com/jspc/eggos/app"
+	"github.com/jspc/eggos/app/cowsay/animal"
 )
 
 var animalTempalteMap = make(map[string]AnimalTemplate)
