@@ -40,7 +40,7 @@ func (g *Generator) eggosImportFile() string {
 func (b *Generator) currentPkgName() string {
 	out, err := exec.Command(b.gobin, "list", "-f", `{{.Name}}`).CombinedOutput()
 	if err != nil {
-		log.Panicf("get current package name:%s", out)
+		log.Panicf("get current package name:%s", err)
 	}
 
 	return strings.TrimSpace(string(out))
