@@ -1,3 +1,4 @@
+//go:build nk
 // +build nk
 
 package cmd
@@ -9,12 +10,12 @@ import (
 	"unsafe"
 
 	"github.com/fogleman/fauxgl"
+	"github.com/icexin/nk/cnk"
+	"github.com/icexin/nk/libc"
 	"github.com/jspc/eggos/app"
 	"github.com/jspc/eggos/drivers/kbd"
 	"github.com/jspc/eggos/drivers/ps2/mouse"
 	"github.com/jspc/eggos/drivers/vbe"
-	"github.com/jspc/nk/cnk"
-	"github.com/jspc/nk/libc"
 	"golang.org/x/image/draw"
 )
 
