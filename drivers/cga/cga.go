@@ -21,6 +21,10 @@ func setCursorColumn(n int) {
 	getbackend().SetPos(pos)
 }
 
+func setCursorHome() {
+	getbackend().SetPos(0)
+}
+
 func eraseLine(method EraseMethod) {
 	backend := getbackend()
 	pos := backend.GetPos()
@@ -69,9 +73,10 @@ func writeCSI(action byte, params []string) {
 	// Hopefully nobody ever uses my fork if they expect that functionality
 	case 'J':
 		eraseLine(EraseMethod_All)
+		setCursorHome()
 
 	default:
-		panic("unsupported CSI action")
+		// ignore
 	}
 }
 
@@ -103,6 +108,7 @@ func WriteByte(ch byte) {
 	case errInvalidChar:
 		parser.Reset()
 	default:
+		getbackend().WriteByte(ch)
 		// ignore
 	}
 }
