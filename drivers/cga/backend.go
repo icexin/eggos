@@ -96,7 +96,7 @@ func (c *cgabackend) WriteByte(ch byte) {
 		}
 	}
 	c.SetPos(pos)
-	crt[pos] = ' ' | 0x0700
+	//crt[pos] = ' ' | 0x0700
 }
 
 func getbackend() Backend {
