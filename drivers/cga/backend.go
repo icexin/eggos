@@ -17,6 +17,14 @@ type Backend interface {
 	WriteByte(ch byte)
 }
 
+type EraseMethod uint8
+
+const (
+	EraseMethod_Unknown EraseMethod = iota
+	EraseMethod_Line
+	EraseMethod_All
+)
+
 const (
 	CRTPORT = 0x3d4
 	bs      = '\b'
