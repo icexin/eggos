@@ -1,9 +1,9 @@
 package mouse
 
 import (
-	"github.com/icexin/eggos/drivers/pic"
-	"github.com/icexin/eggos/drivers/ps2"
-	"github.com/icexin/eggos/kernel/trap"
+	"github.com/jspc/eggos/drivers/pic"
+	"github.com/jspc/eggos/drivers/ps2"
+	"github.com/jspc/eggos/kernel/trap"
 )
 
 const (

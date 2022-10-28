@@ -6,10 +6,10 @@ import (
 	"image/draw"
 	"image/png"
 
-	"github.com/icexin/eggos/assets"
-	imouse "github.com/icexin/eggos/drivers/ps2/mouse"
-	"github.com/icexin/eggos/drivers/uart"
-	"github.com/icexin/eggos/drivers/vbe"
+	"github.com/jspc/eggos/assets"
+	imouse "github.com/jspc/eggos/drivers/ps2/mouse"
+	"github.com/jspc/eggos/drivers/uart"
+	"github.com/jspc/eggos/drivers/vbe"
 	"golang.org/x/exp/shiny/screen"
 	"golang.org/x/image/math/f64"
 )

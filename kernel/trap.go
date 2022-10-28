@@ -3,11 +3,11 @@ package kernel
 import (
 	"unsafe"
 
-	"github.com/icexin/eggos/drivers/pic"
-	"github.com/icexin/eggos/kernel/isyscall"
-	"github.com/icexin/eggos/kernel/sys"
-	"github.com/icexin/eggos/kernel/trap"
-	"github.com/icexin/eggos/log"
+	"github.com/jspc/eggos/drivers/pic"
+	"github.com/jspc/eggos/kernel/isyscall"
+	"github.com/jspc/eggos/kernel/sys"
+	"github.com/jspc/eggos/kernel/trap"
+	"github.com/jspc/eggos/log"
 )
 
 var (

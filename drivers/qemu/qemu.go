@@ -2,7 +2,7 @@
 // emulator and virtualizer.
 package qemu
 
-import "github.com/icexin/eggos/kernel/sys"
+import "github.com/jspc/eggos/kernel/sys"
 
 const (
 	// port used for Qemu exit commands.

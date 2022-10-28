@@ -10,12 +10,12 @@ import (
 	"unsafe"
 
 	"github.com/fogleman/fauxgl"
-	"github.com/icexin/eggos/app"
-	"github.com/icexin/eggos/drivers/kbd"
-	"github.com/icexin/eggos/drivers/ps2/mouse"
-	"github.com/icexin/eggos/drivers/vbe"
 	"github.com/icexin/nk/cnk"
 	"github.com/icexin/nk/libc"
+	"github.com/jspc/eggos/app"
+	"github.com/jspc/eggos/drivers/kbd"
+	"github.com/jspc/eggos/drivers/ps2/mouse"
+	"github.com/jspc/eggos/drivers/vbe"
 	"golang.org/x/image/draw"
 )
 

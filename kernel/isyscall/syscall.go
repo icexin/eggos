@@ -13,7 +13,7 @@ var (
 	handlers [512]Handler
 )
 
-//go:linkname wakeup github.com/icexin/eggos/kernel.wakeup
+//go:linkname wakeup github.com/jspc/eggos/kernel.wakeup
 func wakeup(lock *uintptr, n int)
 
 type Handler func(req *Request)

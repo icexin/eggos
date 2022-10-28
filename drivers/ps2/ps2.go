@@ -1,6 +1,6 @@
 package ps2
 
-import "github.com/icexin/eggos/kernel/sys"
+import "github.com/jspc/eggos/kernel/sys"
 
 const (
 	_CMD_PORT  = 0x64

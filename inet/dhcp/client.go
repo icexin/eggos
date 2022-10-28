@@ -14,7 +14,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/icexin/eggos/log"
+	"github.com/jspc/eggos/log"
 
 	"gvisor.dev/gvisor/pkg/tcpip"
 	"gvisor.dev/gvisor/pkg/tcpip/adapters/gonet"

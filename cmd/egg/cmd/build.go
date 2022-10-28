@@ -18,12 +18,8 @@ package cmd
 import (
 	"log"
 
-	"github.com/icexin/eggos/cmd/egg/build"
+	"github.com/jspc/eggos/cmd/egg/build"
 	"github.com/spf13/cobra"
-)
-
-var (
-	output string
 )
 
 // buildCmd represents the build command

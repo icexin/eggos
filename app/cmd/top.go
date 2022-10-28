@@ -5,9 +5,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/icexin/eggos/app"
-	"github.com/icexin/eggos/drivers/kbd"
-	"github.com/icexin/eggos/kernel"
+	"github.com/jspc/eggos/app"
+	"github.com/jspc/eggos/drivers/kbd"
+	"github.com/jspc/eggos/kernel"
 )
 
 func printstat(ctx *app.Context) {

@@ -25,8 +25,8 @@ import (
 	"strings"
 
 	"github.com/google/shlex"
-	"github.com/icexin/eggos/cmd/egg/assets"
-	"github.com/icexin/eggos/cmd/egg/build"
+	"github.com/jspc/eggos/cmd/egg/assets"
+	"github.com/jspc/eggos/cmd/egg/build"
 	"github.com/spf13/cobra"
 )
 
@@ -120,15 +120,6 @@ func runKernel(args []string) error {
 	default:
 		return err
 	}
-}
-
-func fileExists(name string) bool {
-	if _, err := os.Stat(name); err != nil {
-		if os.IsNotExist(err) {
-			return false
-		}
-	}
-	return true
 }
 
 func mustLoaderFile(fname string) {

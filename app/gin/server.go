@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/icexin/eggos/app"
+	"github.com/jspc/eggos/app"
 )
 
 func main(ctx *app.Context) error {

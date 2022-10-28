@@ -158,6 +158,11 @@ func Egg() error {
 	return nil
 }
 
+func Includes() error {
+	mg.Deps(Egg)
+	return sh.RunV(eggBin, "generate")
+}
+
 func Clean() {
 	rmGlob("*.o")
 	rmGlob("kernel.elf")

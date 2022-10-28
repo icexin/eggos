@@ -5,8 +5,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/icexin/eggos/inet/dhcp"
-	"github.com/icexin/eggos/log"
+	"github.com/jspc/eggos/inet/dhcp"
+	"github.com/jspc/eggos/log"
 
 	"gvisor.dev/gvisor/pkg/tcpip"
 	"gvisor.dev/gvisor/pkg/tcpip/header"

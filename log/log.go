@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/icexin/eggos/console"
-	"github.com/icexin/eggos/drivers/uart"
-	"github.com/icexin/eggos/kernel/sys"
+	"github.com/jspc/eggos/console"
+	"github.com/jspc/eggos/drivers/uart"
+	"github.com/jspc/eggos/kernel/sys"
 )
 
 type LogLevel int8

@@ -3,8 +3,8 @@ package kernel
 import (
 	"unsafe"
 
-	"github.com/icexin/eggos/drivers/multiboot"
-	"github.com/icexin/eggos/kernel/sys"
+	"github.com/jspc/eggos/drivers/multiboot"
+	"github.com/jspc/eggos/kernel/sys"
 	"gvisor.dev/gvisor/pkg/abi/linux"
 )
 

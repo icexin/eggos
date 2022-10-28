@@ -3,9 +3,9 @@ package cga
 import (
 	"unsafe"
 
-	"github.com/icexin/eggos/drivers/cga/fbcga"
-	"github.com/icexin/eggos/drivers/vbe"
-	"github.com/icexin/eggos/kernel/sys"
+	"github.com/jspc/eggos/drivers/cga/fbcga"
+	"github.com/jspc/eggos/drivers/vbe"
+	"github.com/jspc/eggos/kernel/sys"
 )
 
 type Backend interface {
@@ -16,6 +16,14 @@ type Backend interface {
 	// WriteByte write char and advance pos
 	WriteByte(ch byte)
 }
+
+type EraseMethod uint8
+
+const (
+	EraseMethod_Unknown EraseMethod = iota
+	EraseMethod_Line
+	EraseMethod_All
+)
 
 const (
 	CRTPORT = 0x3d4
@@ -88,7 +96,7 @@ func (c *cgabackend) WriteByte(ch byte) {
 		}
 	}
 	c.SetPos(pos)
-	crt[pos] = ' ' | 0x0700
+	//crt[pos] = ' ' | 0x0700
 }
 
 func getbackend() Backend {

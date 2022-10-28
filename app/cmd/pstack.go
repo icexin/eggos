@@ -3,7 +3,7 @@ package cmd
 import (
 	"runtime"
 
-	"github.com/icexin/eggos/app"
+	"github.com/jspc/eggos/app"
 )
 
 func gostack() []byte {

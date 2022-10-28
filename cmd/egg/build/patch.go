@@ -3,27 +3,19 @@ package build
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
-	"text/template"
+
+	"github.com/jspc/eggos/cmd/egg/generate"
 )
 
 const (
-	eggosModulePath = "github.com/icexin/eggos"
-	eggosImportFile = "import_eggos.go"
+	eggosModulePath = "github.com/jspc/eggos"
 	overlayFile     = "overlay.json"
-)
-
-var (
-	eggosImportTpl = template.Must(template.New("eggos").Parse(`
-	//+build eggos
-
-	package {{.name}}
-	import _ "github.com/icexin/eggos"
-	`))
 )
 
 type gomodule struct {
@@ -45,16 +37,27 @@ type buildOverlay struct {
 }
 
 func (b *Builder) eggosImportFile() string {
-	return filepath.Join(b.basedir, eggosImportFile)
+	return filepath.Join(b.basedir, generate.ImportFile)
+}
+
+func (b Builder) localImportFileExists() bool {
+	_, err := os.Stat(generate.ImportFile)
+	if err == nil {
+		return true
+	}
+
+	if errors.Is(err, os.ErrNotExist) {
+		return false
+	}
+
+	panic(err)
 }
 
 func (b *Builder) overlayFile() string {
 	return filepath.Join(b.basedir, overlayFile)
 }
 
-func (b *Builder) buildPrepare() error {
-	var err error
-
+func (b *Builder) buildPrepare() (err error) {
 	if !b.modHasEggos() {
 		log.Printf("eggos not found in go.mod")
 		err = b.editGoMod()
@@ -63,12 +66,16 @@ func (b *Builder) buildPrepare() error {
 		}
 	}
 
-	err = b.writeImportFile(b.eggosImportFile())
+	if b.localImportFileExists() {
+		return
+	}
+
+	err = b.writeImportFile()
 	if err != nil {
 		return err
 	}
 
-	err = writeOverlayFile(b.overlayFile(), eggosImportFile, b.eggosImportFile())
+	err = writeOverlayFile(b.overlayFile(), generate.ImportFile, b.eggosImportFile())
 	if err != nil {
 		return err
 	}
@@ -87,7 +94,7 @@ func writeOverlayFile(overlayFile, dest, source string) error {
 
 func (b *Builder) readGomodule() (*gomodule, error) {
 	var buf bytes.Buffer
-	cmd := exec.Command(b.gobin(), "mod", "edit", "-json")
+	cmd := exec.Command(b.gobin, "mod", "edit", "-json")
 	cmd.Stdout = &buf
 	err := cmd.Run()
 	if err != nil {
@@ -129,23 +136,15 @@ func (b *Builder) editGoMod() error {
 		"GOARCH=amd64",
 	}
 	env = append(env, os.Environ()...)
-	cmd := exec.Command(b.gobin(), "get", getPath)
+	cmd := exec.Command(b.gobin, "get", getPath)
 	cmd.Env = env
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
 }
 
-func (b *Builder) currentPkgName() string {
-	out, err := exec.Command(b.gobin(), "list", "-f", `{{.Name}}`).CombinedOutput()
-	if err != nil {
-		log.Panicf("get current package name:%s", out)
-	}
-	return strings.TrimSpace(string(out))
-}
-
 func (b *Builder) currentModulePath() string {
-	out, err := exec.Command(b.gobin(), "list", "-f", `{{.Module.Path}}`).CombinedOutput()
+	out, err := exec.Command(b.gobin, "list", "-f", `{{.Module.Path}}`).CombinedOutput()
 	if err != nil {
 		log.Panicf("get current module path:%s", out)
 	}
@@ -153,16 +152,11 @@ func (b *Builder) currentModulePath() string {
 
 }
 
-func (b *Builder) writeImportFile(fname string) error {
-	pkgname := b.currentPkgName()
-	var rawFile bytes.Buffer
-	err := eggosImportTpl.Execute(&rawFile, map[string]interface{}{
-		"name": pkgname,
-	})
+func (b *Builder) writeImportFile() (err error) {
+	g, err := generate.NewGenerator(b.basedir)
 	if err != nil {
-		return err
+		return
 	}
 
-	err = os.WriteFile(fname, rawFile.Bytes(), 0644)
-	return err
+	return g.Generate()
 }

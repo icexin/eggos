@@ -3,10 +3,10 @@ package kernel
 import (
 	"unsafe"
 
-	"github.com/icexin/eggos/drivers/qemu"
-	"github.com/icexin/eggos/drivers/uart"
-	"github.com/icexin/eggos/kernel/sys"
-	"github.com/icexin/eggos/log"
+	"github.com/jspc/eggos/drivers/qemu"
+	"github.com/jspc/eggos/drivers/uart"
+	"github.com/jspc/eggos/kernel/sys"
+	"github.com/jspc/eggos/log"
 )
 
 var (

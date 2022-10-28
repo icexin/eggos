@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/icexin/eggos/kernel/sys"
+	"github.com/jspc/eggos/kernel/sys"
 	"github.com/robertkrimen/otto"
 )
 

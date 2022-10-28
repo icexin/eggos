@@ -5,9 +5,9 @@ import (
 	"syscall"
 	"unsafe"
 
-	"github.com/icexin/eggos/kernel/isyscall"
-	"github.com/icexin/eggos/kernel/sys"
-	"github.com/icexin/eggos/log"
+	"github.com/jspc/eggos/kernel/isyscall"
+	"github.com/jspc/eggos/kernel/sys"
+	"github.com/jspc/eggos/log"
 )
 
 var (

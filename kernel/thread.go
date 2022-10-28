@@ -3,8 +3,8 @@ package kernel
 import (
 	"unsafe"
 
-	"github.com/icexin/eggos/kernel/mm"
-	"github.com/icexin/eggos/kernel/sys"
+	"github.com/jspc/eggos/kernel/mm"
+	"github.com/jspc/eggos/kernel/sys"
 )
 
 const (

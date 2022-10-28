@@ -11,9 +11,9 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/icexin/eggos/app"
-	"github.com/icexin/eggos/drivers/kbd"
-	"github.com/icexin/eggos/drivers/vbe"
+	"github.com/jspc/eggos/app"
+	"github.com/jspc/eggos/drivers/kbd"
+	"github.com/jspc/eggos/drivers/vbe"
 	"github.com/jakecoffman/cp"
 )
 

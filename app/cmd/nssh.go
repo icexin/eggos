@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/icexin/eggos/app"
+	"github.com/jspc/eggos/app"
 )
 
 func nsshmain(ctx *app.Context) error {

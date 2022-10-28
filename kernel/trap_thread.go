@@ -6,9 +6,9 @@ import (
 	"syscall"
 	"unsafe"
 
-	"github.com/icexin/eggos/drivers/pic"
-	"github.com/icexin/eggos/kernel/trap"
-	"github.com/icexin/eggos/log"
+	"github.com/jspc/eggos/drivers/pic"
+	"github.com/jspc/eggos/kernel/trap"
+	"github.com/jspc/eggos/log"
 )
 
 var (

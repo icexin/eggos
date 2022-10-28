@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/icexin/eggos/app"
+	"github.com/jspc/eggos/app"
 	"github.com/robertkrimen/otto"
 )
 

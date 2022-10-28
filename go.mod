@@ -1,4 +1,4 @@
-module github.com/icexin/eggos
+module github.com/jspc/eggos
 
 go 1.16
 

@@ -1,9 +1,9 @@
 package kernel
 
 import (
-	"github.com/icexin/eggos/drivers/pic"
-	"github.com/icexin/eggos/kernel/sys"
-	"github.com/icexin/eggos/kernel/trap"
+	"github.com/jspc/eggos/drivers/pic"
+	"github.com/jspc/eggos/kernel/sys"
+	"github.com/jspc/eggos/kernel/trap"
 	"gvisor.dev/gvisor/pkg/abi/linux"
 )
 
