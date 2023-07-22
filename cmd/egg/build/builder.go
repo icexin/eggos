@@ -1,10 +1,12 @@
 package build
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 )
 
 type Config struct {
@@ -39,7 +41,15 @@ func (b *Builder) Build() error {
 		b.basedir = b.cfg.Basedir
 	}
 
-	err := b.buildPrepare()
+	goversion, err := b.goVersion()
+	if err != nil {
+		return err
+	}
+	if !strings.Contains(goversion, "go1.16") {
+		return fmt.Errorf("eggos requires go 1.16 but found %s", strings.TrimSpace(goversion))
+	}
+
+	err = b.buildPrepare()
 	if err != nil {
 		return err
 	}
@@ -69,6 +79,16 @@ func (b *Builder) fixGoTags() bool {
 		}
 	}
 	return false
+}
+
+func (b *Builder) goVersion() (string, error) {
+	cmd := exec.Command(b.gobin(), "version")
+	cmd.Env = os.Environ()
+	stdout, err := cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("error executing: go version: %w", err)
+	}
+	return string(stdout), nil
 }
 
 func (b *Builder) buildPkg() error {
